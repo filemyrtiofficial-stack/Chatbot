@@ -1,0 +1,51 @@
+FileMyRTI Chatbot
+
+Overview
+- MERN-style app (React + Node/Express) using MySQL and OpenAI.
+- Focused strictly on India's RTI Act. Unrelated questions return: "I can only help you with RTI-related queries for India's RTI Act."
+- Supports guided RTI draft creation with downloadable letters per conversation.
+
+Structure
+- `server`: Express API (auth, chat history, RTI draft workflow, OpenAI integration)
+- `client`: Vite + React UI (login, signup, protected chat interface)
+
+Requirements
+- Node.js 18+
+- MySQL 8+
+- OpenAI API key
+
+Setup
+1) Backend
+   - Copy `server/.env.example` to `server/.env` and fill in the values.
+   - Ensure MySQL is running and credentials match.
+   - From `filemyrti-chatbot/server` run:
+     - `npm install`
+     - `npm run dev`
+
+   Notes
+   - Database tables are created automatically on server start if missing.
+   - CORS allows `http://localhost:5173` by default (configure via `CLIENT_ORIGIN`).
+
+2) Frontend
+   - Optional: create `client/.env` and set `VITE_API_BASE=http://localhost:5000` if the backend URL differs.
+   - From `filemyrti-chatbot/client` run:
+     - `npm install`
+     - `npm run dev`
+
+Usage
+- Visit `http://localhost:5173`.
+- Sign up or log in.
+- Ask RTI-related questions or start an application draft in the chat.
+- When a draft is ready, download the generated RTI letter from the conversation list.
+
+Security
+- Passwords are hashed with bcryptjs.
+- JWT secures chat endpoints.
+- Sample environment variables never include real secrets.
+
+Environment Variables (server)
+- `OPENAI_API_KEY` (required)
+- `OPENAI_MODEL` (default: gpt-4o-mini)
+- `JWT_SECRET` (required in production)
+- `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
+- `CLIENT_ORIGIN` (default: http://localhost:5173)
