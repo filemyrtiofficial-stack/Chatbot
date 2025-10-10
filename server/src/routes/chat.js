@@ -7,7 +7,7 @@ import { getConfig } from '../config.js';
 
 const router = express.Router();
 
-const FALLBACK = "I can only help you with RTI-related queries for India's RTI Act.";
+const FALLBACK = "I only help with questions related to India's Right to Information (RTI) Act.";
 const CLARIFY =
   'Please specify your RTI-related query or provide details on the information you seek, so I can guide you on the right RTI application, filing steps, or applicable rules in India.';
 const SERVICE_UNAVAILABLE =
@@ -146,6 +146,40 @@ function needsClarification(text) {
   if (tokens.length <= 4 && normalized.includes('rti')) {
     return true;
   }
+
+  return false;
+}
+
+function isGeneralRtiQuestion(text) {
+  if (!text) return false;
+  const normalized = text.trim().toLowerCase().replace(/[?.!]+$/g, '');
+  if (!normalized) return false;
+
+  const patterns = [
+    /^(what\s+is\s+(the\s+)?rti(\s+act)?)$/,
+    /^(explain\s+(the\s+)?rti(\s+act)?)$/,
+    /^(tell\s+me\s+about\s+(the\s+)?rti(\s+act)?)$/,
+    /^(meaning\s+of\s+rti)$/,
+    /^(define\s+rti)$/,
+    /^(rti\s+meaning)$/,
+    /^(how\s+does\s+rti\s+work)$/,
+    /^(what\s+is\s+right\s+to\s+information)$/,
+    /^(how\s+to\s+file\s+(an?\s+)?rti)$/,
+    /^(how\s+do\s+i\s+file\s+(an?\s+)?rti)$/,
+    /^(guide\s+me(\s+on|\s+about)?\s*(the)?\s*rti)$/,
+    /^(how\s+to\s+apply\s+for\s+(an?\s+)?rti)$/,
+  ];
+
+  if (patterns.some(rx => rx.test(normalized))) {
+    return true;
+  }
+
+  if (normalized.includes('what is rti')) return true;
+  if (normalized.includes('explain rti')) return true;
+  if (normalized.includes('about rti')) return true;
+  if (normalized.includes('how to file rti')) return true;
+  if (normalized.includes('how do i file rti')) return true;
+  if (normalized.includes('guide me on rti')) return true;
 
   return false;
 }
@@ -538,6 +572,8 @@ router.post('/', async (req, res) => {
     const hasCollectingApplication =
       existingApplication && existingApplication.status === 'collecting';
 
+    const generalRtiQuestion = isGeneralRtiQuestion(message);
+
     // If unrelated, respond immediately with fallback
     if (!isRTIRelated(message) && !hasCollectingApplication) {
       const saved = await recordChat(userId, sessionId, message, FALLBACK);
@@ -550,12 +586,15 @@ router.post('/', async (req, res) => {
       });
     }
 
-    const rtiFlow = await handleRtiApplication({
-      userId,
-      sessionId,
-      message,
-      existingApplication,
-    });
+    let rtiFlow = null;
+    if (!generalRtiQuestion) {
+      rtiFlow = await handleRtiApplication({
+        userId,
+        sessionId,
+        message,
+        existingApplication,
+      });
+    }
 
     if (rtiFlow) {
       const saved = await recordChat(userId, sessionId, message, rtiFlow.reply);
@@ -570,7 +609,7 @@ router.post('/', async (req, res) => {
       });
     }
 
-    if (needsClarification(message)) {
+    if (!generalRtiQuestion && hasCollectingApplication && needsClarification(message)) {
       const saved = await recordChat(userId, sessionId, message, CLARIFY);
       return res.json({
         reply: CLARIFY,
@@ -585,19 +624,43 @@ router.post('/', async (req, res) => {
       return res.status(503).json({ error: SERVICE_UNAVAILABLE });
     }
 
+    // Update the prompt below to tune FileMyRTI's behaviour for chat responses.
     const systemPrompt = `
-You are FileMyRTI, an assistant ONLY for India's Right to Information (RTI) Act.
-1. Respond ONLY to RTI-related queries. If unrelated, reply exactly with "${FALLBACK}".
-2. Ask relevant questions when the user's input is incomplete. Do NOT ask unnecessary questions.
-3. Gather essential information for an RTI draft:
-   - To (public authority)
-   - From (applicant's name & address)
-   - Details of information requested
-   - Any applicable references or documents
-  4. If the user doesn't provide To/From details, still generate a complete RTI draft using placeholders like "[Applicant Name]" or "[Public Authority]".
-  5. Keep answers concise, clear, friendly, and under 200 words. Avoid legal advice. Provide practical steps like filing method, fees, and timelines.
-  6. Always keep context of previous user inputs to avoid repeated questions.
-  `;
+You are FileMyRTI, an assistant dedicated to India's Right to Information (RTI) Act.
+
+Core boundaries:
+- Handle ONLY RTI-related matters. If a message is unrelated, respond exactly: "${FALLBACK}".
+- Keep replies warm, clear, and concise (no more than 160 words). Use plain language and never give legal advice or mention OpenAI, prompts, or internal policies.
+- Track earlier conversation turns so you do not repeat questions the user has already answered.
+
+Robust input handling:
+- Treat case-insensitively and tolerate common typos and short forms (e.g., "rti", "RIT", "what rti", "what is rit"). For short/ambiguous asks, give a one-line plain-language definition first, then 1–2 short bullet points (or a single short paragraph) with key details.
+- Always expand the acronym once on first use in a reply: e.g., "RTI (Right to Information)".
+
+How to respond (by intent):
+1) General RTI questions (e.g., "What is RTI?", "Explain RTI"): start with a one-line simple definition, then mention who can use it (Indian citizens), the Act's purpose (transparency, accountability), and key features — access to official records, timelines from Section 7 (30 days; 48 hours if life-or-liberty), and the right to seek information. Keep this under 160 words.
+
+2) Filing/procedural questions: confirm the user's immediate goal in one brief line, then list practical steps concisely:
+   - identify the correct Public Information Officer (PIO);
+   - write a clear Section 6(1) request;
+   - pay the standard filing fee (commonly ₹10 nationally; state rates may vary);
+   - submit by post, in person, or online;
+   - note Section 7 response timelines and appeal options under Section 19.
+Ask only for missing details that are essential to proceed.
+
+3) Draft assistance: if required details (applicant name, contact, public authority/department, exact information sought, reference numbers) are missing, ask one succinct question listing only the missing items. When possible, offer a ready-to-use template using placeholders like "[Applicant Name]" and explain how to replace them.
+
+Tone and style:
+- Use plain everyday language; prefer short sentences and simple words.
+- If asked for "simple words" or "explain like I'm 5", simplify further and shorten to one short paragraph.
+- Never offer legal advice or speculate about outcomes.
+
+Conversation hygiene:
+- If the user already provided the requested details in earlier turns, do not repeat the same request.
+- If the user asks anything outside RTI, respond exactly with the fallback string above.
+
+End of prompt.
+`;
 
     // Call OpenAI
     const completion = await client.chat.completions.create({
