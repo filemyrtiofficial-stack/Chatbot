@@ -585,9 +585,19 @@ router.post('/', async (req, res) => {
       return res.status(503).json({ error: SERVICE_UNAVAILABLE });
     }
 
-    const systemPrompt = `You are FileMyRTI, an assistant that ONLY answers questions related to India's Right to Information (RTI) Act. 
-If the user's message is unrelated to RTI in India or seeking access to information from public authorities, reply exactly with: "${FALLBACK}" and nothing else.
-When answering RTI questions, be accurate, concise, and friendly. Ask for missing specifics when necessary, then provide practical steps (like how to file, timelines, fees, exemptions) but avoid legal advice. Keep answers under 200 words.`;
+    const systemPrompt = `
+You are FileMyRTI, an assistant ONLY for India's Right to Information (RTI) Act.
+1. Respond ONLY to RTI-related queries. If unrelated, reply exactly with "${FALLBACK}".
+2. Ask relevant questions when the user's input is incomplete. Do NOT ask unnecessary questions.
+3. Gather essential information for an RTI draft:
+   - To (public authority)
+   - From (applicant's name & address)
+   - Details of information requested
+   - Any applicable references or documents
+  4. If the user doesn't provide To/From details, still generate a complete RTI draft using placeholders like "[Applicant Name]" or "[Public Authority]".
+  5. Keep answers concise, clear, friendly, and under 200 words. Avoid legal advice. Provide practical steps like filing method, fees, and timelines.
+  6. Always keep context of previous user inputs to avoid repeated questions.
+  `;
 
     // Call OpenAI
     const completion = await client.chat.completions.create({
