@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { API_BASE, api, clearAuthRefresh, registerAuthRefresh } from '../api';
+import { api, clearAuthRefresh, registerAuthRefresh, resolveApiUrl } from '../api';
 
 export type User = { id: number; name: string; email: string } | null;
 
@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function refreshSession() {
       try {
-        const res = await fetch(`${API_BASE}/api/auth/refresh`, {
+        const res = await fetch(resolveApiUrl('/api/auth/refresh'), {
           method: 'POST',
           credentials: 'include',
         });
@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      await fetch(`${API_BASE}/api/auth/logout`, {
+      await fetch(resolveApiUrl('/api/auth/logout'), {
         method: 'POST',
         credentials: 'include',
       });

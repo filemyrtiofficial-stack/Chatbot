@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { ApiError, API_BASE, api } from '../api';
+import { ApiError, api, resolveApiUrl } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { ThemeToggle } from '../components/ThemeToggle';
 
@@ -331,7 +331,7 @@ export default function Chat() {
     try {
       setDownloadingSession(sessionId);
       const res = await fetch(
-        `${API_BASE}/api/chat/application/${encodeURIComponent(sessionId)}/download`,
+        resolveApiUrl(`/api/chat/application/${encodeURIComponent(sessionId)}/download`),
         {
           credentials: 'include',
         }
