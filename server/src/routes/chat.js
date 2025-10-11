@@ -92,6 +92,24 @@ const GREETING_PATTERNS = [
   /^good (morning|evening|afternoon)$/i,
 ];
 
+const GENERAL_SUPPORT_PATTERNS = [
+  {
+    regex: /\b(pf|provident\s+fund|epfo|epf|uan|universal\s+account\s+number)\b/i,
+    reply:
+      'It sounds like you are facing an Employee Provident Fund issue. You can check your PF status on the EPFO portal with your UAN, or raise a grievance at https://epfigms.gov.in/. If you would like to file an RTI to get an official update from a government department, just let me know.',
+  },
+  {
+    regex: /\b(salary|wages?|pay\s*slip|payroll|salary\s+delay|pending\s+payment)\b/i,
+    reply:
+      'Salary delays and payroll concerns are usually handled by writing to your employer and, if needed, escalating to the labour department. Keep copies of your appointment letter and previous payslips. If this is with a government employer and you need an RTI drafted, I can help with that once you are ready.',
+  },
+  {
+    regex: /\b(gratuity|bonus|leave\s+encashment|final\s+settlement)\b/i,
+    reply:
+      'For gratuity, bonus, or final settlement matters, start by writing a detailed representation to HR and keep proof of submission. If the employer is a public authority and you decide to pursue information via RTI, I can help prepare that application step by step.',
+  },
+];
+
 function getSession(userId) {
   if (!sessionMemory.has(userId)) {
     // Initialise per-user memory slots that map directly to RTI draft fields.
@@ -164,6 +182,16 @@ function storeUserInfo(userId, message = '') {
     session.lastUpdated = Date.now();
   }
   return updatedFields;
+}
+
+function getGeneralSupportResponse(message = '') {
+  if (!message) return null;
+  for (const pattern of GENERAL_SUPPORT_PATTERNS) {
+    if (pattern.regex.test(message)) {
+      return pattern.reply;
+    }
+  }
+  return null;
 }
 
 async function recordChat(userId, sessionId, message, response) {
@@ -900,11 +928,14 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // If unrelated, respond immediately with fallback
+    // Offer helpful guidance for general non-RTI queries without forcing an RTI workflow.
     if (!isRTIRelated(message) && !hasCollectingApplication) {
-      const saved = await recordChat(userId, sessionId, message, FALLBACK);
+      const generalReply =
+        getGeneralSupportResponse(message) ||
+        'I can assist with RTI or general employment queries. Do you want help with filing an RTI application or something else?';
+      const saved = await recordChat(userId, sessionId, message, generalReply);
       return res.json({
-        reply: FALLBACK,
+        reply: generalReply,
         id: saved.id,
         message,
         timestamp: saved.timestamp,
