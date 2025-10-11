@@ -107,6 +107,14 @@ const GENERAL_SUPPORT_PATTERNS = [
   },
 ];
 
+const NAME_RECALL_PATTERNS = [
+  /\bwhat(?:'s|\s+is)\s+my\s+name\b/i,
+  /\btell\s+me\s+my\s+name\b/i,
+  /\btell\s+name\b/i,
+  /\bdo\s+you\s+remember\s+my\s+name\b/i,
+  /\bwho\s+am\s+i\b/i,
+];
+
 function getSession(userId) {
   if (!sessionMemory.has(userId)) {
     // Initialise per-user memory slots that map directly to RTI draft fields.
@@ -189,6 +197,11 @@ function getGeneralSupportResponse(message = '') {
     }
   }
   return null;
+}
+
+function isNameRecallRequest(message = '') {
+  if (!message) return false;
+  return NAME_RECALL_PATTERNS.some(pattern => pattern.test(message));
 }
 
 async function recordChat(userId, sessionId, message, response) {
@@ -931,6 +944,20 @@ router.post('/', async (req, res) => {
       const saved = await recordChat(userId, sessionId, message, generalSupport);
       return res.json({
         reply: generalSupport,
+        id: saved.id,
+        message,
+        timestamp: saved.timestamp,
+        sessionId: saved.sessionId,
+      });
+    }
+
+    if (isNameRecallRequest(message)) {
+      const reply = session.full_name
+        ? `You mentioned that your name is ${session.full_name}.`
+        : "I don't think you've shared your name yet. Let me know, and I'll remember it for the rest of this chat.";
+      const saved = await recordChat(userId, sessionId, message, reply);
+      return res.json({
+        reply,
         id: saved.id,
         message,
         timestamp: saved.timestamp,
