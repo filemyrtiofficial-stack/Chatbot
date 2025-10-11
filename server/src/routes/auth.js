@@ -1,5 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
+import passport from 'passport';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { z } from 'zod';
 import { pool } from '../db.js';
 import { authMiddleware } from '../middleware/auth.js';
@@ -18,8 +20,28 @@ import {
   purgeExpiredRefreshTokens,
   saveRefreshToken,
 } from '../models/refreshTokens.js';
+import { getConfig } from '../config.js';
 
 const router = express.Router();
+const config = getConfig();
+const googleEnabled = Boolean(config.GOOGLE_CLIENT_ID && config.GOOGLE_CLIENT_SECRET);
+
+if (googleEnabled) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: config.GOOGLE_CLIENT_ID,
+        clientSecret: config.GOOGLE_CLIENT_SECRET,
+        callbackURL: config.GOOGLE_CALLBACK_URL,
+      },
+      (accessToken, refreshToken, profile, done) => {
+        done(null, profile);
+      }
+    )
+  );
+}
+
+router.use(passport.initialize());
 
 const signupSchema = z.object({
   name: z.string().min(2).max(100),
@@ -33,16 +55,118 @@ const loginSchema = z.object({
 });
 
 function mapUser(row) {
-  return { id: row.id, name: row.name, email: row.email };
+  return {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    pictureUrl: row.picture_url ?? row.pictureUrl ?? null,
+  };
 }
 
 async function issueTokens(res, user) {
-  const accessToken = signAccessToken(user);
+  const payload = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    pictureUrl: user.pictureUrl ?? null,
+  };
+  const accessToken = signAccessToken(payload);
   const { token: refreshToken, tokenHash, expiresAt } = generateRefreshToken();
   await purgeExpiredRefreshTokens();
   await saveRefreshToken(user.id, tokenHash, expiresAt);
   await limitRefreshTokensForUser(user.id);
   setAuthCookies(res, accessToken, refreshToken);
+}
+
+function ensureGoogleConfigured(req, res, next) {
+  if (!googleEnabled) {
+    return res.status(503).json({ error: 'Google OAuth is not configured' });
+  }
+  return next();
+}
+
+function resolveClientUrl(path = '/') {
+  const base = config.CLIENT_ORIGIN.replace(/\/+$/, '');
+  const safePath = path.startsWith('/') ? path : `/${path}`;
+  return `${base}${safePath}`;
+}
+
+function buildDisplayName(profile) {
+  const full = profile.displayName?.trim();
+  if (full) return full;
+  const parts = [profile.name?.givenName, profile.name?.familyName]
+    .filter(Boolean)
+    .map(part => String(part).trim());
+  if (parts.length > 0) {
+    return parts.join(' ');
+  }
+  const email = profile.emails?.[0]?.value;
+  if (email) {
+    return email.split('@')[0];
+  }
+  return 'Google User';
+}
+
+function extractPicture(profile) {
+  const photo = profile.photos?.[0]?.value;
+  return photo || null;
+}
+
+async function upsertGoogleUser(profile) {
+  const googleId = profile.id;
+  const email = profile.emails?.[0]?.value?.toLowerCase();
+  if (!googleId || !email) {
+    const error = new Error('Google account details are incomplete');
+    error.statusCode = 400;
+    throw error;
+  }
+  const displayName = buildDisplayName(profile);
+  const picture = extractPicture(profile);
+
+  const [existingByGoogle] = await pool.query(
+    'SELECT id, name, email, picture_url FROM users WHERE google_id = ?',
+    [googleId]
+  );
+  if (existingByGoogle.length > 0) {
+    const userRow = existingByGoogle[0];
+    const shouldUpdate =
+      (displayName && displayName !== userRow.name) || picture !== userRow.picture_url;
+    if (shouldUpdate) {
+      await pool.query('UPDATE users SET name = ?, picture_url = ? WHERE id = ?', [
+        displayName || userRow.name,
+        picture,
+        userRow.id,
+      ]);
+      return mapUser({ ...userRow, name: displayName || userRow.name, picture_url: picture });
+    }
+    return mapUser(userRow);
+  }
+
+  const [existingByEmail] = await pool.query(
+    'SELECT id, name, email, picture_url FROM users WHERE email = ?',
+    [email]
+  );
+  if (existingByEmail.length > 0) {
+    const row = existingByEmail[0];
+    await pool.query('UPDATE users SET google_id = ?, name = ?, picture_url = ? WHERE id = ?', [
+      googleId,
+      displayName || row.name,
+      picture,
+      row.id,
+    ]);
+    return mapUser({ ...row, name: displayName || row.name, picture_url: picture });
+  }
+
+  const [result] = await pool.query(
+    'INSERT INTO users (name, email, google_id, picture_url) VALUES (?, ?, ?, ?)',
+    [displayName, email, googleId, picture]
+  );
+  return mapUser({
+    id: result.insertId,
+    name: displayName,
+    email,
+    picture_url: picture,
+  });
 }
 
 router.post('/signup', async (req, res, next) => {
@@ -57,7 +181,7 @@ router.post('/signup', async (req, res, next) => {
       'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)',
       [body.name, body.email, passwordHash]
     );
-    const user = { id: result.insertId, name: body.name, email: body.email };
+    const user = { id: result.insertId, name: body.name, email: body.email, pictureUrl: null };
     await issueTokens(res, user);
     return res.status(201).json({ user });
   } catch (err) {
@@ -72,7 +196,7 @@ router.post('/login', async (req, res, next) => {
   try {
     const body = loginSchema.parse(req.body);
     const [rows] = await pool.query(
-      'SELECT id, name, email, password_hash FROM users WHERE email = ?',
+      'SELECT id, name, email, password_hash, picture_url FROM users WHERE email = ?',
       [body.email]
     );
     if (rows.length === 0) {
@@ -134,7 +258,7 @@ router.post('/refresh', async (req, res, next) => {
     }
 
     await deleteRefreshToken(entry.userId, tokenHash);
-    const [rows] = await pool.query('SELECT id, name, email FROM users WHERE id = ?', [
+    const [rows] = await pool.query('SELECT id, name, email, picture_url FROM users WHERE id = ?', [
       entry.userId,
     ]);
     if (rows.length === 0) {
@@ -148,6 +272,40 @@ router.post('/refresh', async (req, res, next) => {
     return next(err);
   }
 });
+
+const googleFailureRedirect = resolveClientUrl('/login?error=google');
+
+router.get(
+  '/google',
+  ensureGoogleConfigured,
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    prompt: 'select_account',
+  })
+);
+
+router.get(
+  '/google/callback',
+  ensureGoogleConfigured,
+  passport.authenticate('google', {
+    session: false,
+    failureRedirect: googleFailureRedirect,
+  }),
+  async (req, res) => {
+    try {
+      const profile = req.user;
+      if (!profile) {
+        return res.redirect(`${googleFailureRedirect}&reason=missing_profile`);
+      }
+      const user = await upsertGoogleUser(profile);
+      await issueTokens(res, user);
+      return res.redirect(resolveClientUrl('/'));
+    } catch (err) {
+      req.log?.error?.(err);
+      return res.redirect(`${googleFailureRedirect}&reason=server_error`);
+    }
+  }
+);
 
 router.get('/me', authMiddleware, (req, res) => {
   return res.json({ user: req.user });

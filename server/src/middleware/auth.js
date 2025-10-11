@@ -9,7 +9,12 @@ export function authMiddleware(req, res, next) {
   if (!token) return res.status(401).json({ error: 'Authentication required' });
   try {
     const payload = verifyAccessToken(token);
-    req.user = { id: payload.id, email: payload.email, name: payload.name };
+    req.user = {
+      id: payload.id,
+      email: payload.email,
+      name: payload.name,
+      pictureUrl: payload.pictureUrl ?? null,
+    };
     next();
   } catch (err) {
     return res.status(401).json({ error: 'Invalid or expired token' });

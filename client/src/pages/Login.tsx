@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { api } from '../api';
+import { api, resolveApiUrl } from '../api';
 import { ThemeToggle } from '../components/ThemeToggle';
 
 export default function Login() {
@@ -28,6 +28,10 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = resolveApiUrl('/api/auth/google');
   };
 
   return (
@@ -92,6 +96,38 @@ export default function Login() {
           </div>
           <button className="btn-primary w-full" disabled={loading}>
           {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+          <div className="relative">
+            <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-slate-200 dark:bg-slate-800" />
+            <span className="relative mx-auto block w-max bg-white px-3 text-xs font-semibold uppercase tracking-[0.28em] text-slate-300 dark:bg-slate-900/80 dark:text-slate-600">
+              or
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100 dark:hover:bg-slate-900"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M22.56 12.25c0-.78-.07-1.53-.21-2.25H12v4.26h5.92a5.06 5.06 0 01-2.21 3.32v2.77h3.58c2.1-1.94 3.27-4.8 3.27-8.1z"
+                fill="#4285F4"
+              />
+              <path
+                d="M12 23c2.97 0 5.46-.98 7.28-2.65l-3.58-2.77c-.99.66-2.26 1.05-3.7 1.05-2.84 0-5.24-1.92-6.1-4.51H2.18v2.84A11 11 0 0012 23z"
+                fill="#34A853"
+              />
+              <path
+                d="M5.9 14.12A6.58 6.58 0 015.56 12c0-.74.13-1.46.34-2.12V7.04H2.18A11 11 0 001 12a11 11 0 001.18 4.96l3.72-2.84z"
+                fill="#FBBC05"
+              />
+              <path
+                d="M12 5.27c1.62 0 3.05.56 4.19 1.66l3.14-3.14C17.45 1.72 15 1 12 1A11 11 0 002.18 7.04l3.72 2.84C6.76 7.2 9.16 5.27 12 5.27z"
+                fill="#EA4335"
+              />
+              <path d="M1 1h22v22H1z" fill="none" />
+            </svg>
+            Continue with Google
           </button>
           <div className="flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400">
             <span>New to FileMyRTI?</span>

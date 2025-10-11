@@ -16,6 +16,12 @@ const envSchema = z.object({
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(7),
   RATE_LIMIT_WINDOW_MINUTES: z.coerce.number().int().positive().default(1),
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(60),
+  GOOGLE_CLIENT_ID: z.string().min(1, 'GOOGLE_CLIENT_ID is required').optional(),
+  GOOGLE_CLIENT_SECRET: z
+    .string()
+    .min(1, 'GOOGLE_CLIENT_SECRET is required')
+    .optional(),
+  GOOGLE_CALLBACK_URL: z.string().url().optional(),
 });
 
 let cachedConfig;
@@ -30,6 +36,15 @@ export function getConfig() {
   }
 
   cachedConfig = parseResult.data;
+
+  if (
+    !cachedConfig.GOOGLE_CALLBACK_URL &&
+    cachedConfig.GOOGLE_CLIENT_ID &&
+    cachedConfig.GOOGLE_CLIENT_SECRET
+  ) {
+    cachedConfig.GOOGLE_CALLBACK_URL = `http://localhost:${cachedConfig.PORT}/api/auth/google/callback`;
+  }
+
   return cachedConfig;
 }
 

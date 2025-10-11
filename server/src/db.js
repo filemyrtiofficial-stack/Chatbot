@@ -46,10 +46,24 @@ export async function initDatabase() {
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(100),
         email VARCHAR(150) UNIQUE,
+        google_id VARCHAR(128) UNIQUE,
         password_hash VARCHAR(255),
+        picture_url VARCHAR(512),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       ) ENGINE=InnoDB;
     `);
+
+    const [googleIdColumn] = await conn.query("SHOW COLUMNS FROM users LIKE 'google_id'");
+    if (googleIdColumn.length === 0) {
+      await conn.query(
+        'ALTER TABLE users ADD COLUMN google_id VARCHAR(128) UNIQUE NULL AFTER email'
+      );
+    }
+
+    const [pictureColumn] = await conn.query("SHOW COLUMNS FROM users LIKE 'picture_url'");
+    if (pictureColumn.length === 0) {
+      await conn.query('ALTER TABLE users ADD COLUMN picture_url VARCHAR(512) NULL AFTER password_hash');
+    }
 
     await conn.query(`
       CREATE TABLE IF NOT EXISTS chats (

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { api, clearAuthRefresh, registerAuthRefresh, resolveApiUrl } from '../api';
 
-export type User = { id: number; name: string; email: string } | null;
+export type User = { id: number; name: string; email: string; pictureUrl?: string | null } | null;
 
 type AuthContextType = {
   user: User;
