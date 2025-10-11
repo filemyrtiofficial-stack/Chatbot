@@ -82,6 +82,90 @@ const APPLICATION_FIELD_MAP = APPLICATION_FIELDS.reduce((acc, field) => {
 
 const APPLICATION_TRIGGER_REGEX = /(file|draft|submit)\s+(an?\s+)?rti|rti\s+application|rti\s+draft/i;
 
+// Lightweight in-memory session store so the assistant can remember user details during a chat.
+const sessionMemory = new Map();
+const GREETING_PATTERNS = [
+  /^hi(?: there)?$/i,
+  /^hello(?: there)?$/i,
+  /^hey(?: there)?$/i,
+  /^namaste$/i,
+  /^good (morning|evening|afternoon)$/i,
+];
+
+function getSession(userId) {
+  if (!sessionMemory.has(userId)) {
+    // Initialise per-user memory slots that map directly to RTI draft fields.
+    sessionMemory.set(userId, {
+      full_name: '',
+      contact_info: '',
+      department: '',
+      information_request: '',
+      lastUpdated: Date.now(),
+    });
+  }
+  return sessionMemory.get(userId);
+}
+
+function isGreeting(message = '') {
+  const normalized = message.trim().toLowerCase().replace(/[!.]/g, '').replace(/\s+/g, ' ');
+  if (!normalized) return false;
+  return GREETING_PATTERNS.some(pattern => pattern.test(normalized));
+}
+
+function storeUserInfo(userId, message = '') {
+  if (!message || !userId) return [];
+  const session = getSession(userId);
+  const updatedFields = [];
+  const sanitized = message.trim();
+
+  // Capture full name statements like "my name is ..." or "I am ..."
+  const nameMatch = sanitized.match(/\b(?:my name is|i am|this is|call me)\s+([A-Za-z][A-Za-z\s'.-]{1,60})/i);
+  if (nameMatch) {
+    const name = nameMatch[1].trim();
+    if (name && session.full_name !== name) {
+      session.full_name = name;
+      updatedFields.push('full_name');
+    }
+  }
+
+  // Capture address/contact details.
+  const addressMatch = sanitized.match(/\b(?:my address is|address is|address:|i live at|residing at|living at)\s+([^.\n\r]+)/i);
+  if (addressMatch) {
+    const address = addressMatch[1].trim();
+    if (address && session.contact_info !== address) {
+      session.contact_info = address;
+      updatedFields.push('contact_info');
+    }
+  }
+
+  // Capture department or authority names.
+  const departmentMatch = sanitized.match(/\b(?:department|authority|office|ministry)\s*(?:is|:)\s*([^.\n\r]+)/i);
+  if (departmentMatch) {
+    const department = departmentMatch[1].trim();
+    if (department && session.department !== department) {
+      session.department = department;
+      updatedFields.push('department');
+    }
+  }
+
+  // Capture information request sentences.
+  const infoMatch =
+    sanitized.match(/\b(?:i (?:am seeking|need|want)|please provide)\s+(?:the\s+)?(?:information|details)\s*(?:regarding|about|on)\s+([^.\n\r]+)/i) ||
+    sanitized.match(/\b(?:information request|information needed)\s*:?\s*([^.\n\r]+)/i);
+  if (infoMatch) {
+    const info = infoMatch[1].trim();
+    if (info && session.information_request !== info) {
+      session.information_request = info;
+      updatedFields.push('information_request');
+    }
+  }
+
+  if (updatedFields.length > 0) {
+    session.lastUpdated = Date.now();
+  }
+  return updatedFields;
+}
+
 async function recordChat(userId, sessionId, message, response) {
   const [result] = await pool.query(
     'INSERT INTO chats (user_id, session_id, message, response) VALUES (?, ?, ?, ?)',
@@ -308,6 +392,22 @@ function collectNonEmptyFields(fields) {
   }, {});
 }
 
+function updateSessionFromFields(userId, fields = {}) {
+  if (!userId || !fields) return;
+  const session = getSession(userId);
+  let updated = false;
+  ['full_name', 'contact_info', 'department', 'information_request'].forEach(key => {
+    const value = fields[key];
+    if (typeof value === 'string' && value.trim() && session[key] !== value.trim()) {
+      session[key] = value.trim();
+      updated = true;
+    }
+  });
+  if (updated) {
+    session.lastUpdated = Date.now();
+  }
+}
+
 function hasAllRequiredFields(fields) {
   if (!fields) return false;
   return REQUIRED_FIELD_KEYS.every(key => {
@@ -520,7 +620,7 @@ Would you like to download this draft as a Word document?
   return draft || null;
 }
 
-async function finalizeApplication(userId, application) {
+async function finalizeApplication(userId, application, session) {
   if (!client) {
     return {
       handled: true,
@@ -539,6 +639,17 @@ async function finalizeApplication(userId, application) {
     };
   }
 
+  // Sync the freshly fetched application data back into the active session.
+  updateSessionFromFields(userId, refreshed);
+  if (session) {
+    ['full_name', 'contact_info', 'department', 'information_request'].forEach(key => {
+      const value = refreshed[key];
+      if (typeof value === 'string' && value.trim()) {
+        session[key] = value.trim();
+      }
+    });
+    session.lastUpdated = Date.now();
+  }
   if (!refreshed.reference_details || !refreshed.reference_details.trim()) {
     const defaultReference = 'No specific reference details provided.';
     if (refreshed.reference_details !== defaultReference) {
@@ -578,8 +689,9 @@ async function finalizeApplication(userId, application) {
   };
 }
 
-async function handleRtiApplication({ userId, sessionId, message, existingApplication }) {
+async function handleRtiApplication({ userId, sessionId, message, existingApplication, session }) {
   const trimmed = message.trim();
+  const activeSession = session || getSession(userId);
   let application = existingApplication || (await getLatestApplication(userId, sessionId));
   const triggered = shouldStartApplication(trimmed);
 
@@ -592,16 +704,27 @@ async function handleRtiApplication({ userId, sessionId, message, existingApplic
     }
 
     application = await createApplication(userId, sessionId);
-    let recognizedFields = {};
+    const sessionPrefill = collectNonEmptyFields({
+      full_name: activeSession.full_name,
+      contact_info: activeSession.contact_info,
+      department: activeSession.department,
+      information_request: activeSession.information_request,
+    });
+    let recognizedFields = { ...sessionPrefill };
     if (extractedFields) {
-      recognizedFields = collectNonEmptyFields(extractedFields);
-      if (Object.keys(recognizedFields).length > 0) {
-        await setApplicationState(application.id, recognizedFields);
-        application = { ...application, ...recognizedFields };
-      }
+      const extracted = collectNonEmptyFields(extractedFields);
+      recognizedFields = { ...sessionPrefill, ...extracted };
+    }
+    if (Object.keys(recognizedFields).length > 0) {
+      await setApplicationState(application.id, recognizedFields);
+      application = { ...application, ...recognizedFields };
+      updateSessionFromFields(userId, recognizedFields);
     }
 
-    const allFieldsPresent = hasAllRequiredFields(extractedFields);
+    const allFieldsPresent = hasAllRequiredFields({
+      ...sessionPrefill,
+      ...(extractedFields || {}),
+    });
     if (allFieldsPresent) {
       const referenceValue =
         application.reference_details && application.reference_details.trim()
@@ -615,7 +738,7 @@ async function handleRtiApplication({ userId, sessionId, message, existingApplic
       application.reference_details = referenceValue;
       application.current_field = null;
 
-      return finalizeApplication(userId, application);
+      return finalizeApplication(userId, application, activeSession);
     }
 
     const nextFieldKey = nextMissingField(application) || APPLICATION_FIELDS[0].key;
@@ -631,6 +754,31 @@ async function handleRtiApplication({ userId, sessionId, message, existingApplic
     ].join('\n');
 
     return { handled: true, reply: introLines, draftAvailable: false };
+  }
+
+  // Auto-fill any outstanding RTI draft fields using remembered session values.
+  const missingFieldsForSession = REQUIRED_FIELD_KEYS.filter(key => {
+    const currentValue = application[key];
+    return !currentValue || !String(currentValue).trim();
+  });
+  if (missingFieldsForSession.length > 0) {
+    const sessionAutoFill = missingFieldsForSession.reduce((acc, key) => {
+      const sessionValue = activeSession[key];
+      if (typeof sessionValue === 'string' && sessionValue.trim()) {
+        acc[key] = sessionValue.trim();
+      }
+      return acc;
+    }, {});
+    if (Object.keys(sessionAutoFill).length > 0) {
+      await setApplicationState(application.id, sessionAutoFill);
+      application = { ...application, ...sessionAutoFill };
+      updateSessionFromFields(userId, sessionAutoFill);
+      if (application.current_field && sessionAutoFill[application.current_field]) {
+        const nextFieldAfterAuto = nextMissingField(application);
+        await setApplicationState(application.id, { current_field: nextFieldAfterAuto });
+        application.current_field = nextFieldAfterAuto;
+      }
+    }
   }
 
   if (application.status === 'completed') {
@@ -658,7 +806,7 @@ async function handleRtiApplication({ userId, sessionId, message, existingApplic
 
   let currentField = application.current_field || nextMissingField(application);
   if (!currentField) {
-    return finalizeApplication(userId, application);
+    return finalizeApplication(userId, application, activeSession);
   }
 
   const fieldInfo = APPLICATION_FIELD_MAP[currentField];
@@ -677,6 +825,7 @@ async function handleRtiApplication({ userId, sessionId, message, existingApplic
 
   await setApplicationField(application.id, currentField, value);
   application[currentField] = value;
+  updateSessionFromFields(userId, { [currentField]: value });
 
   const nextFieldKey = nextMissingField(application);
   if (nextFieldKey) {
@@ -690,7 +839,7 @@ async function handleRtiApplication({ userId, sessionId, message, existingApplic
     };
   }
 
-  return finalizeApplication(userId, application);
+  return finalizeApplication(userId, application, activeSession);
 }
 
 // GET chat history
@@ -725,11 +874,31 @@ router.post('/', async (req, res) => {
       sessionId = randomUUID();
     }
 
+    // Initialise session memory for this user and capture any personal details in the latest message.
+    const session = getSession(userId);
+    storeUserInfo(userId, message);
+
     const existingApplication = await getLatestApplication(userId, sessionId);
     const hasCollectingApplication =
       existingApplication && existingApplication.status === 'collecting';
 
     const generalRtiQuestion = isGeneralRtiQuestion(message);
+
+    if (isGreeting(message) && !isRTIRelated(message) && !generalRtiQuestion) {
+      const friendlyName = session.full_name ? ` ${session.full_name}` : '';
+      const reply =
+        session.full_name
+          ? `Hello${friendlyName}! How can I assist you with India's RTI Act today?`
+          : 'Hello! How can I assist you with India\'s RTI Act today?';
+      const saved = await recordChat(userId, sessionId, message, reply);
+      return res.json({
+        reply,
+        id: saved.id,
+        message,
+        timestamp: saved.timestamp,
+        sessionId: saved.sessionId,
+      });
+    }
 
     // If unrelated, respond immediately with fallback
     if (!isRTIRelated(message) && !hasCollectingApplication) {
@@ -750,6 +919,7 @@ router.post('/', async (req, res) => {
         sessionId,
         message,
         existingApplication,
+        session,
       });
     }
 
