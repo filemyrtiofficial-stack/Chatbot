@@ -1,7 +1,6 @@
 ﻿import { useEffect, useMemo, useRef, useState, type FormEvent, type SVGProps } from 'react';
 import { ApiError, api, resolveApiUrl } from '../api';
 import { useAuth } from '../context/AuthContext';
-import { ThemeToggle } from '../components/ThemeToggle';
 
 type HistoryRecord = {
   id: number;
@@ -430,14 +429,14 @@ export default function Chat() {
   const userInitial = (user?.name?.trim()?.[0] ?? user?.email?.trim()?.[0] ?? 'R').toUpperCase();
 
   return (
-    <div className="flex min-h-screen bg-[#f9fafb] text-slate-900 dark:bg-[#1f1f22] dark:text-slate-100">
-      <aside className="hidden w-72 shrink-0 flex-col border-r border-slate-200 bg-white/80 backdrop-blur dark:border-[#26262a] dark:bg-[#1a1a1d]/90 md:flex">
+    <div className="flex min-h-screen bg-[#f9fafb] text-slate-900">
+      <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-white/80 backdrop-blur md:flex">
         <div className="px-6 pt-8">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-2xl text-white shadow-sm dark:bg-slate-100 dark:text-slate-900">🤖</div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-2xl text-white shadow-sm">🤖</div>
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">RTI Mitra</p>
-              <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">Conversations</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">RTI DOST</p>
+              <p className="mt-1 text-sm font-semibold text-slate-900">Conversations</p>
             </div>
           </div>
         </div>
@@ -445,25 +444,25 @@ export default function Chat() {
           <button
             type="button"
             onClick={startNewConversation}
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white/95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300 dark:border-[#2d2d32] dark:bg-[#202123] dark:text-slate-200 dark:hover:border-[#3a3a40] dark:hover:bg-[#26262a]"
+            className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white/95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
           >
             <span className="text-base leading-none">+</span>
             New Chat
           </button>
         </div>
-        <div className="mt-8 flex items-center justify-between px-6 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400 dark:text-slate-500">
+        <div className="mt-8 flex items-center justify-between px-6 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
           <span>Previous 7 days</span>
           <button
             type="button"
             onClick={refreshApplications}
-            className="text-slate-400 transition hover:text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300 dark:text-slate-400 dark:hover:text-slate-200"
+            className="text-slate-400 transition hover:text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
           >
             Refresh
           </button>
         </div>
         <nav className="mt-4 flex-1 overflow-y-auto px-4 pb-6">
           {orderedSessions.length === 0 && !loading && (
-            <div className="rounded-3xl border border-dashed border-slate-200 bg-white/70 px-4 py-6 text-center text-sm text-slate-500 dark:border-[#2d2d32] dark:bg-[#202123] dark:text-slate-300">
+            <div className="rounded-3xl border border-dashed border-slate-200 bg-white/70 px-4 py-6 text-center text-sm text-slate-500">
               No conversations yet. Start a new chat to begin.
             </div>
           )}
@@ -474,8 +473,8 @@ export default function Chat() {
                 key={session.sessionId}
                 className={`group mb-3 rounded-2xl border transition ${
                   isActive
-                    ? 'border-slate-900/15 bg-white shadow-sm dark:border-[#2d2d32] dark:bg-[#202123]'
-                    : 'border-transparent bg-transparent hover:border-slate-200 hover:bg-white/80 dark:border-transparent dark:hover:border-[#2d2d32] dark:hover:bg-[#202123]'
+                    ? 'border-slate-900/15 bg-white shadow-sm'
+                    : 'border-transparent bg-transparent hover:border-slate-200 hover:bg-white/80'
                 }`}
               >
                 <button
@@ -484,16 +483,16 @@ export default function Chat() {
                   className="w-full rounded-2xl px-4 pt-4 text-left"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <span className="line-clamp-2 text-sm font-medium text-slate-900 dark:text-slate-100">
+                    <span className="line-clamp-2 text-sm font-medium text-slate-900">
                       {deriveTitle(session.entries)}
                     </span>
                     {session.hasDraft && (
-                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-200">
+                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
                         Draft
                       </span>
                     )}
                   </div>
-                  <div className="mt-2 flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+                  <div className="mt-2 flex items-center gap-2 text-[11px] text-slate-500">
                     <span>
                       {session.status === 'completed'
                         ? 'Completed'
@@ -505,10 +504,10 @@ export default function Chat() {
                     <span>{formatTimestamp(session.updatedAt)}</span>
                   </div>
                 </button>
-                <div className="flex items-center gap-3 px-4 pb-4 pt-2 text-xs text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-3 px-4 pb-4 pt-2 text-xs text-slate-500">
                   <button
                     type="button"
-                    className="font-medium transition hover:text-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-200 dark:hover:text-red-400"
+                    className="font-medium transition hover:text-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-200"
                     onClick={e => {
                       e.stopPropagation();
                       handleDeleteSession(session.sessionId);
@@ -519,7 +518,7 @@ export default function Chat() {
                   {session.hasDraft && (
                     <button
                       type="button"
-                      className="font-medium transition hover:text-sky-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-200 dark:hover:text-sky-400"
+                      className="font-medium transition hover:text-sky-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-200"
                       onClick={e => {
                         e.stopPropagation();
                         handleDownloadDraft(session.sessionId);
@@ -534,9 +533,9 @@ export default function Chat() {
             );
           })}
         </nav>
-        <div className="border-t border-slate-200 px-6 py-6 dark:border-[#26262a]">
+        <div className="border-t border-slate-200 px-6 py-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-slate-200 text-sm font-semibold text-slate-600 dark:bg-[#2a2a2f] dark:text-slate-200">
+            <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-slate-200 text-sm font-semibold text-slate-600">
               {user?.pictureUrl ? (
                 <img src={user.pictureUrl} alt={user.name ?? 'User avatar'} className="h-full w-full object-cover" />
               ) : (
@@ -544,13 +543,13 @@ export default function Chat() {
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">{user?.name}</p>
-              <p className="truncate text-xs text-slate-500 dark:text-slate-400">{user?.email}</p>
+              <p className="truncate text-sm font-semibold text-slate-900">{user?.name}</p>
+              <p className="truncate text-xs text-slate-500">{user?.email}</p>
             </div>
             <button
               type="button"
               onClick={logout}
-              className="text-xs font-semibold text-slate-500 transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300 dark:text-slate-400 dark:hover:text-slate-200"
+              className="text-xs font-semibold text-slate-500 transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
             >
               Logout
             </button>
@@ -558,12 +557,12 @@ export default function Chat() {
         </div>
       </aside>
       <main className="flex min-h-screen flex-1 flex-col">
-        <header className="flex flex-col gap-4 border-b border-slate-200 bg-[#f9fafb]/85 px-6 py-5 backdrop-blur dark:border-[#26262a] dark:bg-[#1f1f22]/85 sm:flex-row sm:items-center sm:justify-between">
+        <header className="sticky top-0 z-20 flex flex-col gap-4 border-b border-slate-200 bg-[#f9fafb]/85 px-6 py-5 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-3xl shadow-sm dark:bg-[#202123]">🤖</div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-3xl shadow-sm">🤖</div>
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">RTI-Mitra</p>
-              <h1 className="mt-1 text-lg font-semibold text-slate-900 dark:text-slate-100">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">RTI-Dost</p>
+              <h1 className="mt-1 text-lg font-semibold text-slate-900">
                 Your assistant for Right to Information in India
               </h1>
             </div>
@@ -572,27 +571,26 @@ export default function Chat() {
             <button
               type="button"
               onClick={startNewConversation}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white md:hidden dark:border-[#2d2d32] dark:bg-[#202123] dark:text-slate-200 dark:hover:border-[#3a3a40] dark:hover:bg-[#26262a]"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white md:hidden"
             >
               <span className="text-base leading-none">+</span>
               New Chat
             </button>
-            <ThemeToggle />
           </div>
         </header>
         {(error || globalNotice) && (
           <div
             className={`border-b px-6 py-3 text-sm ${
               error
-                ? 'border-red-100 bg-red-50 text-red-600 dark:border-red-900 dark:bg-[#3b1f23] dark:text-red-200'
-                : 'border-emerald-100 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-[#123229] dark:text-emerald-200'
+                ? 'border-red-100 bg-red-50 text-red-600'
+                : 'border-emerald-100 bg-emerald-50 text-emerald-700'
             }`}
           >
             <div className="mx-auto max-w-3xl">{error || globalNotice}</div>
           </div>
         )}
-        <div className="border-b border-slate-200 px-6 py-4 md:hidden dark:border-[#26262a]">
-          <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.25em] text-slate-400 dark:text-slate-500">
+        <div className="border-b border-slate-200 px-6 py-4 md:hidden">
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
             Conversation
           </label>
           <select
@@ -605,7 +603,7 @@ export default function Chat() {
                 setSelectedSessionId(value);
               }
             }}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200 dark:border-[#2d2d32] dark:bg-[#202123] dark:text-slate-200 dark:focus:border-[#3a3a40] dark:focus:ring-[#3a3a40]"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
           >
             <option value={NEW_SESSION_SENTINEL}>+ New chat</option>
             {orderedSessions.map(session => (
@@ -623,20 +621,20 @@ export default function Chat() {
               aria-live="polite"
             >
               {loading && (
-                <div className="mx-auto w-full max-w-sm rounded-3xl border border-dashed border-slate-200 bg-white/80 px-4 py-5 text-center text-sm text-slate-500 shadow-sm dark:border-[#2d2d32] dark:bg-[#202123] dark:text-slate-300">
+                <div className="mx-auto w-full max-w-sm rounded-3xl border border-dashed border-slate-200 bg-white/80 px-4 py-5 text-center text-sm text-slate-500 shadow-sm">
                   Loading your conversations...
                 </div>
               )}
               {showEmptyState && (
-                <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 rounded-3xl border border-dashed border-slate-200 bg-white/90 px-8 py-12 text-center shadow-sm dark:border-[#2d2d32] dark:bg-[#202123]">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#eef2ff] text-3xl dark:bg-[#2a2f4a]">🙌</div>
+                <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 rounded-3xl border border-dashed border-slate-200 bg-white/90 px-8 py-12 text-center shadow-sm">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#eef2ff] text-3xl">🙌</div>
                   <div className="space-y-2">
-                    <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Namaste! I&apos;m RTI Mitra</h2>
-                    <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                    <h2 className="text-xl font-semibold text-slate-900">Namaste! I&apos;m RTI Dost</h2>
+                    <p className="text-sm leading-relaxed text-slate-500">
                       I can help you draft RTI applications, understand the RTI Act, and find answers to your RTI-related questions.
                     </p>
                   </div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
                     Ask your first question below
                   </p>
                 </div>
@@ -650,25 +648,25 @@ export default function Chat() {
                     <div
                       className={`max-w-[75%] rounded-3xl px-5 py-4 text-sm leading-relaxed shadow-sm ${
                         entry.role === 'user'
-                          ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                          : 'border border-slate-200 bg-white text-slate-800 dark:border-[#2d2d32] dark:bg-[#202123] dark:text-slate-100'
+                          ? 'bg-slate-900 text-white'
+                          : 'border border-slate-200 bg-white text-slate-800'
                       }`}
                     >
                       <div className="whitespace-pre-wrap">{entry.text}</div>
-                      <div className={`mt-3 text-xs ${entry.role === 'user' ? 'text-white/70 dark:text-slate-600' : 'text-slate-400 dark:text-slate-400'}`}>
-                        {entry.role === 'user' ? 'You' : 'RTI Mitra'} • {formatTimestamp(entry.timestamp)}
+                      <div className={`mt-3 text-xs ${entry.role === 'user' ? 'text-white/70' : 'text-slate-400'}`}>
+                        {entry.role === 'user' ? 'You' : 'RTI Dost'} • {formatTimestamp(entry.timestamp)}
                       </div>
                     </div>
                   </div>
                 ))}
             </div>
           </div>
-          <div className="border-t border-slate-200 bg-[#f9fafb] px-4 py-6 dark:border-[#26262a] dark:bg-[#1f1f22]">
+          <div className="border-t border-slate-200 bg-[#f9fafb] px-4 py-6">
             <form onSubmit={handleSend} className="mx-auto w-full max-w-3xl space-y-3">
-              <div className="flex items-end gap-3 rounded-3xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition focus-within:border-slate-400 focus-within:shadow-md focus-within:ring-2 focus-within:ring-slate-200 dark:border-[#2d2d32] dark:bg-[#202123] dark:focus-within:border-[#3a3a40] dark:focus-within:ring-[#3a3a40]">
+              <div className="flex items-end gap-3 rounded-3xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition focus-within:border-slate-400 focus-within:shadow-md focus-within:ring-2 focus-within:ring-slate-200">
                 <button
                   type="button"
-                  className="text-slate-400 transition hover:text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300 dark:text-slate-400 dark:hover:text-slate-100"
+                  className="text-slate-400 transition hover:text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
                   aria-label="Attach a file"
                   disabled={sending}
                 >
@@ -676,8 +674,8 @@ export default function Chat() {
                 </button>
                 <textarea
                   ref={textareaRef}
-                  className="max-h-48 min-h-[48px] flex-1 resize-none border-0 bg-transparent text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 focus:outline-none dark:text-slate-100"
-                  placeholder="Message RTI Mitra"
+                  className="max-h-48 min-h-[48px] flex-1 resize-none border-0 bg-transparent text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 focus:outline-none"
+                  placeholder="Message RTI Dost"
                   value={message}
                   onChange={e => {
                     setMessage(e.target.value);
@@ -692,7 +690,7 @@ export default function Chat() {
                 />
                 <button
                   type="button"
-                  className="text-slate-400 transition hover:text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300 dark:text-slate-400 dark:hover:text-slate-100"
+                  className="text-slate-400 transition hover:text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
                   aria-label="Start voice input"
                   disabled
                 >
@@ -700,29 +698,29 @@ export default function Chat() {
                 </button>
                 <button
                   type="submit"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white dark:disabled:bg-[#2d2d32] dark:disabled:text-slate-500"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
                   disabled={disableSend}
                 >
                   {sending ? (
-                    <span className="flex h-4 w-4 animate-spin rounded-full border-2 border-white/70 border-t-transparent dark:border-slate-900/60 dark:border-t-transparent" />
+                    <span className="flex h-4 w-4 animate-spin rounded-full border-2 border-white/70 border-t-transparent" />
                   ) : (
                     <SendIcon className="h-4 w-4" />
                   )}
                   <span className="sr-only">Send message</span>
                 </button>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-slate-500">
                 FileMyRTI responds only to queries about India&apos;s Right to Information Act.
               </p>
             </form>
-            <footer className="mx-auto mt-10 flex w-full max-w-3xl flex-col items-center gap-3 border-t border-slate-200 pt-4 text-xs text-slate-500 dark:border-[#2d2d32] dark:text-slate-400 sm:flex-row sm:justify-between">
-              <span>RTI-Mitra: AI assistant for drafting RTIs.</span>
+            <footer className="mx-auto mt-10 flex w-full max-w-3xl flex-col items-center gap-3 border-t border-slate-200 pt-4 text-xs text-slate-500 sm:flex-row sm:justify-between">
+              <span>RTI-Dost: AI assistant for drafting RTIs.</span>
               <div className="flex items-center gap-4">
                 <a
                   href="https://filemyrti.com/privacy-policy"
                   target="_blank"
                   rel="noreferrer"
-                  className="transition hover:text-slate-700 dark:hover:text-slate-200"
+                  className="transition hover:text-slate-700"
                 >
                   Privacy Policy
                 </a>
@@ -730,7 +728,7 @@ export default function Chat() {
                   href="https://filemyrti.com/terms-of-service"
                   target="_blank"
                   rel="noreferrer"
-                  className="transition hover:text-slate-700 dark:hover:text-slate-200"
+                  className="transition hover:text-slate-700"
                 >
                   Terms of Service
                 </a>
