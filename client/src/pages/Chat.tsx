@@ -505,15 +505,15 @@ export default function Chat() {
 
   return (
     <div className={`flex h-screen transition-colors duration-200 ${isDarkMode
-      ? 'bg-gray-900 text-gray-100'
+      ? 'text-gray-100'
       : 'text-gray-900'
-      }`} style={{ backgroundColor: isDarkMode ? '#111827' : '#FFFFFF' }}>
+      }`} style={{ backgroundColor: isDarkMode ? '#212121' : '#FFFFFF' }}>
       {/* Sidebar - optimized for large screens */}
       <aside className={`${sidebarOpen ? 'flex' : 'hidden'} xl:w-64 xl:flex-col xl:fixed xl:inset-y-0 xl:z-50`}>
         <div className={`flex grow flex-col gap-y-5 overflow-y-auto border-r px-6 pb-4 transition-colors duration-200 ${isDarkMode
           ? 'border-gray-700'
           : 'border-gray-200'
-          }`} style={{ backgroundColor: isDarkMode ? '#1F2937' : '#F7F7F8' }}>
+          }`} style={{ backgroundColor: isDarkMode ? '#181818' : '#F7F7F8' }}>
           <div className="flex h-16 shrink-0 items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-14 items-center justify-center text-xs font-bold">
@@ -641,8 +641,8 @@ export default function Chat() {
       {/* Main content area */}
       <div className={`flex flex-1 flex-col ${sidebarOpen ? 'xl:pl-64' : ''}`}>
         {/* Header */}
-        <div className={`sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 px-4 sm:gap-x-6 sm:px-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? 'bg-gray-800' : 'bg-white'
-          }`}>
+        <div className={`sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 px-4 sm:gap-x-6 sm:px-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? '' : 'bg-white'
+          }`} style={{ backgroundColor: isDarkMode ? '#212121' : undefined }}>
           <button type="button" className={`-m-2.5 p-2.5 xl:hidden transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
             }`}>
             <span className="sr-only">Open sidebar</span>
