@@ -160,6 +160,15 @@ export default function Chat() {
   const [downloadingSession, setDownloadingSession] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('Dost1.0');
+  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+
+  const availableModels = [
+    'Dost1.0',
+    'Dost2.0',
+    'Dost Pro',
+    'Dost Lite'
+  ];
 
   const messageListRef = useRef<HTMLDivElement | null>(null);
 
@@ -223,6 +232,23 @@ export default function Chat() {
       mediaQuery.removeEventListener('change', handleChange);
     };
   }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isModelDropdownOpen) {
+        setIsModelDropdownOpen(false);
+      }
+    };
+
+    if (isModelDropdownOpen) {
+      document.addEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isModelDropdownOpen]);
 
   useEffect(() => {
     let active = true;
@@ -641,16 +667,45 @@ export default function Chat() {
                 <div className="relative">
                   <button
                     type="button"
+                    onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
                     className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${isDarkMode
                       ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                   >
-                    <span>RTI-Dost1.0 (Dummy Model)</span>
+                    <span>{selectedModel}</span>
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                     </svg>
                   </button>
+
+                  {isModelDropdownOpen && (
+                    <div className={`absolute top-full left-0 mt-1 w-full min-w-[120px] rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 ${isDarkMode ? 'bg-gray-700' : 'bg-white'
+                      }`}>
+                      <div className="py-1">
+                        {availableModels.map((model) => (
+                          <button
+                            key={model}
+                            type="button"
+                            onClick={() => {
+                              setSelectedModel(model);
+                              setIsModelDropdownOpen(false);
+                            }}
+                            className={`block w-full text-left px-4 py-2 text-sm transition-colors duration-200 ${model === selectedModel
+                                ? isDarkMode
+                                  ? 'bg-gray-600 text-white'
+                                  : 'bg-gray-100 text-gray-900'
+                                : isDarkMode
+                                  ? 'text-gray-300 hover:bg-gray-600 hover:text-white'
+                                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                              }`}
+                          >
+                            {model}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
