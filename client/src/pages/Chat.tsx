@@ -507,13 +507,13 @@ export default function Chat() {
     <div className={`flex h-screen transition-colors duration-200 ${isDarkMode
       ? 'text-gray-100'
       : 'text-gray-900'
-      }`} style={{ backgroundColor: isDarkMode ? '#000000' : '#FFFFFF' }}>
+      }`} style={{ backgroundColor: isDarkMode ? '#212121' : '#FFFFFF' }}>
       {/* Sidebar - optimized for large screens */}
       <aside className={`${sidebarOpen ? 'flex' : 'hidden'} xl:w-64 xl:flex-col xl:fixed xl:inset-y-0 xl:z-50`}>
         <div className={`flex grow flex-col gap-y-5 overflow-y-auto border-r px-6 pb-4 transition-colors duration-200 ${isDarkMode
           ? 'border-gray-800'
           : 'border-gray-200'
-          }`} style={{ backgroundColor: isDarkMode ? '#111111' : '#F7F7F8' }}>
+          }`} style={{ backgroundColor: isDarkMode ? '#181818' : '#F7F7F8' }}>
           <div className="flex h-16 shrink-0 items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-14 items-center justify-center text-xs font-bold">
@@ -642,7 +642,7 @@ export default function Chat() {
       <div className={`flex flex-1 flex-col ${sidebarOpen ? 'xl:pl-64' : ''}`}>
         {/* Header */}
         <div className={`sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 px-4 sm:gap-x-6 sm:px-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? '' : 'bg-white'
-          }`} style={{ backgroundColor: isDarkMode ? '#000000' : undefined }}>
+          }`} style={{ backgroundColor: isDarkMode ? '#212121' : undefined }}>
           <button type="button" className={`-m-2.5 p-2.5 xl:hidden transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
             }`}>
             <span className="sr-only">Open sidebar</span>
@@ -790,14 +790,14 @@ export default function Chat() {
                   <div className="w-full max-w-2xl">
                     <form onSubmit={handleSend} className="relative">
                       <div className={`flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-3 h-12 transition-colors duration-200 ${isDarkMode
-                          ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
-                          : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
+                        ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
+                        : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
                         }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
                         <button
                           type="button"
                           className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
-                              ? 'text-gray-400 hover:text-gray-200'
-                              : 'text-gray-600 hover:text-gray-800'
+                            ? 'text-gray-400 hover:text-gray-200'
+                            : 'text-gray-600 hover:text-gray-800'
                             }`}
                           disabled={sending}
                         >
@@ -810,8 +810,8 @@ export default function Chat() {
                           name="message"
                           id="message"
                           className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 transition-colors duration-200 ${isDarkMode
-                              ? 'text-gray-100 placeholder:text-gray-500'
-                              : 'text-gray-900 placeholder:text-gray-400'
+                            ? 'text-gray-100 placeholder:text-gray-500'
+                            : 'text-gray-900 placeholder:text-gray-400'
                             }`}
                           placeholder="Message RTI Dost..."
                           value={message}
@@ -830,8 +830,8 @@ export default function Chat() {
                         <button
                           type="button"
                           className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
-                              ? 'text-gray-400 hover:text-gray-200'
-                              : 'text-gray-600 hover:text-gray-800'
+                            ? 'text-gray-400 hover:text-gray-200'
+                            : 'text-gray-600 hover:text-gray-800'
                             }`}
                           disabled={sending}
                         >
@@ -842,8 +842,8 @@ export default function Chat() {
                         <button
                           type="submit"
                           className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${isDarkMode
-                              ? 'text-gray-400 hover:text-gray-200 focus-visible:outline-gray-400'
-                              : 'text-gray-600 hover:text-gray-800 focus-visible:outline-gray-500'
+                            ? 'text-gray-400 hover:text-gray-200 focus-visible:outline-gray-400'
+                            : 'text-gray-600 hover:text-gray-800 focus-visible:outline-gray-500'
                             }`}
                           disabled={disableSend}
                           title="Send"
@@ -906,18 +906,18 @@ export default function Chat() {
           {/* Input area - only show when not in empty state */}
           {!showEmptyState && (
             <div className={`px-4 py-4 sm:px-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? '' : 'bg-white'
-              }`} style={{ backgroundColor: isDarkMode ? '#000000' : undefined }}>
+              }`} style={{ backgroundColor: isDarkMode ? '#212121' : undefined }}>
               <div className="mx-auto max-w-4xl">
                 <form onSubmit={handleSend} className="relative">
                   <div className={`flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-3 h-12 transition-colors duration-200 ${isDarkMode
-                      ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
-                      : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
+                    ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
+                    : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
                     }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
                     <button
                       type="button"
                       className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
-                          ? 'text-gray-400 hover:text-gray-200'
-                          : 'text-gray-600 hover:text-gray-800'
+                        ? 'text-gray-400 hover:text-gray-200'
+                        : 'text-gray-600 hover:text-gray-800'
                         }`}
                       disabled={sending}
                     >
@@ -930,8 +930,8 @@ export default function Chat() {
                       name="message"
                       id="message"
                       className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 transition-colors duration-200 ${isDarkMode
-                          ? 'text-gray-100 placeholder:text-gray-500'
-                          : 'text-gray-900 placeholder:text-gray-400'
+                        ? 'text-gray-100 placeholder:text-gray-500'
+                        : 'text-gray-900 placeholder:text-gray-400'
                         }`}
                       placeholder="Message RTI Dost..."
                       value={message}
@@ -950,8 +950,8 @@ export default function Chat() {
                     <button
                       type="button"
                       className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
-                          ? 'text-gray-400 hover:text-gray-200'
-                          : 'text-gray-600 hover:text-gray-800'
+                        ? 'text-gray-400 hover:text-gray-200'
+                        : 'text-gray-600 hover:text-gray-800'
                         }`}
                       disabled={sending}
                     >
@@ -962,8 +962,8 @@ export default function Chat() {
                     <button
                       type="submit"
                       className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${isDarkMode
-                          ? 'text-gray-400 hover:text-gray-200 focus-visible:outline-gray-400'
-                          : 'text-gray-600 hover:text-gray-800 focus-visible:outline-gray-500'
+                        ? 'text-gray-400 hover:text-gray-200 focus-visible:outline-gray-400'
+                        : 'text-gray-600 hover:text-gray-800 focus-visible:outline-gray-500'
                         }`}
                       disabled={disableSend}
                       title="Send"
