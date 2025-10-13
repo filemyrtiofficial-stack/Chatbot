@@ -466,14 +466,14 @@ export default function Chat() {
 
   return (
     <div className={`flex h-screen transition-colors duration-200 ${isDarkMode
-        ? 'bg-gray-900 text-gray-100'
-        : 'text-gray-900'
+      ? 'bg-gray-900 text-gray-100'
+      : 'text-gray-900'
       }`} style={{ backgroundColor: isDarkMode ? '#111827' : '#FFFFFF' }}>
       {/* Sidebar - optimized for large screens */}
       <aside className={`${sidebarOpen ? 'flex' : 'hidden'} xl:w-64 xl:flex-col xl:fixed xl:inset-y-0 xl:z-50`}>
         <div className={`flex grow flex-col gap-y-5 overflow-y-auto border-r px-6 pb-4 transition-colors duration-200 ${isDarkMode
-            ? 'border-gray-700'
-            : 'border-gray-200'
+          ? 'border-gray-700'
+          : 'border-gray-200'
           }`} style={{ backgroundColor: isDarkMode ? '#1F2937' : '#F7F7F8' }}>
           <div className="flex h-16 shrink-0 items-center justify-between">
             <div className="flex items-center gap-3">
@@ -517,13 +517,13 @@ export default function Chat() {
                   type="button"
                   onClick={startNewConversation}
                   className={`group -mx-2 flex gap-x-3 rounded-xl p-3 text-sm leading-6 font-semibold transition-colors duration-200 ${isDarkMode
-                      ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                      : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
+                    ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                    : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
                     }`}
                 >
                   <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-lg font-medium transition-colors duration-200 ${isDarkMode
-                      ? 'bg-gray-600 text-gray-300 group-hover:bg-gray-500'
-                      : 'bg-gray-100 text-gray-600 group-hover:bg-gray-200'
+                    ? 'bg-gray-600 text-gray-300 group-hover:bg-gray-500'
+                    : 'bg-gray-100 text-gray-600 group-hover:bg-gray-200'
                     }`}>
                     +
                   </span>
@@ -542,13 +542,13 @@ export default function Chat() {
                           type="button"
                           onClick={() => setSelectedSessionId(session.sessionId)}
                           className={`group flex gap-x-3 rounded-lg p-3 text-sm leading-6 font-medium transition-colors duration-200 w-full text-left ${isDarkMode
-                              ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                              : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
+                            ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                            : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
                             }`}
                         >
                           <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors duration-200 ${isDarkMode
-                              ? 'bg-gray-600 text-gray-400 group-hover:bg-gray-500'
-                              : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
+                            ? 'bg-gray-600 text-gray-400 group-hover:bg-gray-500'
+                            : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
                             }`}>
                             💬
                           </span>
@@ -565,8 +565,8 @@ export default function Chat() {
           <div className={`flex items-center gap-x-4 px-3 py-4 border-t transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
             }`}>
             <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-sm font-semibold transition-colors duration-200 ${isDarkMode
-                ? 'from-gray-600 to-gray-700 text-gray-200'
-                : 'from-gray-200 to-gray-300 text-gray-700'
+              ? 'from-gray-600 to-gray-700 text-gray-200'
+              : 'from-gray-200 to-gray-300 text-gray-700'
               }`}>
               {user?.pictureUrl ? (
                 <img src={user.pictureUrl} alt={user.name ?? 'User avatar'} className="h-full w-full rounded-full object-cover" />
@@ -584,8 +584,8 @@ export default function Chat() {
               type="button"
               onClick={logout}
               className={`text-xs transition-colors duration-200 ${isDarkMode
-                  ? 'text-gray-400 hover:text-gray-200'
-                  : 'text-gray-500 hover:text-gray-700'
+                ? 'text-gray-400 hover:text-gray-200'
+                : 'text-gray-500 hover:text-gray-700'
                 }`}
             >
               Logout
@@ -618,8 +618,8 @@ export default function Chat() {
                 setSidebarOpen(true);
               }}
               className={`hidden xl:flex items-center justify-center p-2 transition-colors duration-200 ${isDarkMode
-                  ? 'text-gray-400 hover:text-gray-200'
-                  : 'text-gray-600 hover:text-gray-900'
+                ? 'text-gray-400 hover:text-gray-200'
+                : 'text-gray-600 hover:text-gray-900'
                 }`}
               title="Open sidebar"
             >
@@ -642,8 +642,8 @@ export default function Chat() {
                   <button
                     type="button"
                     className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${isDarkMode
-                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                   >
                     <span>RTI-Dost1.0</span>
@@ -659,8 +659,8 @@ export default function Chat() {
                 type="button"
                 onClick={startNewConversation}
                 className={`inline-flex items-center justify-center rounded-lg p-2 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 ${isDarkMode
-                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 title="Temporary Chat"
               >
@@ -712,7 +712,7 @@ export default function Chat() {
                   {/* Centered input box for empty state */}
                   <div className="w-full max-w-2xl">
                     <form onSubmit={handleSend} className="relative">
-                      <div className="flex items-center gap-3 rounded-xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white p-3">
+                      <div className="flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white p-3">
                         <button
                           type="button"
                           className="inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 transition-colors"
@@ -796,7 +796,7 @@ export default function Chat() {
             <div className="border-t border-gray-200 bg-white px-4 py-4 sm:px-6 lg:px-8">
               <div className="mx-auto max-w-4xl">
                 <form onSubmit={handleSend} className="relative">
-                  <div className="flex items-center gap-3 rounded-xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white p-3">
+                  <div className="flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white p-3">
                     <button
                       type="button"
                       className="inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 transition-colors"
