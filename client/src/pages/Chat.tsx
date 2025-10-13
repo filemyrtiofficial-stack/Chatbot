@@ -525,8 +525,8 @@ export default function Chat() {
         <div className="flex flex-1 flex-col overflow-hidden">
           {(error || globalNotice) && (
             <div className={`border-b px-6 py-3 text-sm ${error
-                ? 'border-red-100 bg-red-50 text-red-600'
-                : 'border-green-100 bg-green-50 text-green-600'
+              ? 'border-red-100 bg-red-50 text-red-600'
+              : 'border-green-100 bg-green-50 text-green-600'
               }`}>
               <div className="mx-auto max-w-4xl">{error || globalNotice}</div>
             </div>
@@ -563,8 +563,8 @@ export default function Chat() {
                   >
                     <div
                       className={`max-w-4xl rounded-2xl px-6 py-4 ${entry.role === 'user'
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200'
                         }`}
                     >
                       <div className="whitespace-pre-wrap text-base leading-relaxed">{entry.text}</div>
@@ -576,19 +576,19 @@ export default function Chat() {
           </div>
 
           {/* Input area */}
-          <div className="border-t border-gray-200 bg-white px-4 py-6 sm:px-6 lg:px-8">
+          <div className="border-t border-gray-200 bg-white px-4 py-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-4xl">
               <form onSubmit={handleSend} className="relative">
-                <div className="overflow-hidden rounded-2xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
+                <div className="overflow-hidden rounded-xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
                   <label htmlFor="message" className="sr-only">
                     Add your message
                   </label>
                   <textarea
                     ref={textareaRef}
-                    rows={4}
+                    rows={1}
                     name="message"
                     id="message"
-                    className="block w-full resize-none border-0 bg-transparent py-4 px-6 text-gray-900 placeholder:text-gray-400 focus:ring-0 text-base leading-6"
+                    className="block w-full resize-none border-0 bg-transparent py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-0 text-sm leading-6"
                     placeholder="Message RTI Dost..."
                     value={message}
                     onChange={e => {
@@ -596,26 +596,34 @@ export default function Chat() {
                       if (textareaRef.current) {
                         textareaRef.current.style.height = 'auto';
                         const { scrollHeight } = textareaRef.current;
-                        textareaRef.current.style.height = `${Math.min(scrollHeight, 200)}px`;
+                        textareaRef.current.style.height = `${Math.min(scrollHeight, 120)}px`;
+                      }
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        if (!disableSend) {
+                          handleSend(e);
+                        }
                       }
                     }}
                     disabled={sending}
                   />
-                  <div className="flex items-center justify-between gap-x-3 border-t border-gray-200 bg-gray-50 px-4 py-3">
+                  <div className="flex items-center justify-between gap-x-3 border-t border-gray-200 bg-gray-50 px-3 py-2">
                     <div className="flex">
                       <button
                         type="button"
-                        className="-m-2.5 -my-1.5 inline-flex h-10 w-10 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 transition-colors"
+                        className="-m-2.5 -my-1.5 inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 transition-colors"
                         disabled={sending}
                       >
-                        <PaperclipIcon className="h-5 w-5" />
+                        <PaperclipIcon className="h-4 w-4" />
                         <span className="sr-only">Attach a file</span>
                       </button>
                     </div>
                     <div className="flex-shrink-0">
                       <button
                         type="submit"
-                        className="inline-flex items-center gap-x-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="inline-flex items-center gap-x-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         disabled={disableSend}
                       >
                         {sending ? (
@@ -629,8 +637,8 @@ export default function Chat() {
                   </div>
                 </div>
               </form>
-              <p className="mt-3 text-sm text-gray-500 text-center">
-                RTI Dost responds only to queries about India's Right to Information Act.
+              <p className="mt-2 text-xs text-gray-500 text-center">
+                RTI Dost responds only to queries about India's Right to Information Act. Press Enter to send, Shift+Enter for new line.
               </p>
             </div>
           </div>
