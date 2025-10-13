@@ -472,8 +472,11 @@ export default function Chat() {
           }`} style={{ backgroundColor: isDarkMode ? '#1F2937' : '#F7F7F8' }}>
           <div className="flex h-16 shrink-0 items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white text-lg font-bold shadow-lg">
-                RTI
+              <div className="flex h-12 w-20 items-center justify-center bg-black text-white text-xs font-bold">
+                <div className="text-center">
+                  <div className="text-white text-[10px] font-bold leading-tight">FILE MY</div>
+                  <div className="bg-white text-black px-1 py-0.5 text-[10px] font-bold leading-tight">RTI</div>
+                </div>
               </div>
               <div>
                 <span className={`text-xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
@@ -641,7 +644,7 @@ export default function Chat() {
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                   >
-                    <span>RTI-Dost1.0</span>
+                    <span>RTI-Dost1.0 (Dummy Model)</span>
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                     </svg>
@@ -707,10 +710,10 @@ export default function Chat() {
                   {/* Centered input box for empty state */}
                   <div className="w-full max-w-2xl">
                     <form onSubmit={handleSend} className="relative">
-                      <div className="flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white p-3">
+                      <div className="flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white p-3 h-12">
                         <button
                           type="button"
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 transition-colors"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-600 hover:text-gray-800 transition-colors"
                           disabled={sending}
                         >
                           <PaperclipIcon className="h-4 w-4" />
@@ -738,7 +741,7 @@ export default function Chat() {
 
                         <button
                           type="button"
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 transition-colors"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-600 hover:text-gray-800 transition-colors"
                           disabled={sending}
                         >
                           <MicrophoneIcon className="h-4 w-4" />
@@ -774,9 +777,10 @@ export default function Chat() {
                   >
                     <div
                       className={`max-w-4xl rounded-2xl px-6 py-4 ${entry.role === 'user'
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200'
+                        ? 'text-gray-900'
+                        : 'bg-white text-gray-900'
                         }`}
+                      style={{ backgroundColor: entry.role === 'user' ? '#F7F7F8' : undefined }}
                     >
                       <div className="whitespace-pre-wrap text-base leading-relaxed">{entry.text}</div>
                     </div>
@@ -791,10 +795,10 @@ export default function Chat() {
             <div className="bg-white px-4 py-4 sm:px-6 lg:px-8">
               <div className="mx-auto max-w-4xl">
                 <form onSubmit={handleSend} className="relative">
-                  <div className="flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white p-3">
+                  <div className="flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white p-3 h-12">
                     <button
                       type="button"
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 transition-colors"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-600 hover:text-gray-800 transition-colors"
                       disabled={sending}
                     >
                       <PaperclipIcon className="h-4 w-4" />
@@ -822,7 +826,7 @@ export default function Chat() {
 
                     <button
                       type="button"
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 transition-colors"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-600 hover:text-gray-800 transition-colors"
                       disabled={sending}
                     >
                       <MicrophoneIcon className="h-4 w-4" />
