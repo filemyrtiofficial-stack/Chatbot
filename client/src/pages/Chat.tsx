@@ -415,70 +415,77 @@ export default function Chat() {
   const userInitial = (user?.name?.trim()?.[0] ?? user?.email?.trim()?.[0] ?? 'R').toUpperCase();
 
   return (
-    <div className="flex min-h-screen bg-gray-50 text-gray-900">
-      {/* Minimal sidebar - only visible on larger screens */}
-      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:z-50">
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
+    <div className="flex h-screen bg-gray-50 text-gray-900">
+      {/* Sidebar - optimized for large screens */}
+      <aside className="hidden xl:flex xl:w-80 xl:flex-col xl:fixed xl:inset-y-0 xl:z-50">
+        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white border-r border-gray-200 px-6 pb-4">
           <div className="flex h-16 shrink-0 items-center">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900 text-white text-sm font-semibold">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white text-lg font-bold shadow-lg">
                 RTI
               </div>
-              <span className="text-lg font-semibold text-gray-900">RTI Dost</span>
+              <div>
+                <span className="text-xl font-bold text-gray-900">RTI Dost</span>
+                <p className="text-xs text-gray-500">AI Assistant</p>
+              </div>
             </div>
           </div>
+
           <nav className="flex flex-1 flex-col">
-            <ul role="list" className="flex flex-1 flex-col gap-y-7">
+            <ul role="list" className="flex flex-1 flex-col gap-y-6">
               <li>
                 <button
                   type="button"
                   onClick={startNewConversation}
-                  className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+                  className="group -mx-2 flex gap-x-3 rounded-xl p-3 text-sm leading-6 font-semibold text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
                 >
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-[0.625rem] font-medium text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 text-lg font-medium group-hover:bg-indigo-200">
                     +
                   </span>
-                  New chat
+                  <span className="text-base">New chat</span>
                 </button>
               </li>
-              <li>
-                <div className="text-xs font-semibold leading-6 text-gray-400">Recent</div>
-                <ul role="list" className="-mx-2 mt-2 space-y-1">
-                  {orderedSessions.slice(0, 5).map((session) => (
-                    <li key={session.sessionId}>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedSessionId(session.sessionId)}
-                        className="group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
-                      >
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-[0.625rem] font-medium text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600">
-                          💬
-                        </span>
-                        <span className="truncate">{deriveTitle(session.entries)}</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </li>
+
+              {orderedSessions.length > 0 && (
+                <li>
+                  <div className="text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wider mb-3">Recent conversations</div>
+                  <ul role="list" className="-mx-2 space-y-1">
+                    {orderedSessions.slice(0, 8).map((session) => (
+                      <li key={session.sessionId}>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedSessionId(session.sessionId)}
+                          className="group flex gap-x-3 rounded-lg p-3 text-sm leading-6 font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors w-full text-left"
+                        >
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-gray-100 text-gray-500 group-hover:bg-gray-200">
+                            💬
+                          </span>
+                          <span className="truncate text-sm">{deriveTitle(session.entries)}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              )}
             </ul>
           </nav>
-          <div className="flex items-center gap-x-4 px-2 py-3 text-sm font-semibold leading-6 text-gray-900">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-600">
+
+          <div className="flex items-center gap-x-4 px-3 py-4 border-t border-gray-200">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-gray-200 to-gray-300 text-sm font-semibold text-gray-700">
               {user?.pictureUrl ? (
                 <img src={user.pictureUrl} alt={user.name ?? 'User avatar'} className="h-full w-full rounded-full object-cover" />
               ) : (
                 userInitial
               )}
             </div>
-            <span className="sr-only">Your profile</span>
-            <div aria-hidden="true" className="flex-1">
-              <div className="text-sm font-semibold text-gray-900">{user?.name}</div>
-              <div className="text-xs text-gray-500">{user?.email}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold text-gray-900 truncate">{user?.name}</div>
+              <div className="text-xs text-gray-500 truncate">{user?.email}</div>
             </div>
             <button
               type="button"
               onClick={logout}
-              className="text-xs text-gray-500 hover:text-gray-700"
+              className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
             >
               Logout
             </button>
@@ -487,140 +494,145 @@ export default function Chat() {
       </aside>
 
       {/* Main content area */}
-      <div className="lg:pl-64">
+      <div className="flex flex-1 flex-col xl:pl-80">
+        {/* Header */}
         <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
-          <button type="button" className="-m-2.5 p-2.5 text-gray-700 lg:hidden">
+          <button type="button" className="-m-2.5 p-2.5 text-gray-700 xl:hidden">
             <span className="sr-only">Open sidebar</span>
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
           </button>
-          <div className="h-6 w-px bg-gray-200 lg:hidden" />
+          <div className="h-6 w-px bg-gray-200 xl:hidden" />
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
             <div className="relative flex flex-1">
-              <h1 className="text-lg font-semibold text-gray-900">RTI Assistant</h1>
+              <h1 className="text-xl font-semibold text-gray-900">RTI Assistant</h1>
             </div>
             <div className="flex items-center gap-x-4 lg:gap-x-6">
               <button
                 type="button"
                 onClick={startNewConversation}
-                className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors"
               >
-                <span className="text-base leading-none">+</span>
+                <span className="text-lg leading-none">+</span>
                 New Chat
               </button>
             </div>
           </div>
         </div>
 
-        <main className="py-10">
-          <div className="px-4 sm:px-6 lg:px-8">
-            {(error || globalNotice) && (
-              <div className={`mb-4 rounded-md p-4 ${error
-                ? 'bg-red-50 text-red-600'
-                : 'bg-green-50 text-green-600'
-                }`}>
-                <div className="text-sm">{error || globalNotice}</div>
-              </div>
-            )}
+        {/* Chat area */}
+        <div className="flex flex-1 flex-col overflow-hidden">
+          {(error || globalNotice) && (
+            <div className={`border-b px-6 py-3 text-sm ${error
+                ? 'border-red-100 bg-red-50 text-red-600'
+                : 'border-green-100 bg-green-50 text-green-600'
+              }`}>
+              <div className="mx-auto max-w-4xl">{error || globalNotice}</div>
+            </div>
+          )}
 
-            <div className="mx-auto max-w-4xl">
-              <div className="flex flex-col space-y-4">
-                {loading && (
-                  <div className="flex items-center justify-center py-12">
+          <div className="flex-1 overflow-y-auto">
+            <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+              {loading && (
+                <div className="flex items-center justify-center py-16">
+                  <div className="flex items-center gap-3">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent"></div>
                     <div className="text-sm text-gray-500">Loading...</div>
                   </div>
-                )}
+                </div>
+              )}
 
-                {showEmptyState && (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
-                      <svg className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
-                      </svg>
-                    </div>
-                    <h3 className="mt-2 text-sm font-semibold text-gray-900">Welcome to RTI Dost</h3>
-                    <p className="mt-1 text-sm text-gray-500">Your AI assistant for Right to Information in India. Ask me anything about RTI!</p>
+              {showEmptyState && (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 mb-6">
+                    <svg className="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                    </svg>
                   </div>
-                )}
+                  <h3 className="text-2xl font-semibold text-gray-900 mb-2">Welcome to RTI Dost</h3>
+                  <p className="text-lg text-gray-600 max-w-md">Your AI assistant for Right to Information in India. Ask me anything about RTI!</p>
+                </div>
+              )}
 
+              <div className="space-y-6">
                 {!loading && currentSession?.entries.map((entry) => (
                   <div
                     key={entry.id}
                     className={`flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-3xl rounded-lg px-4 py-2 ${entry.role === 'user'
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200'
+                      className={`max-w-4xl rounded-2xl px-6 py-4 ${entry.role === 'user'
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200'
                         }`}
                     >
-                      <div className="whitespace-pre-wrap text-sm leading-relaxed">{entry.text}</div>
+                      <div className="whitespace-pre-wrap text-base leading-relaxed">{entry.text}</div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-        </main>
 
-        {/* Input area */}
-        <div className="border-t border-gray-200 bg-white px-4 py-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-4xl">
-            <form onSubmit={handleSend} className="relative">
-              <div className="overflow-hidden rounded-lg shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
-                <label htmlFor="message" className="sr-only">
-                  Add your message
-                </label>
-                <textarea
-                  ref={textareaRef}
-                  rows={3}
-                  name="message"
-                  id="message"
-                  className="block w-full resize-none border-0 bg-transparent py-1.5 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                  placeholder="Message RTI Dost..."
-                  value={message}
-                  onChange={e => {
-                    setMessage(e.target.value);
-                    if (textareaRef.current) {
-                      textareaRef.current.style.height = 'auto';
-                      const { scrollHeight } = textareaRef.current;
-                      textareaRef.current.style.height = `${Math.min(scrollHeight, 192)}px`;
-                    }
-                  }}
-                  disabled={sending}
-                />
-                <div className="flex items-center justify-between gap-x-3 border-t border-gray-200 bg-gray-50 px-3 py-2">
-                  <div className="flex">
-                    <button
-                      type="button"
-                      className="-m-2.5 -my-1.5 inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500"
-                      disabled={sending}
-                    >
-                      <PaperclipIcon className="h-5 w-5" />
-                      <span className="sr-only">Attach a file</span>
-                    </button>
-                  </div>
-                  <div className="flex-shrink-0">
-                    <button
-                      type="submit"
-                      className="inline-flex items-center gap-x-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                      disabled={disableSend}
-                    >
-                      {sending ? (
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                      ) : (
-                        <SendIcon className="h-4 w-4" />
-                      )}
-                      Send
-                    </button>
+          {/* Input area */}
+          <div className="border-t border-gray-200 bg-white px-4 py-6 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-4xl">
+              <form onSubmit={handleSend} className="relative">
+                <div className="overflow-hidden rounded-2xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
+                  <label htmlFor="message" className="sr-only">
+                    Add your message
+                  </label>
+                  <textarea
+                    ref={textareaRef}
+                    rows={4}
+                    name="message"
+                    id="message"
+                    className="block w-full resize-none border-0 bg-transparent py-4 px-6 text-gray-900 placeholder:text-gray-400 focus:ring-0 text-base leading-6"
+                    placeholder="Message RTI Dost..."
+                    value={message}
+                    onChange={e => {
+                      setMessage(e.target.value);
+                      if (textareaRef.current) {
+                        textareaRef.current.style.height = 'auto';
+                        const { scrollHeight } = textareaRef.current;
+                        textareaRef.current.style.height = `${Math.min(scrollHeight, 200)}px`;
+                      }
+                    }}
+                    disabled={sending}
+                  />
+                  <div className="flex items-center justify-between gap-x-3 border-t border-gray-200 bg-gray-50 px-4 py-3">
+                    <div className="flex">
+                      <button
+                        type="button"
+                        className="-m-2.5 -my-1.5 inline-flex h-10 w-10 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 transition-colors"
+                        disabled={sending}
+                      >
+                        <PaperclipIcon className="h-5 w-5" />
+                        <span className="sr-only">Attach a file</span>
+                      </button>
+                    </div>
+                    <div className="flex-shrink-0">
+                      <button
+                        type="submit"
+                        className="inline-flex items-center gap-x-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        disabled={disableSend}
+                      >
+                        {sending ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        ) : (
+                          <SendIcon className="h-4 w-4" />
+                        )}
+                        Send
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </form>
-            <p className="mt-2 text-xs text-gray-500">
-              RTI Dost responds only to queries about India's Right to Information Act.
-            </p>
+              </form>
+              <p className="mt-3 text-sm text-gray-500 text-center">
+                RTI Dost responds only to queries about India's Right to Information Act.
+              </p>
+            </div>
           </div>
         </div>
       </div>
