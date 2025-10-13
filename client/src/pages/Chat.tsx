@@ -162,7 +162,6 @@ export default function Chat() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const messageListRef = useRef<HTMLDivElement | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const orderedSessions = useMemo(() => {
     return Object.values(sessions).sort((a, b) => {
@@ -367,10 +366,6 @@ export default function Chat() {
 
       setSelectedSessionId(finalSessionId);
       setMessage('');
-      if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
-        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-      }
 
       if (data.draftAvailable) {
         await refreshApplications();
