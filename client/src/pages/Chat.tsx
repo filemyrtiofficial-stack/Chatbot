@@ -469,7 +469,7 @@ export default function Chat() {
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 text-lg font-medium group-hover:bg-indigo-200">
                     +
                   </span>
-                  <span className="text-base">Temporary Chat</span>
+                  <span className="text-base">New chat</span>
                 </button>
               </li>
 
@@ -546,6 +546,16 @@ export default function Chat() {
                   </button>
                 </div>
               </div>
+            </div>
+            <div className="flex items-center gap-x-4 lg:gap-x-6">
+              <button
+                type="button"
+                onClick={startNewConversation}
+                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors"
+              >
+                <span className="text-lg leading-none">+</span>
+                Temporary Chat
+              </button>
             </div>
           </div>
         </div>
