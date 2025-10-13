@@ -207,63 +207,16 @@ export default function Chat() {
     async function bootstrap() {
       setLoading(true);
       try {
-        const history = await api<HistoryRecord[]>('/api/chat/history');
-        if (!active) return;
-        const grouped: Record<string, SessionState> = {};
-        history.forEach(item => {
-          const session = grouped[item.sessionId] ?? createEmptySession(item.sessionId);
-          const timestamp = item.timestamp || new Date().toISOString();
-          const userEntry: ConversationEntry = {
-            id: `user-${item.id}`,
-            role: 'user',
-            text: item.message,
-            timestamp,
-          };
-          const assistantEntry: ConversationEntry = {
-            id: `assistant-${item.id}`,
-            role: 'assistant',
-            text: item.response,
-            timestamp,
-          };
-          session.entries.push(userEntry, assistantEntry);
-          session.updatedAt = timestamp;
-          grouped[item.sessionId] = session;
-        });
-
-        const metas = await api<ApplicationMeta[]>('/api/chat/applications');
-        if (!active) return;
-        const combined = mergeApplicationMeta(grouped, metas);
-        setSessions(combined);
-
-        let nextSelected: string | null = null;
-        if (typeof window !== 'undefined') {
-          try {
-            const storedId = window.localStorage.getItem(LAST_SESSION_STORAGE_KEY);
-            if (storedId && combined[storedId] && combined[storedId].entries.length > 0) {
-              nextSelected = storedId;
-            }
-          } catch {
-            // ignore storage access errors
-          }
-        }
-
-        if (!nextSelected) {
-          const defaultSession = Object.values(combined)
-            .filter(session => session.entries.length > 0)
-            .sort((a, b) => {
-              return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-            })[0];
-          nextSelected = defaultSession ? defaultSession.sessionId : NEW_SESSION_SENTINEL;
-        }
-
-        setSelectedSessionId(nextSelected);
+        // Always start with a new session - don't load previous chats
+        setSelectedSessionId(NEW_SESSION_SENTINEL);
+        setSessions({});
         setError(null);
       } catch (err) {
         if (err instanceof ApiError && err.status === 401) {
           await logout();
           return;
         }
-        setError(err instanceof Error ? err.message : 'Failed to load chat history.');
+        setError(err instanceof Error ? err.message : 'Failed to initialize chat.');
       } finally {
         if (active) setLoading(false);
       }
@@ -462,244 +415,170 @@ export default function Chat() {
   const userInitial = (user?.name?.trim()?.[0] ?? user?.email?.trim()?.[0] ?? 'R').toUpperCase();
 
   return (
-    <div className="flex min-h-screen bg-[#f9fafb] text-slate-900">
-      <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-white/80 backdrop-blur md:flex">
-        <div className="px-6 pt-8">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-2xl text-white shadow-sm">🤖</div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">RTI DOST</p>
-              <p className="mt-1 text-sm font-semibold text-slate-900">Conversations</p>
+    <div className="flex min-h-screen bg-gray-50 text-gray-900">
+      {/* Minimal sidebar - only visible on larger screens */}
+      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:z-50">
+        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
+          <div className="flex h-16 shrink-0 items-center">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-900 text-white text-sm font-semibold">
+                RTI
+              </div>
+              <span className="text-lg font-semibold text-gray-900">RTI Dost</span>
             </div>
           </div>
-        </div>
-        <div className="px-6 pt-6">
-          <button
-            type="button"
-            onClick={startNewConversation}
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white/95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
-          >
-            <span className="text-base leading-none">+</span>
-            New Chat
-          </button>
-        </div>
-        <div className="mt-8 flex items-center justify-between px-6 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-          <span>Previous 7 days</span>
-          <button
-            type="button"
-            onClick={refreshApplications}
-            className="text-slate-400 transition hover:text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
-          >
-            Refresh
-          </button>
-        </div>
-        <nav className="mt-4 flex-1 overflow-y-auto px-4 pb-6">
-          {orderedSessions.length === 0 && !loading && (
-            <div className="rounded-3xl border border-dashed border-slate-200 bg-white/70 px-4 py-6 text-center text-sm text-slate-500">
-              No conversations yet. Start a new chat to begin.
-            </div>
-          )}
-          {orderedSessions.map(session => {
-            const isActive = selectedSessionId === session.sessionId;
-            return (
-              <div
-                key={session.sessionId}
-                className={`group mb-3 rounded-2xl border transition ${
-                  isActive
-                    ? 'border-slate-900/15 bg-white shadow-sm'
-                    : 'border-transparent bg-transparent hover:border-slate-200 hover:bg-white/80'
-                }`}
-              >
+          <nav className="flex flex-1 flex-col">
+            <ul role="list" className="flex flex-1 flex-col gap-y-7">
+              <li>
                 <button
                   type="button"
-                  onClick={() => setSelectedSessionId(session.sessionId)}
-                  className="w-full rounded-2xl px-4 pt-4 text-left"
+                  onClick={startNewConversation}
+                  className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <span className="line-clamp-2 text-sm font-medium text-slate-900">
-                      {deriveTitle(session.entries)}
-                    </span>
-                    {session.hasDraft && (
-                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
-                        Draft
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-2 flex items-center gap-2 text-[11px] text-slate-500">
-                    <span>
-                      {session.status === 'completed'
-                        ? 'Completed'
-                        : session.status === 'collecting'
-                        ? 'Collecting details'
-                        : 'In progress'}
-                    </span>
-                    <span aria-hidden="true">•</span>
-                    <span>{formatTimestamp(session.updatedAt)}</span>
-                  </div>
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-[0.625rem] font-medium text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600">
+                    +
+                  </span>
+                  New chat
                 </button>
-                <div className="flex items-center gap-3 px-4 pb-4 pt-2 text-xs text-slate-500">
-                  <button
-                    type="button"
-                    className="font-medium transition hover:text-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-200"
-                    onClick={e => {
-                      e.stopPropagation();
-                      handleDeleteSession(session.sessionId);
-                    }}
-                  >
-                    Delete
-                  </button>
-                  {session.hasDraft && (
-                    <button
-                      type="button"
-                      className="font-medium transition hover:text-sky-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-200"
-                      onClick={e => {
-                        e.stopPropagation();
-                        handleDownloadDraft(session.sessionId);
-                      }}
-                      disabled={downloadingSession === session.sessionId}
-                    >
-                      {downloadingSession === session.sessionId ? 'Downloading...' : 'Download draft'}
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </nav>
-        <div className="border-t border-slate-200 px-6 py-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-slate-200 text-sm font-semibold text-slate-600">
+              </li>
+              <li>
+                <div className="text-xs font-semibold leading-6 text-gray-400">Recent</div>
+                <ul role="list" className="-mx-2 mt-2 space-y-1">
+                  {orderedSessions.slice(0, 5).map((session) => (
+                    <li key={session.sessionId}>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSessionId(session.sessionId)}
+                        className="group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+                      >
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-[0.625rem] font-medium text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600">
+                          💬
+                        </span>
+                        <span className="truncate">{deriveTitle(session.entries)}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            </ul>
+          </nav>
+          <div className="flex items-center gap-x-4 px-2 py-3 text-sm font-semibold leading-6 text-gray-900">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-600">
               {user?.pictureUrl ? (
-                <img src={user.pictureUrl} alt={user.name ?? 'User avatar'} className="h-full w-full object-cover" />
+                <img src={user.pictureUrl} alt={user.name ?? 'User avatar'} className="h-full w-full rounded-full object-cover" />
               ) : (
                 userInitial
               )}
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-slate-900">{user?.name}</p>
-              <p className="truncate text-xs text-slate-500">{user?.email}</p>
+            <span className="sr-only">Your profile</span>
+            <div aria-hidden="true" className="flex-1">
+              <div className="text-sm font-semibold text-gray-900">{user?.name}</div>
+              <div className="text-xs text-gray-500">{user?.email}</div>
             </div>
             <button
               type="button"
               onClick={logout}
-              className="text-xs font-semibold text-slate-500 transition hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
+              className="text-xs text-gray-500 hover:text-gray-700"
             >
               Logout
             </button>
           </div>
         </div>
       </aside>
-      <main className="flex min-h-screen flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex flex-col gap-4 border-b border-slate-200 bg-[#f9fafb]/85 px-6 py-5 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-3xl shadow-sm">🤖</div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">RTI-Dost</p>
-              <h1 className="mt-1 text-lg font-semibold text-slate-900">
-                Your assistant for Right to Information in India
-              </h1>
+
+      {/* Main content area */}
+      <div className="lg:pl-64">
+        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+          <button type="button" className="-m-2.5 p-2.5 text-gray-700 lg:hidden">
+            <span className="sr-only">Open sidebar</span>
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+          <div className="h-6 w-px bg-gray-200 lg:hidden" />
+          <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+            <div className="relative flex flex-1">
+              <h1 className="text-lg font-semibold text-gray-900">RTI Assistant</h1>
+            </div>
+            <div className="flex items-center gap-x-4 lg:gap-x-6">
+              <button
+                type="button"
+                onClick={startNewConversation}
+                className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              >
+                <span className="text-base leading-none">+</span>
+                New Chat
+              </button>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={startNewConversation}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white md:hidden"
-            >
-              <span className="text-base leading-none">+</span>
-              New Chat
-            </button>
-          </div>
-        </header>
-        {(error || globalNotice) && (
-          <div
-            className={`border-b px-6 py-3 text-sm ${
-              error
-                ? 'border-red-100 bg-red-50 text-red-600'
-                : 'border-emerald-100 bg-emerald-50 text-emerald-700'
-            }`}
-          >
-            <div className="mx-auto max-w-3xl">{error || globalNotice}</div>
-          </div>
-        )}
-        <div className="border-b border-slate-200 px-6 py-4 md:hidden">
-          <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">
-            Conversation
-          </label>
-          <select
-            value={mobileSessionValue}
-            onChange={e => {
-              const value = e.target.value;
-              if (value === NEW_SESSION_SENTINEL) {
-                startNewConversation();
-              } else {
-                setSelectedSessionId(value);
-              }
-            }}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
-          >
-            <option value={NEW_SESSION_SENTINEL}>+ New chat</option>
-            {orderedSessions.map(session => (
-              <option key={session.sessionId} value={session.sessionId}>
-                {deriveTitle(session.entries)}
-              </option>
-            ))}
-          </select>
         </div>
-        <div className="relative flex flex-1 flex-col">
-          <div className="flex-1 overflow-y-auto px-4">
-            <div
-              ref={messageListRef}
-              className="mx-auto flex min-h-full w-full max-w-3xl flex-col gap-5 py-10"
-              aria-live="polite"
-            >
-              {loading && (
-                <div className="mx-auto w-full max-w-sm rounded-3xl border border-dashed border-slate-200 bg-white/80 px-4 py-5 text-center text-sm text-slate-500 shadow-sm">
-                  Loading your conversations...
-                </div>
-              )}
-              {showEmptyState && (
-                <div className="mx-auto flex w-full max-w-xl items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white/90 px-8 py-10 text-center shadow-sm">
-                  <p className="text-sm text-slate-600">Your RTI assistant &bull; Ask anything about RTI</p>
-                </div>
-              )}
-              {!loading &&
-                currentSession?.entries.map(entry => (
+
+        <main className="py-10">
+          <div className="px-4 sm:px-6 lg:px-8">
+            {(error || globalNotice) && (
+              <div className={`mb-4 rounded-md p-4 ${error
+                  ? 'bg-red-50 text-red-600'
+                  : 'bg-green-50 text-green-600'
+                }`}>
+                <div className="text-sm">{error || globalNotice}</div>
+              </div>
+            )}
+
+            <div className="mx-auto max-w-4xl">
+              <div className="flex flex-col space-y-4">
+                {loading && (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="text-sm text-gray-500">Loading...</div>
+                  </div>
+                )}
+
+                {showEmptyState && (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
+                      <svg className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                      </svg>
+                    </div>
+                    <h3 className="mt-2 text-sm font-semibold text-gray-900">Welcome to RTI Dost</h3>
+                    <p className="mt-1 text-sm text-gray-500">Your AI assistant for Right to Information in India. Ask me anything about RTI!</p>
+                  </div>
+                )}
+
+                {!loading && currentSession?.entries.map((entry) => (
                   <div
                     key={entry.id}
                     className={`flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[75%] rounded-3xl px-5 py-4 text-sm leading-relaxed shadow-sm ${
-                        entry.role === 'user'
-                          ? 'bg-slate-900 text-white'
-                          : 'border border-slate-200 bg-white text-slate-800'
-                      }`}
+                      className={`max-w-3xl rounded-lg px-4 py-2 ${entry.role === 'user'
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200'
+                        }`}
                     >
-                      <div className="whitespace-pre-wrap">{entry.text}</div>
-                      <div className={`mt-3 text-xs ${entry.role === 'user' ? 'text-white/70' : 'text-slate-400'}`}>
-                        {entry.role === 'user' ? 'You' : 'RTI Dost'} &bull; {formatTimestamp(entry.timestamp)}
-                      </div>
+                      <div className="whitespace-pre-wrap text-sm leading-relaxed">{entry.text}</div>
                     </div>
                   </div>
                 ))}
+              </div>
             </div>
           </div>
-          <div className="border-t border-slate-200 bg-[#f9fafb] px-4 py-6">
-            <form onSubmit={handleSend} className="mx-auto w-full max-w-3xl space-y-3">
-              <div className="flex items-end gap-3 rounded-3xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition focus-within:border-slate-400 focus-within:shadow-md focus-within:ring-2 focus-within:ring-slate-200">
-                <button
-                  type="button"
-                  className="text-slate-400 transition hover:text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
-                  aria-label="Attach a file"
-                  disabled={sending}
-                >
-                  <PaperclipIcon className="h-5 w-5" />
-                </button>
+        </main>
+
+        {/* Input area */}
+        <div className="border-t border-gray-200 bg-white px-4 py-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-4xl">
+            <form onSubmit={handleSend} className="relative">
+              <div className="overflow-hidden rounded-lg shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
+                <label htmlFor="message" className="sr-only">
+                  Add your message
+                </label>
                 <textarea
                   ref={textareaRef}
-                  className="max-h-48 min-h-[48px] flex-1 resize-none border-0 bg-transparent text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 focus:outline-none"
-                  placeholder="Message RTI Dost"
+                  rows={3}
+                  name="message"
+                  id="message"
+                  className="block w-full resize-none border-0 bg-transparent py-1.5 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                  placeholder="Message RTI Dost..."
                   value={message}
                   onChange={e => {
                     setMessage(e.target.value);
@@ -710,57 +589,41 @@ export default function Chat() {
                     }
                   }}
                   disabled={sending}
-                  rows={1}
                 />
-                <button
-                  type="button"
-                  className="text-slate-400 transition hover:text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
-                  aria-label="Start voice input"
-                  disabled
-                >
-                  <MicrophoneIcon className="h-5 w-5" />
-                </button>
-                <button
-                  type="submit"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
-                  disabled={disableSend}
-                >
-                  {sending ? (
-                    <span className="flex h-4 w-4 animate-spin rounded-full border-2 border-white/70 border-t-transparent" />
-                  ) : (
-                    <SendIcon className="h-4 w-4" />
-                  )}
-                  <span className="sr-only">Send message</span>
-                </button>
+                <div className="flex items-center justify-between gap-x-3 border-t border-gray-200 bg-gray-50 px-3 py-2">
+                  <div className="flex">
+                    <button
+                      type="button"
+                      className="-m-2.5 -my-1.5 inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500"
+                      disabled={sending}
+                    >
+                      <PaperclipIcon className="h-5 w-5" />
+                      <span className="sr-only">Attach a file</span>
+                    </button>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <button
+                      type="submit"
+                      className="inline-flex items-center gap-x-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={disableSend}
+                    >
+                      {sending ? (
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      ) : (
+                        <SendIcon className="h-4 w-4" />
+                      )}
+                      Send
+                    </button>
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-slate-500">
-                FileMyRTI responds only to queries about India&apos;s Right to Information Act.
-              </p>
             </form>
-            <footer className="mx-auto mt-10 flex w-full max-w-3xl flex-col items-center gap-3 border-t border-slate-200 pt-4 text-xs text-slate-500 sm:flex-row sm:justify-between">
-              <span>RTI-Dost: AI assistant for drafting RTIs.</span>
-              <div className="flex items-center gap-4">
-                <a
-                  href="https://filemyrti.com/privacy-policy"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="transition hover:text-slate-700"
-                >
-                  Privacy Policy
-                </a>
-                <a
-                  href="https://filemyrti.com/terms-of-service"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="transition hover:text-slate-700"
-                >
-                  Terms of Service
-                </a>
-              </div>
-            </footer>
+            <p className="mt-2 text-xs text-gray-500">
+              RTI Dost responds only to queries about India's Right to Information Act.
+            </p>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
