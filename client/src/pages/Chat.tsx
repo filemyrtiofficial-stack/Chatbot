@@ -444,7 +444,7 @@ export default function Chat() {
   return (
     <div className="flex h-screen bg-gray-50 text-gray-900">
       {/* Sidebar - optimized for large screens */}
-      <aside className="hidden xl:flex xl:w-80 xl:flex-col xl:fixed xl:inset-y-0 xl:z-50">
+      <aside className="hidden xl:flex xl:w-64 xl:flex-col xl:fixed xl:inset-y-0 xl:z-50">
         <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white border-r border-gray-200 px-6 pb-4">
           <div className="flex h-16 shrink-0 items-center">
             <div className="flex items-center gap-3">
@@ -469,7 +469,7 @@ export default function Chat() {
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 text-lg font-medium group-hover:bg-indigo-200">
                     +
                   </span>
-                  <span className="text-base">New chat</span>
+                  <span className="text-base">Temporary Chat</span>
                 </button>
               </li>
 
@@ -521,7 +521,7 @@ export default function Chat() {
       </aside>
 
       {/* Main content area */}
-      <div className="flex flex-1 flex-col xl:pl-80">
+      <div className="flex flex-1 flex-col xl:pl-64">
         {/* Header */}
         <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
           <button type="button" className="-m-2.5 p-2.5 text-gray-700 xl:hidden">
@@ -533,17 +533,19 @@ export default function Chat() {
           <div className="h-6 w-px bg-gray-200 xl:hidden" />
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
             <div className="relative flex flex-1">
-              <h1 className="text-xl font-semibold text-gray-900">RTI Assistant</h1>
-            </div>
-            <div className="flex items-center gap-x-4 lg:gap-x-6">
-              <button
-                type="button"
-                onClick={startNewConversation}
-                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors"
-              >
-                <span className="text-lg leading-none">+</span>
-                New Chat
-              </button>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  >
+                    <span>RTI-Dost1.0</span>
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
