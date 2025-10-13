@@ -47,6 +47,7 @@ type SessionState = {
 };
 
 const NEW_SESSION_SENTINEL = '__new-session__';
+const LAST_SESSION_STORAGE_KEY = 'filemyrti:lastSessionId';
 
 type IconProps = SVGProps<SVGSVGElement>;
 
@@ -185,6 +186,23 @@ export default function Chat() {
   }, [selectedSessionId, currentMessageCount]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!selectedSessionId || selectedSessionId === NEW_SESSION_SENTINEL || !sessions[selectedSessionId]) {
+      try {
+        window.localStorage.removeItem(LAST_SESSION_STORAGE_KEY);
+      } catch {
+        // ignore storage access errors
+      }
+      return;
+    }
+    try {
+      window.localStorage.setItem(LAST_SESSION_STORAGE_KEY, selectedSessionId);
+    } catch {
+      // ignore storage access errors
+    }
+  }, [selectedSessionId, sessions]);
+
+  useEffect(() => {
     let active = true;
     async function bootstrap() {
       setLoading(true);
@@ -217,13 +235,28 @@ export default function Chat() {
         const combined = mergeApplicationMeta(grouped, metas);
         setSessions(combined);
 
-        const defaultSession = Object.values(combined)
-          .filter(session => session.entries.length > 0)
-          .sort((a, b) => {
-            return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-          })[0];
+        let nextSelected: string | null = null;
+        if (typeof window !== 'undefined') {
+          try {
+            const storedId = window.localStorage.getItem(LAST_SESSION_STORAGE_KEY);
+            if (storedId && combined[storedId] && combined[storedId].entries.length > 0) {
+              nextSelected = storedId;
+            }
+          } catch {
+            // ignore storage access errors
+          }
+        }
 
-        setSelectedSessionId(defaultSession ? defaultSession.sessionId : NEW_SESSION_SENTINEL);
+        if (!nextSelected) {
+          const defaultSession = Object.values(combined)
+            .filter(session => session.entries.length > 0)
+            .sort((a, b) => {
+              return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+            })[0];
+          nextSelected = defaultSession ? defaultSession.sessionId : NEW_SESSION_SENTINEL;
+        }
+
+        setSelectedSessionId(nextSelected);
         setError(null);
       } catch (err) {
         if (err instanceof ApiError && err.status === 401) {
@@ -627,7 +660,7 @@ export default function Chat() {
               )}
               {showEmptyState && (
                 <div className="mx-auto flex w-full max-w-xl items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white/90 px-8 py-10 text-center shadow-sm">
-                  <p className="text-sm text-slate-600">Your RTI assistant • Ask anything about RTI</p>
+                  <p className="text-sm text-slate-600">Your RTI assistant &bull; Ask anything about RTI</p>
                 </div>
               )}
               {!loading &&
@@ -645,7 +678,7 @@ export default function Chat() {
                     >
                       <div className="whitespace-pre-wrap">{entry.text}</div>
                       <div className={`mt-3 text-xs ${entry.role === 'user' ? 'text-white/70' : 'text-slate-400'}`}>
-                        {entry.role === 'user' ? 'You' : 'RTI Dost'} • {formatTimestamp(entry.timestamp)}
+                        {entry.role === 'user' ? 'You' : 'RTI Dost'} &bull; {formatTimestamp(entry.timestamp)}
                       </div>
                     </div>
                   </div>
