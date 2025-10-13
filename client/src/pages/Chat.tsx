@@ -158,6 +158,7 @@ export default function Chat() {
   const [error, setError] = useState<string | null>(null);
   const [globalNotice, setGlobalNotice] = useState<string | null>(null);
   const [downloadingSession, setDownloadingSession] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const messageListRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -444,7 +445,7 @@ export default function Chat() {
   return (
     <div className="flex h-screen text-gray-900" style={{ backgroundColor: '#FFFFFF' }}>
       {/* Sidebar - optimized for large screens */}
-      <aside className="hidden xl:flex xl:w-64 xl:flex-col xl:fixed xl:inset-y-0 xl:z-50">
+      <aside className={`${sidebarOpen ? 'flex' : 'hidden'} xl:flex xl:w-64 xl:flex-col xl:fixed xl:inset-y-0 xl:z-50`}>
         <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 px-6 pb-4" style={{ backgroundColor: '#F7F7F8' }}>
           <div className="flex h-16 shrink-0 items-center">
             <div className="flex items-center gap-3">
@@ -521,7 +522,7 @@ export default function Chat() {
       </aside>
 
       {/* Main content area */}
-      <div className="flex flex-1 flex-col xl:pl-64">
+      <div className={`flex flex-1 flex-col ${sidebarOpen ? 'xl:pl-64' : 'xl:pl-0'}`}>
         {/* Header */}
         <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
           <button type="button" className="-m-2.5 p-2.5 text-gray-700 xl:hidden">
@@ -531,6 +532,25 @@ export default function Chat() {
             </svg>
           </button>
           <div className="h-6 w-px bg-gray-200 xl:hidden" />
+
+          {/* Sidebar toggle button */}
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="hidden xl:flex items-center justify-center p-2 text-gray-600 hover:text-gray-900 transition-colors"
+            title={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+          >
+            <svg className="h-5 w-6" viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+              {/* Rounded rectangle outline */}
+              <rect x="1" y="1" width="22" height="14" rx="3" ry="3" fill="none" stroke="currentColor" />
+              {/* Vertical divider line */}
+              <line x1="7" y1="1" x2="7" y2="15" stroke="currentColor" />
+              {/* Hamburger lines in left section */}
+              <line x1="3" y1="5" x2="5" y2="5" stroke="currentColor" strokeLinecap="round" />
+              <line x1="3" y1="8" x2="5" y2="8" stroke="currentColor" strokeLinecap="round" />
+            </svg>
+          </button>
+
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
             <div className="relative flex flex-1">
               <div className="flex items-center gap-2">
