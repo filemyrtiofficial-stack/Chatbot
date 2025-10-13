@@ -523,7 +523,7 @@ export default function Chat() {
       {/* Main content area */}
       <div className="flex flex-1 flex-col xl:pl-64">
         {/* Header */}
-        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
           <button type="button" className="-m-2.5 p-2.5 text-gray-700 xl:hidden">
             <span className="sr-only">Open sidebar</span>
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
@@ -551,21 +551,12 @@ export default function Chat() {
               <button
                 type="button"
                 onClick={startNewConversation}
-                className="inline-flex items-center justify-center rounded-lg bg-indigo-600 p-3 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors"
+                className="inline-flex items-center justify-center rounded-lg bg-gray-100 p-2 text-gray-600 hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 transition-colors"
                 title="Temporary Chat"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                  {/* Segmented chat bubble - outer frame */}
-                  <rect x="4" y="4" width="16" height="16" rx="3" ry="3" fill="none" stroke="currentColor" strokeWidth="2" />
-                  {/* Inner segments */}
-                  <rect x="6" y="6" width="12" height="2" rx="1" fill="currentColor" />
-                  <rect x="6" y="16" width="12" height="2" rx="1" fill="currentColor" />
-                  <rect x="4" y="8" width="2" height="8" rx="1" fill="currentColor" />
-                  <rect x="18" y="8" width="2" height="8" rx="1" fill="currentColor" />
-                  {/* Inner structure */}
-                  <rect x="7" y="10" width="2" height="4" rx="1" fill="currentColor" />
-                  <rect x="15" y="10" width="2" height="4" rx="1" fill="currentColor" />
-                  <rect x="10" y="14" width="4" height="2" rx="1" fill="currentColor" />
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+                  <path d="M8 8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm8 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z" />
                 </svg>
               </button>
             </div>
@@ -601,8 +592,7 @@ export default function Chat() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
                     </svg>
                   </div>
-                  <h3 className="text-2xl font-semibold text-gray-900 mb-2">Welcome to RTI Dost</h3>
-                  <p className="text-lg text-gray-600 max-w-md mb-8">Your AI assistant for Right to Information in India. Ask me anything about RTI!</p>
+                  <h3 className="text-2xl font-semibold text-gray-900 mb-8">Welcome to RTI Dost</h3>
 
                   {/* Centered input box for empty state */}
                   <div className="w-full max-w-2xl">
