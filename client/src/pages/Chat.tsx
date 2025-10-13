@@ -207,16 +207,43 @@ export default function Chat() {
     async function bootstrap() {
       setLoading(true);
       try {
-        // Always start with a new session - don't load previous chats
+        const history = await api<HistoryRecord[]>('/api/chat/history');
+        if (!active) return;
+        const grouped: Record<string, SessionState> = {};
+        history.forEach(item => {
+          const session = grouped[item.sessionId] ?? createEmptySession(item.sessionId);
+          const timestamp = item.timestamp || new Date().toISOString();
+          const userEntry: ConversationEntry = {
+            id: `user-${item.id}`,
+            role: 'user',
+            text: item.message,
+            timestamp,
+          };
+          const assistantEntry: ConversationEntry = {
+            id: `assistant-${item.id}`,
+            role: 'assistant',
+            text: item.response,
+            timestamp,
+          };
+          session.entries.push(userEntry, assistantEntry);
+          session.updatedAt = timestamp;
+          grouped[item.sessionId] = session;
+        });
+
+        const metas = await api<ApplicationMeta[]>('/api/chat/applications');
+        if (!active) return;
+        const combined = mergeApplicationMeta(grouped, metas);
+        setSessions(combined);
+
+        // Always start with a new session on page load/refresh
         setSelectedSessionId(NEW_SESSION_SENTINEL);
-        setSessions({});
         setError(null);
       } catch (err) {
         if (err instanceof ApiError && err.status === 401) {
           await logout();
           return;
         }
-        setError(err instanceof Error ? err.message : 'Failed to initialize chat.');
+        setError(err instanceof Error ? err.message : 'Failed to load chat history.');
       } finally {
         if (active) setLoading(false);
       }
@@ -551,7 +578,73 @@ export default function Chat() {
                     </svg>
                   </div>
                   <h3 className="text-2xl font-semibold text-gray-900 mb-2">Welcome to RTI Dost</h3>
-                  <p className="text-lg text-gray-600 max-w-md">Your AI assistant for Right to Information in India. Ask me anything about RTI!</p>
+                  <p className="text-lg text-gray-600 max-w-md mb-8">Your AI assistant for Right to Information in India. Ask me anything about RTI!</p>
+
+                  {/* Centered input box for empty state */}
+                  <div className="w-full max-w-2xl">
+                    <form onSubmit={handleSend} className="relative">
+                      <div className="overflow-hidden rounded-xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
+                        <label htmlFor="message" className="sr-only">
+                          Add your message
+                        </label>
+                        <textarea
+                          ref={textareaRef}
+                          rows={1}
+                          name="message"
+                          id="message"
+                          className="block w-full resize-none border-0 bg-transparent py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-0 text-sm leading-6"
+                          placeholder="Message RTI Dost..."
+                          value={message}
+                          onChange={e => {
+                            setMessage(e.target.value);
+                            if (textareaRef.current) {
+                              textareaRef.current.style.height = 'auto';
+                              const { scrollHeight } = textareaRef.current;
+                              textareaRef.current.style.height = `${Math.min(scrollHeight, 120)}px`;
+                            }
+                          }}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              if (!disableSend) {
+                                handleSend(e);
+                              }
+                            }
+                          }}
+                          disabled={sending}
+                        />
+                        <div className="flex items-center justify-between gap-x-3 border-t border-gray-200 bg-gray-50 px-3 py-2">
+                          <div className="flex">
+                            <button
+                              type="button"
+                              className="-m-2.5 -my-1.5 inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 transition-colors"
+                              disabled={sending}
+                            >
+                              <PaperclipIcon className="h-4 w-4" />
+                              <span className="sr-only">Attach a file</span>
+                            </button>
+                          </div>
+                          <div className="flex-shrink-0">
+                            <button
+                              type="submit"
+                              className="inline-flex items-center gap-x-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                              disabled={disableSend}
+                            >
+                              {sending ? (
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                              ) : (
+                                <SendIcon className="h-4 w-4" />
+                              )}
+                              Send
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </form>
+                    <p className="mt-2 text-xs text-gray-500 text-center">
+                      RTI Dost responds only to queries about India's Right to Information Act. Press Enter to send, Shift+Enter for new line.
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -575,73 +668,75 @@ export default function Chat() {
             </div>
           </div>
 
-          {/* Input area */}
-          <div className="border-t border-gray-200 bg-white px-4 py-4 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-4xl">
-              <form onSubmit={handleSend} className="relative">
-                <div className="overflow-hidden rounded-xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
-                  <label htmlFor="message" className="sr-only">
-                    Add your message
-                  </label>
-                  <textarea
-                    ref={textareaRef}
-                    rows={1}
-                    name="message"
-                    id="message"
-                    className="block w-full resize-none border-0 bg-transparent py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-0 text-sm leading-6"
-                    placeholder="Message RTI Dost..."
-                    value={message}
-                    onChange={e => {
-                      setMessage(e.target.value);
-                      if (textareaRef.current) {
-                        textareaRef.current.style.height = 'auto';
-                        const { scrollHeight } = textareaRef.current;
-                        textareaRef.current.style.height = `${Math.min(scrollHeight, 120)}px`;
-                      }
-                    }}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        if (!disableSend) {
-                          handleSend(e);
+          {/* Input area - only show when not in empty state */}
+          {!showEmptyState && (
+            <div className="border-t border-gray-200 bg-white px-4 py-4 sm:px-6 lg:px-8">
+              <div className="mx-auto max-w-4xl">
+                <form onSubmit={handleSend} className="relative">
+                  <div className="overflow-hidden rounded-xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
+                    <label htmlFor="message" className="sr-only">
+                      Add your message
+                    </label>
+                    <textarea
+                      ref={textareaRef}
+                      rows={1}
+                      name="message"
+                      id="message"
+                      className="block w-full resize-none border-0 bg-transparent py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-0 text-sm leading-6"
+                      placeholder="Message RTI Dost..."
+                      value={message}
+                      onChange={e => {
+                        setMessage(e.target.value);
+                        if (textareaRef.current) {
+                          textareaRef.current.style.height = 'auto';
+                          const { scrollHeight } = textareaRef.current;
+                          textareaRef.current.style.height = `${Math.min(scrollHeight, 120)}px`;
                         }
-                      }
-                    }}
-                    disabled={sending}
-                  />
-                  <div className="flex items-center justify-between gap-x-3 border-t border-gray-200 bg-gray-50 px-3 py-2">
-                    <div className="flex">
-                      <button
-                        type="button"
-                        className="-m-2.5 -my-1.5 inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 transition-colors"
-                        disabled={sending}
-                      >
-                        <PaperclipIcon className="h-4 w-4" />
-                        <span className="sr-only">Attach a file</span>
-                      </button>
-                    </div>
-                    <div className="flex-shrink-0">
-                      <button
-                        type="submit"
-                        className="inline-flex items-center gap-x-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        disabled={disableSend}
-                      >
-                        {sending ? (
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                        ) : (
-                          <SendIcon className="h-4 w-4" />
-                        )}
-                        Send
-                      </button>
+                      }}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          if (!disableSend) {
+                            handleSend(e);
+                          }
+                        }
+                      }}
+                      disabled={sending}
+                    />
+                    <div className="flex items-center justify-between gap-x-3 border-t border-gray-200 bg-gray-50 px-3 py-2">
+                      <div className="flex">
+                        <button
+                          type="button"
+                          className="-m-2.5 -my-1.5 inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 transition-colors"
+                          disabled={sending}
+                        >
+                          <PaperclipIcon className="h-4 w-4" />
+                          <span className="sr-only">Attach a file</span>
+                        </button>
+                      </div>
+                      <div className="flex-shrink-0">
+                        <button
+                          type="submit"
+                          className="inline-flex items-center gap-x-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          disabled={disableSend}
+                        >
+                          {sending ? (
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                          ) : (
+                            <SendIcon className="h-4 w-4" />
+                          )}
+                          Send
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </form>
-              <p className="mt-2 text-xs text-gray-500 text-center">
-                RTI Dost responds only to queries about India's Right to Information Act. Press Enter to send, Shift+Enter for new line.
-              </p>
+                </form>
+                <p className="mt-2 text-xs text-gray-500 text-center">
+                  RTI Dost responds only to queries about India's Right to Information Act. Press Enter to send, Shift+Enter for new line.
+                </p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
