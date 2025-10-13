@@ -555,8 +555,13 @@ export default function Chat() {
                 title="Temporary Chat"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
-                  <path d="M8 8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm8 0c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z" />
+                  {/* Segmented dot pattern - 6 dots in hexagonal arrangement */}
+                  <circle cx="12" cy="4" r="2" fill="currentColor" />
+                  <circle cx="18" cy="8" r="2" fill="currentColor" />
+                  <circle cx="18" cy="16" r="2" fill="currentColor" />
+                  <circle cx="12" cy="20" r="2" fill="currentColor" />
+                  <circle cx="6" cy="16" r="2" fill="currentColor" />
+                  <circle cx="6" cy="8" r="2" fill="currentColor" />
                 </svg>
               </button>
             </div>
