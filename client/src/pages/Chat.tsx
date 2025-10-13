@@ -442,18 +442,18 @@ export default function Chat() {
   const userInitial = (user?.name?.trim()?.[0] ?? user?.email?.trim()?.[0] ?? 'R').toUpperCase();
 
   return (
-    <div className="flex h-screen bg-white text-gray-900">
+    <div className="flex h-screen text-gray-900" style={{ backgroundColor: '#FFFFFF' }}>
       {/* Sidebar - optimized for large screens */}
       <aside className="hidden xl:flex xl:w-64 xl:flex-col xl:fixed xl:inset-y-0 xl:z-50">
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 border-r border-gray-700 px-6 pb-4">
+        <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 px-6 pb-4" style={{ backgroundColor: '#F7F7F8' }}>
           <div className="flex h-16 shrink-0 items-center">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white text-lg font-bold shadow-lg">
                 RTI
               </div>
               <div>
-                <span className="text-xl font-bold text-white">RTI Dost</span>
-                <p className="text-xs text-gray-400">AI Assistant</p>
+                <span className="text-xl font-bold text-gray-900">RTI Dost</span>
+                <p className="text-xs text-gray-500">AI Assistant</p>
               </div>
             </div>
           </div>
@@ -464,9 +464,9 @@ export default function Chat() {
                 <button
                   type="button"
                   onClick={startNewConversation}
-                  className="group -mx-2 flex gap-x-3 rounded-xl p-3 text-sm leading-6 font-semibold text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                  className="group -mx-2 flex gap-x-3 rounded-xl p-3 text-sm leading-6 font-semibold text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-colors"
                 >
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-700 text-gray-300 text-lg font-medium group-hover:bg-gray-600">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600 text-lg font-medium group-hover:bg-gray-200">
                     +
                   </span>
                   <span className="text-base">New chat</span>
@@ -475,16 +475,16 @@ export default function Chat() {
 
               {orderedSessions.length > 0 && (
                 <li>
-                  <div className="text-xs font-semibold leading-6 text-gray-500 uppercase tracking-wider mb-3">Recent conversations</div>
+                  <div className="text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wider mb-3">Recent conversations</div>
                   <ul role="list" className="-mx-2 space-y-1">
                     {orderedSessions.slice(0, 8).map((session) => (
                       <li key={session.sessionId}>
                         <button
                           type="button"
                           onClick={() => setSelectedSessionId(session.sessionId)}
-                          className="group flex gap-x-3 rounded-lg p-3 text-sm leading-6 font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition-colors w-full text-left"
+                          className="group flex gap-x-3 rounded-lg p-3 text-sm leading-6 font-medium text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-colors w-full text-left"
                         >
-                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-gray-700 text-gray-400 group-hover:bg-gray-600">
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-gray-100 text-gray-500 group-hover:bg-gray-200">
                             💬
                           </span>
                           <span className="truncate text-sm">{deriveTitle(session.entries)}</span>
@@ -497,8 +497,8 @@ export default function Chat() {
             </ul>
           </nav>
 
-          <div className="flex items-center gap-x-4 px-3 py-4 border-t border-gray-700">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-gray-600 to-gray-700 text-sm font-semibold text-gray-200">
+          <div className="flex items-center gap-x-4 px-3 py-4 border-t border-gray-200">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-gray-200 to-gray-300 text-sm font-semibold text-gray-700">
               {user?.pictureUrl ? (
                 <img src={user.pictureUrl} alt={user.name ?? 'User avatar'} className="h-full w-full rounded-full object-cover" />
               ) : (
@@ -506,13 +506,13 @@ export default function Chat() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-semibold text-white truncate">{user?.name}</div>
-              <div className="text-xs text-gray-400 truncate">{user?.email}</div>
+              <div className="text-sm font-semibold text-gray-900 truncate">{user?.name}</div>
+              <div className="text-xs text-gray-500 truncate">{user?.email}</div>
             </div>
             <button
               type="button"
               onClick={logout}
-              className="text-xs text-gray-400 hover:text-gray-200 transition-colors"
+              className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
             >
               Logout
             </button>
