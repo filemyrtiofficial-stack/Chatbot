@@ -517,8 +517,8 @@ export default function Chat() {
           <div className="px-4 sm:px-6 lg:px-8">
             {(error || globalNotice) && (
               <div className={`mb-4 rounded-md p-4 ${error
-                  ? 'bg-red-50 text-red-600'
-                  : 'bg-green-50 text-green-600'
+                ? 'bg-red-50 text-red-600'
+                : 'bg-green-50 text-green-600'
                 }`}>
                 <div className="text-sm">{error || globalNotice}</div>
               </div>
@@ -551,8 +551,8 @@ export default function Chat() {
                   >
                     <div
                       className={`max-w-3xl rounded-lg px-4 py-2 ${entry.role === 'user'
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200'
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-white text-gray-900 shadow-sm ring-1 ring-gray-200'
                         }`}
                     >
                       <div className="whitespace-pre-wrap text-sm leading-relaxed">{entry.text}</div>
