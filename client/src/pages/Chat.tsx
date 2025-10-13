@@ -167,8 +167,13 @@ export default function Chat() {
     'Dost1.0',
     'Dost2.0',
     'Dost3.0',
+    'Dost4.0',
     'Dost Pro',
-    'Dost Lite'
+    'Dost Lite',
+    'Dost Advanced',
+    'Dost Enterprise',
+    'Dost Beta',
+    'Dost Alpha'
   ];
 
   const messageListRef = useRef<HTMLDivElement | null>(null);
@@ -499,7 +504,7 @@ export default function Chat() {
           }`} style={{ backgroundColor: isDarkMode ? '#1F2937' : '#F7F7F8' }}>
           <div className="flex h-16 shrink-0 items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-14 items-center justify-center text-xs font-bold">
+              <div className="flex h-10 w-14 items-center justify-center text-xs font-bold">
                 <div className="text-center">
                   <div className={`text-[8px] font-bold leading-tight transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
                     }`}>FILE MY</div>
@@ -808,7 +813,7 @@ export default function Chat() {
 
                         <button
                           type="submit"
-                          className="inline-flex items-center justify-center rounded-lg bg-indigo-600 p-2 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          className="inline-flex items-center justify-center rounded-lg p-2 text-gray-600 hover:text-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                           disabled={disableSend}
                           title="Send"
                         >
@@ -820,9 +825,28 @@ export default function Chat() {
                         </button>
                       </div>
                     </form>
-                    <p className="mt-2 text-xs text-gray-500 text-center">
-                      RTI Dost responds only to queries about India's Right to Information Act. Press Enter to send.
-                    </p>
+                    <div className="mt-2 text-xs text-gray-500 text-center">
+                      <p>RTI-DOST AI assistance for drafting RTIs.</p>
+                      <div className="flex items-center justify-center gap-4 mt-1">
+                        <a
+                          href="https://filemyrti.com/privacy-policy"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="transition hover:text-gray-700"
+                        >
+                          Privacy Policy
+                        </a>
+                        <span>•</span>
+                        <a
+                          href="https://filemyrti.com/terms-of-service"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="transition hover:text-gray-700"
+                        >
+                          Terms & Conditions
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -893,7 +917,7 @@ export default function Chat() {
 
                     <button
                       type="submit"
-                      className="inline-flex items-center justify-center rounded-lg bg-indigo-600 p-2 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="inline-flex items-center justify-center rounded-lg p-2 text-gray-600 hover:text-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       disabled={disableSend}
                       title="Send"
                     >
@@ -905,9 +929,28 @@ export default function Chat() {
                     </button>
                   </div>
                 </form>
-                <p className="mt-2 text-xs text-gray-500 text-center">
-                  RTI Dost responds only to queries about India's Right to Information Act. Press Enter to send.
-                </p>
+                <div className="mt-2 text-xs text-gray-500 text-center">
+                  <p>RTI-DOST AI assistance for drafting RTIs.</p>
+                  <div className="flex items-center justify-center gap-4 mt-1">
+                    <a
+                      href="https://filemyrti.com/privacy-policy"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="transition hover:text-gray-700"
+                    >
+                      Privacy Policy
+                    </a>
+                    <span>•</span>
+                    <a
+                      href="https://filemyrti.com/terms-of-service"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="transition hover:text-gray-700"
+                    >
+                      Terms & Conditions
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           )}
