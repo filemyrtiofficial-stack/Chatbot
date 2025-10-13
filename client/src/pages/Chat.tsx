@@ -252,7 +252,9 @@ export default function Chat() {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isModelDropdownOpen) {
+      const target = event.target as Element;
+      const dropdown = target.closest('[data-dropdown]');
+      if (isModelDropdownOpen && !dropdown) {
         setIsModelDropdownOpen(false);
       }
     };
@@ -680,10 +682,14 @@ export default function Chat() {
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
             <div className="relative flex flex-1">
               <div className="flex items-center gap-2">
-                <div className="relative">
+                <div className="relative" data-dropdown>
                   <button
                     type="button"
-                    onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log('Dropdown button clicked, current state:', isModelDropdownOpen);
+                      setIsModelDropdownOpen(!isModelDropdownOpen);
+                    }}
                     className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${isDarkMode
                       ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -697,7 +703,7 @@ export default function Chat() {
 
                   {isModelDropdownOpen && (
                     <div className={`absolute top-full left-0 mt-1 w-full min-w-[140px] max-h-60 overflow-y-auto rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 ${isDarkMode ? 'bg-gray-700' : 'bg-white'
-                      }`}>
+                      }`} data-dropdown>
                       <div className="py-1">
                         {availableModels.map((model) => (
                           <button
