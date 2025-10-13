@@ -692,12 +692,12 @@ export default function Chat() {
                               setIsModelDropdownOpen(false);
                             }}
                             className={`block w-full text-left px-4 py-2 text-sm transition-colors duration-200 ${model === selectedModel
-                                ? isDarkMode
-                                  ? 'bg-gray-600 text-white'
-                                  : 'bg-gray-100 text-gray-900'
-                                : isDarkMode
-                                  ? 'text-gray-300 hover:bg-gray-600 hover:text-white'
-                                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                              ? isDarkMode
+                                ? 'bg-gray-600 text-white'
+                                : 'bg-gray-100 text-gray-900'
+                              : isDarkMode
+                                ? 'text-gray-300 hover:bg-gray-600 hover:text-white'
+                                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                               }`}
                           >
                             {model}
