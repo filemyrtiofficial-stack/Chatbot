@@ -542,7 +542,7 @@ export default function Chat() {
       {/* Main content area */}
       <div className={`flex flex-1 flex-col ${sidebarOpen ? 'xl:pl-64' : 'xl:pl-0'}`}>
         {/* Header */}
-        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-white px-4 sm:gap-x-6 sm:px-6 lg:px-8">
           <button type="button" className="-m-2.5 p-2.5 text-gray-700 xl:hidden">
             <span className="sr-only">Open sidebar</span>
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
@@ -550,6 +550,27 @@ export default function Chat() {
             </svg>
           </button>
           <div className="h-6 w-px bg-gray-200 xl:hidden" />
+
+          {/* Show sidebar toggle in navbar when sidebar is closed */}
+          {!sidebarOpen && (
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              className="hidden xl:flex items-center justify-center p-2 text-gray-600 hover:text-gray-900 transition-colors"
+              title="Open sidebar"
+            >
+              <svg className="h-5 w-6" viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                {/* Rounded rectangle outline */}
+                <rect x="1" y="1" width="22" height="14" rx="3" ry="3" fill="none" stroke="currentColor" />
+                {/* Vertical divider line */}
+                <line x1="7" y1="1" x2="7" y2="15" stroke="currentColor" />
+                {/* Hamburger lines in left section */}
+                <line x1="3" y1="5" x2="5" y2="5" stroke="currentColor" strokeLinecap="round" />
+                <line x1="3" y1="8" x2="5" y2="8" stroke="currentColor" strokeLinecap="round" />
+              </svg>
+            </button>
+          )}
+
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
             <div className="relative flex flex-1">
               <div className="flex items-center gap-2">
