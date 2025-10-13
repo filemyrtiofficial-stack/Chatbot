@@ -696,7 +696,7 @@ export default function Chat() {
                   </button>
 
                   {isModelDropdownOpen && (
-                    <div className={`absolute top-full left-0 mt-1 w-full min-w-[120px] rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 ${isDarkMode ? 'bg-gray-700' : 'bg-white'
+                    <div className={`absolute top-full left-0 mt-1 w-full min-w-[140px] max-h-60 overflow-y-auto rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 ${isDarkMode ? 'bg-gray-700' : 'bg-white'
                       }`}>
                       <div className="py-1">
                         {availableModels.map((model) => (
