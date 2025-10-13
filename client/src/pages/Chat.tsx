@@ -793,7 +793,7 @@ export default function Chat() {
 
           {/* Input area - only show when not in empty state */}
           {!showEmptyState && (
-            <div className="border-t border-gray-200 bg-white px-4 py-4 sm:px-6 lg:px-8">
+            <div className="bg-white px-4 py-4 sm:px-6 lg:px-8">
               <div className="mx-auto max-w-4xl">
                 <form onSubmit={handleSend} className="relative">
                   <div className="flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white p-3">
