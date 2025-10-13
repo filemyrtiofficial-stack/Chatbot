@@ -597,7 +597,7 @@ export default function Chat() {
                           type="text"
                           name="message"
                           id="message"
-                          className="flex-1 border-0 bg-transparent text-gray-900 placeholder:text-gray-400 focus:ring-0 text-sm leading-6"
+                          className="flex-1 border-0 bg-transparent text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-sm leading-6"
                           placeholder="Message RTI Dost..."
                           value={message}
                           onChange={e => setMessage(e.target.value)}
@@ -681,7 +681,7 @@ export default function Chat() {
                       type="text"
                       name="message"
                       id="message"
-                      className="flex-1 border-0 bg-transparent text-gray-900 placeholder:text-gray-400 focus:ring-0 text-sm leading-6"
+                      className="flex-1 border-0 bg-transparent text-gray-900 placeholder:text-gray-400 focus:ring-0 focus:outline-none text-sm leading-6"
                       placeholder="Message RTI Dost..."
                       value={message}
                       onChange={e => setMessage(e.target.value)}
