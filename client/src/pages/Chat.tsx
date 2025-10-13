@@ -472,10 +472,12 @@ export default function Chat() {
           }`} style={{ backgroundColor: isDarkMode ? '#1F2937' : '#F7F7F8' }}>
           <div className="flex h-16 shrink-0 items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-14 items-center justify-center bg-black text-white text-xs font-bold">
+              <div className="flex h-8 w-14 items-center justify-center text-xs font-bold">
                 <div className="text-center">
-                  <div className="text-white text-[8px] font-bold leading-tight">FILE MY</div>
-                  <div className="bg-white text-black px-0.5 py-0 text-[8px] font-bold leading-tight">RTI</div>
+                  <div className={`text-[8px] font-bold leading-tight transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>FILE MY</div>
+                  <div className={`px-0.5 py-0 text-[8px] font-bold leading-tight transition-colors duration-200 ${isDarkMode ? 'bg-white text-black' : 'bg-gray-900 text-white'
+                    }`}>RTI</div>
                 </div>
               </div>
               <div>
