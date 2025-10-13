@@ -165,8 +165,18 @@ export default function Chat() {
 
   const availableModels = [
     'Dost1.0',
+    'Dost1.1',
+    'Dost1.2',
+    'Dost1.3',
+    'Dost1.4',
+    'Dost1.5',
     'Dost2.0',
+    'Dost2.1',
+    'Dost2.2',
+    'Dost2.3',
     'Dost3.0',
+    'Dost3.1',
+    'Dost3.2',
     'Dost4.0',
     'Dost Pro',
     'Dost Lite',
