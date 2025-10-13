@@ -159,6 +159,7 @@ export default function Chat() {
   const [globalNotice, setGlobalNotice] = useState<string | null>(null);
   const [downloadingSession, setDownloadingSession] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   const messageListRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -202,6 +203,27 @@ export default function Chat() {
       // ignore storage access errors
     }
   }, [selectedSessionId, sessions]);
+
+  // System appearance detection
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    // Set initial state
+    setIsDarkMode(mediaQuery.matches);
+
+    // Listen for changes
+    const handleChange = (e: MediaQueryListEvent) => {
+      setIsDarkMode(e.matches);
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -443,25 +465,36 @@ export default function Chat() {
   const userInitial = (user?.name?.trim()?.[0] ?? user?.email?.trim()?.[0] ?? 'R').toUpperCase();
 
   return (
-    <div className="flex h-screen text-gray-900" style={{ backgroundColor: '#FFFFFF' }}>
+    <div className={`flex h-screen transition-colors duration-200 ${isDarkMode
+        ? 'bg-gray-900 text-gray-100'
+        : 'text-gray-900'
+      }`} style={{ backgroundColor: isDarkMode ? '#111827' : '#FFFFFF' }}>
       {/* Sidebar - optimized for large screens */}
-      <aside className={`${sidebarOpen ? 'flex' : 'hidden'} xl:flex xl:w-64 xl:flex-col xl:fixed xl:inset-y-0 xl:z-50`}>
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 px-6 pb-4" style={{ backgroundColor: '#F7F7F8' }}>
+      <aside className={`${sidebarOpen ? 'flex' : 'hidden'} xl:w-64 xl:flex-col xl:fixed xl:inset-y-0 xl:z-50`}>
+        <div className={`flex grow flex-col gap-y-5 overflow-y-auto border-r px-6 pb-4 transition-colors duration-200 ${isDarkMode
+            ? 'border-gray-700'
+            : 'border-gray-200'
+          }`} style={{ backgroundColor: isDarkMode ? '#1F2937' : '#F7F7F8' }}>
           <div className="flex h-16 shrink-0 items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white text-lg font-bold shadow-lg">
                 RTI
               </div>
               <div>
-                <span className="text-xl font-bold text-gray-900">RTI Dost</span>
-                <p className="text-xs text-gray-500">AI Assistant</p>
+                <span className={`text-xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>RTI Dost</span>
+                <p className={`text-xs transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                  }`}>AI Assistant</p>
               </div>
             </div>
 
             {/* Sidebar toggle button */}
             <button
               type="button"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={() => {
+                console.log('Sidebar toggle clicked, current state:', sidebarOpen);
+                setSidebarOpen(!sidebarOpen);
+              }}
               className="flex items-center justify-center p-2 text-gray-600 hover:text-gray-900 transition-colors"
               title="Close sidebar"
             >
@@ -483,9 +516,15 @@ export default function Chat() {
                 <button
                   type="button"
                   onClick={startNewConversation}
-                  className="group -mx-2 flex gap-x-3 rounded-xl p-3 text-sm leading-6 font-semibold text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-colors"
+                  className={`group -mx-2 flex gap-x-3 rounded-xl p-3 text-sm leading-6 font-semibold transition-colors duration-200 ${isDarkMode
+                      ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                      : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
+                    }`}
                 >
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600 text-lg font-medium group-hover:bg-gray-200">
+                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-lg font-medium transition-colors duration-200 ${isDarkMode
+                      ? 'bg-gray-600 text-gray-300 group-hover:bg-gray-500'
+                      : 'bg-gray-100 text-gray-600 group-hover:bg-gray-200'
+                    }`}>
                     +
                   </span>
                   <span className="text-base">New chat</span>
@@ -494,16 +533,23 @@ export default function Chat() {
 
               {orderedSessions.length > 0 && (
                 <li>
-                  <div className="text-xs font-semibold leading-6 text-gray-400 uppercase tracking-wider mb-3">Recent conversations</div>
+                  <div className={`text-xs font-semibold leading-6 uppercase tracking-wider mb-3 transition-colors duration-200 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                    }`}>Recent conversations</div>
                   <ul role="list" className="-mx-2 space-y-1">
                     {orderedSessions.slice(0, 8).map((session) => (
                       <li key={session.sessionId}>
                         <button
                           type="button"
                           onClick={() => setSelectedSessionId(session.sessionId)}
-                          className="group flex gap-x-3 rounded-lg p-3 text-sm leading-6 font-medium text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition-colors w-full text-left"
+                          className={`group flex gap-x-3 rounded-lg p-3 text-sm leading-6 font-medium transition-colors duration-200 w-full text-left ${isDarkMode
+                              ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                              : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
+                            }`}
                         >
-                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-gray-100 text-gray-500 group-hover:bg-gray-200">
+                          <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors duration-200 ${isDarkMode
+                              ? 'bg-gray-600 text-gray-400 group-hover:bg-gray-500'
+                              : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
+                            }`}>
                             💬
                           </span>
                           <span className="truncate text-sm">{deriveTitle(session.entries)}</span>
@@ -516,8 +562,12 @@ export default function Chat() {
             </ul>
           </nav>
 
-          <div className="flex items-center gap-x-4 px-3 py-4 border-t border-gray-200">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-gray-200 to-gray-300 text-sm font-semibold text-gray-700">
+          <div className={`flex items-center gap-x-4 px-3 py-4 border-t transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
+            }`}>
+            <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-sm font-semibold transition-colors duration-200 ${isDarkMode
+                ? 'from-gray-600 to-gray-700 text-gray-200'
+                : 'from-gray-200 to-gray-300 text-gray-700'
+              }`}>
               {user?.pictureUrl ? (
                 <img src={user.pictureUrl} alt={user.name ?? 'User avatar'} className="h-full w-full rounded-full object-cover" />
               ) : (
@@ -525,13 +575,18 @@ export default function Chat() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-semibold text-gray-900 truncate">{user?.name}</div>
-              <div className="text-xs text-gray-500 truncate">{user?.email}</div>
+              <div className={`text-sm font-semibold truncate transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>{user?.name}</div>
+              <div className={`text-xs truncate transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`}>{user?.email}</div>
             </div>
             <button
               type="button"
               onClick={logout}
-              className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
+              className={`text-xs transition-colors duration-200 ${isDarkMode
+                  ? 'text-gray-400 hover:text-gray-200'
+                  : 'text-gray-500 hover:text-gray-700'
+                }`}
             >
               Logout
             </button>
@@ -540,23 +595,32 @@ export default function Chat() {
       </aside>
 
       {/* Main content area */}
-      <div className={`flex flex-1 flex-col ${sidebarOpen ? 'xl:pl-64' : 'xl:pl-0'}`}>
+      <div className={`flex flex-1 flex-col ${sidebarOpen ? 'xl:pl-64' : ''}`}>
         {/* Header */}
-        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 bg-white px-4 sm:gap-x-6 sm:px-6 lg:px-8">
-          <button type="button" className="-m-2.5 p-2.5 text-gray-700 xl:hidden">
+        <div className={`sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 px-4 sm:gap-x-6 sm:px-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? 'bg-gray-800' : 'bg-white'
+          }`}>
+          <button type="button" className={`-m-2.5 p-2.5 xl:hidden transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
+            }`}>
             <span className="sr-only">Open sidebar</span>
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
           </button>
-          <div className="h-6 w-px bg-gray-200 xl:hidden" />
+          <div className={`h-6 w-px xl:hidden transition-colors duration-200 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'
+            }`} />
 
           {/* Show sidebar toggle in navbar when sidebar is closed */}
           {!sidebarOpen && (
             <button
               type="button"
-              onClick={() => setSidebarOpen(true)}
-              className="hidden xl:flex items-center justify-center p-2 text-gray-600 hover:text-gray-900 transition-colors"
+              onClick={() => {
+                console.log('Navbar toggle clicked, opening sidebar');
+                setSidebarOpen(true);
+              }}
+              className={`hidden xl:flex items-center justify-center p-2 transition-colors duration-200 ${isDarkMode
+                  ? 'text-gray-400 hover:text-gray-200'
+                  : 'text-gray-600 hover:text-gray-900'
+                }`}
               title="Open sidebar"
             >
               <svg className="h-5 w-6" viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -577,7 +641,10 @@ export default function Chat() {
                 <div className="relative">
                   <button
                     type="button"
-                    className="inline-flex items-center gap-2 bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${isDarkMode
+                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
                   >
                     <span>RTI-Dost1.0</span>
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
@@ -591,7 +658,10 @@ export default function Chat() {
               <button
                 type="button"
                 onClick={startNewConversation}
-                className="inline-flex items-center justify-center rounded-lg bg-gray-100 p-2 text-gray-600 hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 transition-colors"
+                className={`inline-flex items-center justify-center rounded-lg p-2 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 ${isDarkMode
+                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
                 title="Temporary Chat"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
