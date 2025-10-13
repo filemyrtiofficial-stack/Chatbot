@@ -626,17 +626,8 @@ export default function Chat() {
                 </div>
               )}
               {showEmptyState && (
-                <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 rounded-3xl border border-dashed border-slate-200 bg-white/90 px-8 py-12 text-center shadow-sm">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#eef2ff] text-3xl">🙌</div>
-                  <div className="space-y-2">
-                    <h2 className="text-xl font-semibold text-slate-900">Namaste! I&apos;m RTI Dost</h2>
-                    <p className="text-sm leading-relaxed text-slate-500">
-                      I can help you draft RTI applications, understand the RTI Act, and find answers to your RTI-related questions.
-                    </p>
-                  </div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-                    Ask your first question below
-                  </p>
+                <div className="mx-auto flex w-full max-w-xl items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white/90 px-8 py-10 text-center shadow-sm">
+                  <p className="text-sm text-slate-600">Your RTI assistant • Ask anything about RTI</p>
                 </div>
               )}
               {!loading &&
