@@ -583,28 +583,26 @@ export default function Chat() {
                   {/* Centered input box for empty state */}
                   <div className="w-full max-w-2xl">
                     <form onSubmit={handleSend} className="relative">
-                      <div className="overflow-hidden rounded-xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
-                        <label htmlFor="message" className="sr-only">
-                          Add your message
-                        </label>
-                        <textarea
-                          ref={textareaRef}
-                          rows={1}
+                      <div className="flex items-center gap-3 rounded-xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white p-3">
+                        <button
+                          type="button"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 transition-colors"
+                          disabled={sending}
+                        >
+                          <PaperclipIcon className="h-4 w-4" />
+                          <span className="sr-only">Attach a file</span>
+                        </button>
+
+                        <input
+                          type="text"
                           name="message"
                           id="message"
-                          className="block w-full resize-none border-0 bg-transparent py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-0 text-sm leading-6"
+                          className="flex-1 border-0 bg-transparent text-gray-900 placeholder:text-gray-400 focus:ring-0 text-sm leading-6"
                           placeholder="Message RTI Dost..."
                           value={message}
-                          onChange={e => {
-                            setMessage(e.target.value);
-                            if (textareaRef.current) {
-                              textareaRef.current.style.height = 'auto';
-                              const { scrollHeight } = textareaRef.current;
-                              textareaRef.current.style.height = `${Math.min(scrollHeight, 120)}px`;
-                            }
-                          }}
+                          onChange={e => setMessage(e.target.value)}
                           onKeyDown={e => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
+                            if (e.key === 'Enter') {
                               e.preventDefault();
                               if (!disableSend) {
                                 handleSend(e);
@@ -613,36 +611,32 @@ export default function Chat() {
                           }}
                           disabled={sending}
                         />
-                        <div className="flex items-center justify-between gap-x-3 border-t border-gray-200 bg-gray-50 px-3 py-2">
-                          <div className="flex">
-                            <button
-                              type="button"
-                              className="-m-2.5 -my-1.5 inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 transition-colors"
-                              disabled={sending}
-                            >
-                              <PaperclipIcon className="h-4 w-4" />
-                              <span className="sr-only">Attach a file</span>
-                            </button>
-                          </div>
-                          <div className="flex-shrink-0">
-                            <button
-                              type="submit"
-                              className="inline-flex items-center gap-x-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                              disabled={disableSend}
-                            >
-                              {sending ? (
-                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                              ) : (
-                                <SendIcon className="h-4 w-4" />
-                              )}
-                              Send
-                            </button>
-                          </div>
-                        </div>
+
+                        <button
+                          type="button"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 transition-colors"
+                          disabled={sending}
+                        >
+                          <MicrophoneIcon className="h-4 w-4" />
+                          <span className="sr-only">Voice input</span>
+                        </button>
+
+                        <button
+                          type="submit"
+                          className="inline-flex items-center gap-x-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          disabled={disableSend}
+                        >
+                          {sending ? (
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                          ) : (
+                            <SendIcon className="h-4 w-4" />
+                          )}
+                          Send
+                        </button>
                       </div>
                     </form>
                     <p className="mt-2 text-xs text-gray-500 text-center">
-                      RTI Dost responds only to queries about India's Right to Information Act. Press Enter to send, Shift+Enter for new line.
+                      RTI Dost responds only to queries about India's Right to Information Act. Press Enter to send.
                     </p>
                   </div>
                 </div>
@@ -673,28 +667,26 @@ export default function Chat() {
             <div className="border-t border-gray-200 bg-white px-4 py-4 sm:px-6 lg:px-8">
               <div className="mx-auto max-w-4xl">
                 <form onSubmit={handleSend} className="relative">
-                  <div className="overflow-hidden rounded-xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
-                    <label htmlFor="message" className="sr-only">
-                      Add your message
-                    </label>
-                    <textarea
-                      ref={textareaRef}
-                      rows={1}
+                  <div className="flex items-center gap-3 rounded-xl shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white p-3">
+                    <button
+                      type="button"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 transition-colors"
+                      disabled={sending}
+                    >
+                      <PaperclipIcon className="h-4 w-4" />
+                      <span className="sr-only">Attach a file</span>
+                    </button>
+
+                    <input
+                      type="text"
                       name="message"
                       id="message"
-                      className="block w-full resize-none border-0 bg-transparent py-3 px-4 text-gray-900 placeholder:text-gray-400 focus:ring-0 text-sm leading-6"
+                      className="flex-1 border-0 bg-transparent text-gray-900 placeholder:text-gray-400 focus:ring-0 text-sm leading-6"
                       placeholder="Message RTI Dost..."
                       value={message}
-                      onChange={e => {
-                        setMessage(e.target.value);
-                        if (textareaRef.current) {
-                          textareaRef.current.style.height = 'auto';
-                          const { scrollHeight } = textareaRef.current;
-                          textareaRef.current.style.height = `${Math.min(scrollHeight, 120)}px`;
-                        }
-                      }}
+                      onChange={e => setMessage(e.target.value)}
                       onKeyDown={e => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
+                        if (e.key === 'Enter') {
                           e.preventDefault();
                           if (!disableSend) {
                             handleSend(e);
@@ -703,36 +695,32 @@ export default function Chat() {
                       }}
                       disabled={sending}
                     />
-                    <div className="flex items-center justify-between gap-x-3 border-t border-gray-200 bg-gray-50 px-3 py-2">
-                      <div className="flex">
-                        <button
-                          type="button"
-                          className="-m-2.5 -my-1.5 inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 transition-colors"
-                          disabled={sending}
-                        >
-                          <PaperclipIcon className="h-4 w-4" />
-                          <span className="sr-only">Attach a file</span>
-                        </button>
-                      </div>
-                      <div className="flex-shrink-0">
-                        <button
-                          type="submit"
-                          className="inline-flex items-center gap-x-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                          disabled={disableSend}
-                        >
-                          {sending ? (
-                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                          ) : (
-                            <SendIcon className="h-4 w-4" />
-                          )}
-                          Send
-                        </button>
-                      </div>
-                    </div>
+
+                    <button
+                      type="button"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 transition-colors"
+                      disabled={sending}
+                    >
+                      <MicrophoneIcon className="h-4 w-4" />
+                      <span className="sr-only">Voice input</span>
+                    </button>
+
+                    <button
+                      type="submit"
+                      className="inline-flex items-center gap-x-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      disabled={disableSend}
+                    >
+                      {sending ? (
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      ) : (
+                        <SendIcon className="h-4 w-4" />
+                      )}
+                      Send
+                    </button>
                   </div>
                 </form>
                 <p className="mt-2 text-xs text-gray-500 text-center">
-                  RTI Dost responds only to queries about India's Right to Information Act. Press Enter to send, Shift+Enter for new line.
+                  RTI Dost responds only to queries about India's Right to Information Act. Press Enter to send.
                 </p>
               </div>
             </div>
