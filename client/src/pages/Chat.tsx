@@ -716,7 +716,7 @@ export default function Chat() {
 
             <div className={`flex items-center gap-x-4 px-6 py-2 border-t transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
               }`}>
-              <div className={`flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br text-sm font-semibold transition-colors duration-200 ${isDarkMode
+              <div className={`flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br text-sm font-semibold transition-colors duration-200 ${isDarkMode
                 ? 'from-gray-600 to-gray-700 text-gray-200'
                 : 'from-gray-200 to-gray-300 text-gray-700'
                 }`}>
@@ -888,13 +888,13 @@ export default function Chat() {
                             }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
                             <button
                               type="button"
-                              className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
+                              className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
                                 ? 'text-gray-400 hover:text-gray-200'
                                 : 'text-gray-600 hover:text-gray-800'
                                 }`}
                               disabled={sending}
                             >
-                              <PaperclipIcon className="h-4 w-4" />
+                              <PaperclipIcon className="h-5 w-5" />
                               <span className="sr-only">Attach a file</span>
                             </button>
 
@@ -926,13 +926,13 @@ export default function Chat() {
 
                             <button
                               type="button"
-                              className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
+                              className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
                                 ? 'text-gray-400 hover:text-gray-200'
                                 : 'text-gray-600 hover:text-gray-800'
                                 }`}
                               disabled={sending}
                             >
-                              <MicrophoneIcon className="h-4 w-4" />
+                              <MicrophoneIcon className="h-5 w-5" />
                               <span className="sr-only">Voice input</span>
                             </button>
 
@@ -946,9 +946,9 @@ export default function Chat() {
                               title="Send"
                             >
                               {sending ? (
-                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                               ) : (
-                                <SendIcon className="h-4 w-4" />
+                                <SendIcon className="h-5 w-5" />
                               )}
                             </button>
                           </div>
@@ -1003,13 +1003,13 @@ export default function Chat() {
                       }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
                       <button
                         type="button"
-                        className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
+                        className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
                           ? 'text-gray-400 hover:text-gray-200'
                           : 'text-gray-600 hover:text-gray-800'
                           }`}
                         disabled={sending}
                       >
-                        <PaperclipIcon className="h-4 w-4" />
+                        <PaperclipIcon className="h-5 w-5" />
                         <span className="sr-only">Attach a file</span>
                       </button>
 
@@ -1041,13 +1041,13 @@ export default function Chat() {
 
                       <button
                         type="button"
-                        className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
+                        className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
                           ? 'text-gray-400 hover:text-gray-200'
                           : 'text-gray-600 hover:text-gray-800'
                           }`}
                         disabled={sending}
                       >
-                        <MicrophoneIcon className="h-4 w-4" />
+                        <MicrophoneIcon className="h-5 w-5" />
                         <span className="sr-only">Voice input</span>
                       </button>
 
@@ -1061,9 +1061,9 @@ export default function Chat() {
                         title="Send"
                       >
                         {sending ? (
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                         ) : (
-                          <SendIcon className="h-4 w-4" />
+                          <SendIcon className="h-5 w-5" />
                         )}
                       </button>
                     </div>
