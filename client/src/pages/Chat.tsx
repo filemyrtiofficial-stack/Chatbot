@@ -515,20 +515,14 @@ export default function Chat() {
           : 'border-gray-200'
           }`} style={{ backgroundColor: isDarkMode ? '#181818' : '#F7F7F8' }}>
           <div className="flex h-16 shrink-0 items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center">
+            <div className="flex items-center justify-center">
+              <div className="flex h-12 w-12 items-center justify-center">
                 <div className="text-center">
-                  <div className={`text-[7px] font-bold leading-tight transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                  <div className={`text-[8px] font-bold leading-tight transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
                     }`}>FILE MY</div>
-                  <div className={`px-1 py-0.5 text-[8px] font-bold leading-tight transition-colors duration-200 ${isDarkMode ? 'bg-white text-black' : 'bg-gray-900 text-white'
+                  <div className={`px-1 py-0.5 text-[9px] font-bold leading-tight transition-colors duration-200 ${isDarkMode ? 'bg-white text-black' : 'bg-gray-900 text-white'
                     }`}>RTI</div>
                 </div>
-              </div>
-              <div>
-                <span className={`text-xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>RTI Dost</span>
-                <p className={`text-xs transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                  }`}>AI Assistant</p>
               </div>
             </div>
 
