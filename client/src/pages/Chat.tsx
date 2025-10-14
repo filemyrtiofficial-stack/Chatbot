@@ -859,28 +859,23 @@ export default function Chat() {
                     </form>
                     <div className={`mt-2 text-xs text-center transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
                       }`}>
-                      <p>RTI-DOST AI assistance for drafting RTIs.</p>
-                      <div className="flex items-center justify-center gap-4 mt-1">
-                        <a
-                          href="https://filemyrti.com/privacy-policy"
-                          target="_blank"
-                          rel="noreferrer"
-                          className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
-                            }`}
-                        >
-                          Privacy Policy
-                        </a>
-                        <span>•</span>
-                        <a
-                          href="https://filemyrti.com/terms-of-service"
-                          target="_blank"
-                          rel="noreferrer"
-                          className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
-                            }`}
-                        >
+                      <p>RTI-DOST AI assistance for drafting RTIs. <a
+                        href="https://filemyrti.com/privacy-policy"
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
+                          }`}
+                      >
+                        Privacy Policy
+                      </a> • <a
+                        href="https://filemyrti.com/terms-of-service"
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
+                          }`}
+                      >
                           Terms & Conditions
-                        </a>
-                      </div>
+                        </a></p>
                     </div>
                   </div>
                 </div>
@@ -988,28 +983,23 @@ export default function Chat() {
                 </form>
                 <div className={`mt-2 text-xs text-center transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
                   }`}>
-                  <p>RTI-DOST AI assistance for drafting RTIs.</p>
-                  <div className="flex items-center justify-center gap-4 mt-1">
-                    <a
-                      href="https://filemyrti.com/privacy-policy"
-                      target="_blank"
-                      rel="noreferrer"
-                      className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
-                        }`}
-                    >
-                      Privacy Policy
-                    </a>
-                    <span>•</span>
-                    <a
-                      href="https://filemyrti.com/terms-of-service"
-                      target="_blank"
-                      rel="noreferrer"
-                      className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
-                        }`}
-                    >
+                  <p>RTI-DOST AI assistance for drafting RTIs. <a
+                    href="https://filemyrti.com/privacy-policy"
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
+                      }`}
+                  >
+                    Privacy Policy
+                  </a> • <a
+                    href="https://filemyrti.com/terms-of-service"
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
+                      }`}
+                  >
                       Terms & Conditions
-                    </a>
-                  </div>
+                    </a></p>
                 </div>
               </div>
             </div>
