@@ -874,7 +874,7 @@ export default function Chat() {
                         }`}>Welcome to RTI Dost</h3>
 
                       {/* Centered input box for empty state */}
-                      <div className="w-full max-w-2xl mx-auto">
+                      <div className="w-full max-w-2xl">
                         <form onSubmit={e => {
                           e.preventDefault();
                           if (!disableSend) {
@@ -903,7 +903,7 @@ export default function Chat() {
                               name="message"
                               id="message"
                               rows={1}
-                              className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-all duration-200 overflow-hidden ${isDarkMode
+                              className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-all duration-200 overflow-hidden text-left ${isDarkMode
                                 ? 'text-gray-100 placeholder:text-gray-500'
                                 : 'text-gray-900 placeholder:text-gray-400'
                                 }`}
@@ -1018,7 +1018,7 @@ export default function Chat() {
                         name="message"
                         id="message"
                         rows={1}
-                        className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-all duration-200 overflow-hidden ${isDarkMode
+                        className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-all duration-200 overflow-hidden text-left ${isDarkMode
                           ? 'text-gray-100 placeholder:text-gray-500'
                           : 'text-gray-900 placeholder:text-gray-400'
                           }`}
