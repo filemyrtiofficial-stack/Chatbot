@@ -502,8 +502,9 @@ export default function Chat() {
 
   const showEmptyState =
     !loading &&
-    (orderedSessions.length === 0 ||
-      (selectedSessionId === NEW_SESSION_SENTINEL && !currentSession && !message));
+    selectedSessionId === NEW_SESSION_SENTINEL &&
+    !currentSession &&
+    !message;
 
   const mobileSessionValue =
     selectedSessionId && selectedSessionId !== NEW_SESSION_SENTINEL
