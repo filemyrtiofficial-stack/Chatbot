@@ -168,6 +168,17 @@ export default function Chat() {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
+  // Function to scroll to bottom
+  const scrollToBottom = () => {
+    if (chatMessagesRef.current) {
+      requestAnimationFrame(() => {
+        if (chatMessagesRef.current) {
+          chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+        }
+      });
+    }
+  };
+
   const availableModels = [
     'Dost1.0',
     'Dost1.1',
@@ -271,18 +282,31 @@ export default function Chat() {
 
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {
-    if (chatMessagesRef.current && currentSession?.entries) {
-      // Use setTimeout to ensure DOM is updated
-      setTimeout(() => {
-        if (chatMessagesRef.current) {
-          chatMessagesRef.current.scrollTo({
-            top: chatMessagesRef.current.scrollHeight,
-            behavior: 'smooth'
-          });
-        }
-      }, 100);
+    if (currentSession?.entries && currentSession.entries.length > 0) {
+      scrollToBottom();
     }
   }, [currentSession?.entries]);
+
+  // Scroll to bottom when sending a message
+  useEffect(() => {
+    if (sending) {
+      scrollToBottom();
+    }
+  }, [sending]);
+
+  // Scroll to bottom when conversation starts
+  useEffect(() => {
+    if (hasStartedConversation) {
+      scrollToBottom();
+    }
+  }, [hasStartedConversation]);
+
+  // Scroll to bottom when message is cleared (after sending)
+  useEffect(() => {
+    if (message === '' && hasStartedConversation) {
+      scrollToBottom();
+    }
+  }, [message, hasStartedConversation]);
 
   // Check if user has accepted terms
   useEffect(() => {
@@ -470,6 +494,9 @@ export default function Chat() {
       setSelectedSessionId(finalSessionId);
       setMessage('');
       setHasStartedConversation(true);
+
+      // Scroll to bottom after sending message
+      setTimeout(() => scrollToBottom(), 100);
 
       if (data.draftAvailable) {
         await refreshApplications();
