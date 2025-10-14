@@ -510,13 +510,13 @@ export default function Chat() {
       }`} style={{ backgroundColor: isDarkMode ? '#212121' : '#FFFFFF' }}>
       {/* Sidebar - optimized for large screens */}
       <aside className={`${sidebarOpen ? 'flex' : 'hidden'} xl:w-64 xl:flex-col xl:fixed xl:inset-y-0 xl:z-50`}>
-        <div className={`flex grow flex-col gap-y-5 overflow-y-auto border-r px-6 pb-4 transition-colors duration-200 ${isDarkMode
+        <div className={`flex grow flex-col gap-y-3 overflow-y-auto border-r px-6 pb-4 transition-colors duration-200 ${isDarkMode
           ? 'border-gray-800'
           : 'border-gray-200'
           }`} style={{ backgroundColor: isDarkMode ? '#181818' : '#F7F7F8' }}>
-          <div className="flex h-16 shrink-0 items-center justify-between">
+          <div className="flex h-12 shrink-0 items-center justify-between px-2">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-14 items-center justify-center text-xs font-bold">
+              <div className="flex h-8 w-12 items-center justify-center text-xs font-bold">
                 <div className="text-center">
                   <div className={`text-[8px] font-bold leading-tight transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
                     }`}>FILE MY</div>
@@ -525,7 +525,7 @@ export default function Chat() {
                 </div>
               </div>
               <div>
-                <span className={`text-xl font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                <span className={`text-lg font-bold transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
                   }`}>RTI Dost</span>
                 <p className={`text-xs transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
                   }`}>AI Assistant</p>
@@ -539,10 +539,10 @@ export default function Chat() {
                 console.log('Sidebar toggle clicked, current state:', sidebarOpen);
                 setSidebarOpen(!sidebarOpen);
               }}
-              className="flex items-center justify-center p-2 text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center justify-center p-1.5 text-gray-600 hover:text-gray-900 transition-colors"
               title="Close sidebar"
             >
-              <svg className="h-5 w-6" viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <svg className="h-4 w-5" viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth="1.5">
                 {/* Rounded rectangle outline */}
                 <rect x="1" y="1" width="22" height="14" rx="3" ry="3" fill="none" stroke="currentColor" />
                 {/* Vertical divider line */}
