@@ -903,7 +903,7 @@ export default function Chat() {
                               name="message"
                               id="message"
                               rows={1}
-                              className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-all duration-200 overflow-hidden text-left ${isDarkMode
+                              className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-all duration-200 overflow-hidden text-left flex items-center ${isDarkMode
                                 ? 'text-gray-100 placeholder:text-gray-500'
                                 : 'text-gray-900 placeholder:text-gray-400'
                                 }`}
@@ -921,7 +921,7 @@ export default function Chat() {
                                 }
                               }}
                               disabled={sending}
-                              style={{ minHeight: '24px', maxHeight: '200px' }}
+                              style={{ minHeight: '32px', maxHeight: '200px' }}
                             />
 
                             <button
@@ -1018,7 +1018,7 @@ export default function Chat() {
                         name="message"
                         id="message"
                         rows={1}
-                        className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-all duration-200 overflow-hidden text-left ${isDarkMode
+                        className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-all duration-200 overflow-hidden text-left flex items-center ${isDarkMode
                           ? 'text-gray-100 placeholder:text-gray-500'
                           : 'text-gray-900 placeholder:text-gray-400'
                           }`}
@@ -1036,7 +1036,7 @@ export default function Chat() {
                           }
                         }}
                         disabled={sending}
-                        style={{ minHeight: '24px', maxHeight: '200px' }}
+                        style={{ minHeight: '32px', maxHeight: '200px' }}
                       />
 
                       <button
