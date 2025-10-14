@@ -621,7 +621,7 @@ export default function Chat() {
             ? 'border-gray-800'
             : 'border-gray-200'
             }`} style={{ backgroundColor: isDarkMode ? '#181818' : '#F7F7F8' }}>
-            <div className="flex h-16 shrink-0 items-center justify-between">
+            <div className="flex h-12 shrink-0 items-center justify-between">
               <div className="flex items-center justify-center">
                 <div className="flex h-12 w-12 items-center justify-center">
                   <div className="text-center">
@@ -742,7 +742,7 @@ export default function Chat() {
         {/* Main content area */}
         <div className={`flex flex-1 flex-col ${sidebarOpen ? 'xl:pl-64' : ''}`}>
           {/* Header */}
-          <div className={`sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 px-4 sm:gap-x-6 sm:px-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? '' : 'bg-white'
+          <div className={`sticky top-0 z-40 flex h-12 shrink-0 items-center gap-x-4 px-4 sm:gap-x-6 sm:px-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? '' : 'bg-white'
             }`} style={{ backgroundColor: isDarkMode ? '#212121' : undefined }}>
             <button type="button" className={`-m-2.5 p-2.5 xl:hidden transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
               }`}>
