@@ -164,6 +164,8 @@ export default function Chat() {
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [hasStartedConversation, setHasStartedConversation] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const availableModels = [
     'Dost1.0',
@@ -258,6 +260,16 @@ export default function Chat() {
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   }, [message]);
+
+  // Check if user has accepted terms
+  useEffect(() => {
+    const hasAcceptedTerms = localStorage.getItem('rti-dost-terms-accepted');
+    if (!hasAcceptedTerms) {
+      setShowTermsModal(true);
+    } else {
+      setTermsAccepted(true);
+    }
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -354,6 +366,19 @@ export default function Chat() {
     setGlobalNotice(null);
     setError(null);
     setHasStartedConversation(false);
+  }
+
+  function handleAcceptTerms() {
+    localStorage.setItem('rti-dost-terms-accepted', 'true');
+    setTermsAccepted(true);
+    setShowTermsModal(false);
+  }
+
+  function handleRejectTerms() {
+    // Redirect to logout or show message
+    alert('You must accept the terms and conditions to use RTI Dost.');
+    // You can also redirect to logout or home page
+    // window.location.href = '/logout';
   }
 
   async function handleSend(e: FormEvent) {
@@ -516,470 +541,542 @@ export default function Chat() {
   const userInitial = (user?.name?.trim()?.[0] ?? user?.email?.trim()?.[0] ?? 'R').toUpperCase();
 
   return (
-    <div className={`flex h-screen transition-colors duration-200 ${isDarkMode
-      ? 'text-gray-100'
-      : 'text-gray-900'
-      }`} style={{ backgroundColor: isDarkMode ? '#212121' : '#FFFFFF' }}>
-      {/* Sidebar - optimized for large screens */}
-      <aside className={`${sidebarOpen ? 'flex' : 'hidden'} xl:w-64 xl:flex-col xl:fixed xl:inset-y-0 xl:z-50`}>
-        <div className={`flex grow flex-col gap-y-5 overflow-y-auto border-r px-6 pb-4 transition-colors duration-200 ${isDarkMode
-          ? 'border-gray-800'
-          : 'border-gray-200'
-          }`} style={{ backgroundColor: isDarkMode ? '#181818' : '#F7F7F8' }}>
-          <div className="flex h-16 shrink-0 items-center justify-between">
-            <div className="flex items-center justify-center">
-              <div className="flex h-12 w-12 items-center justify-center">
-                <div className="text-center">
-                  <div className={`text-[8px] font-bold leading-tight transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>FILE MY</div>
-                  <div className={`px-1 py-0.5 text-[9px] font-bold leading-tight transition-colors duration-200 ${isDarkMode ? 'bg-white text-black' : 'bg-gray-900 text-white'
-                    }`}>RTI</div>
-                </div>
+    <>
+      {/* Terms and Conditions Modal */}
+      {showTermsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className={`mx-4 max-w-2xl rounded-lg p-6 shadow-xl transition-colors duration-200 ${isDarkMode
+            ? 'bg-gray-800 text-gray-100'
+            : 'bg-white text-gray-900'
+            }`}>
+            <div className="mb-6">
+              <h2 className={`text-2xl font-bold mb-4 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>Terms and Conditions</h2>
+
+              <div className={`max-h-96 overflow-y-auto text-sm leading-relaxed transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                }`}>
+                <p className="mb-4">
+                  Welcome to RTI Dost, an AI-powered assistant designed to help you draft Right to Information (RTI) applications in India.
+                </p>
+
+                <h3 className={`font-semibold mb-2 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>1. Service Description</h3>
+                <p className="mb-4">
+                  RTI Dost provides AI assistance for drafting RTI applications. The service is designed to help users understand RTI procedures and create well-structured applications.
+                </p>
+
+                <h3 className={`font-semibold mb-2 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>2. User Responsibilities</h3>
+                <p className="mb-4">
+                  Users are responsible for verifying all information provided in their RTI applications. RTI Dost is a tool to assist in drafting, not a substitute for legal advice.
+                </p>
+
+                <h3 className={`font-semibold mb-2 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>3. Data Privacy</h3>
+                <p className="mb-4">
+                  We respect your privacy and handle your data in accordance with our Privacy Policy. Your conversations and RTI drafts are processed securely.
+                </p>
+
+                <h3 className={`font-semibold mb-2 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>4. Limitation of Liability</h3>
+                <p className="mb-4">
+                  RTI Dost is provided "as is" without warranties. We are not liable for any outcomes resulting from the use of drafted RTI applications.
+                </p>
+
+                <h3 className={`font-semibold mb-2 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>5. Acceptance</h3>
+                <p className="mb-4">
+                  By using RTI Dost, you agree to these terms and conditions. If you do not agree, please discontinue use of the service.
+                </p>
               </div>
             </div>
 
-            {/* Sidebar toggle button */}
-            <button
-              type="button"
-              onClick={() => {
-                console.log('Sidebar toggle clicked, current state:', sidebarOpen);
-                setSidebarOpen(!sidebarOpen);
-              }}
-              className="flex items-center justify-center p-2 text-gray-600 hover:text-gray-900 transition-colors"
-              title="Close sidebar"
-            >
-              <svg className="h-5 w-6" viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                {/* Rounded rectangle outline */}
-                <rect x="1" y="1" width="22" height="14" rx="3" ry="3" fill="none" stroke="currentColor" />
-                {/* Vertical divider line */}
-                <line x1="7" y1="1" x2="7" y2="15" stroke="currentColor" />
-                {/* Hamburger lines in left section */}
-                <line x1="3" y1="5" x2="5" y2="5" stroke="currentColor" strokeLinecap="round" />
-                <line x1="3" y1="8" x2="5" y2="8" stroke="currentColor" strokeLinecap="round" />
-              </svg>
-            </button>
-          </div>
-
-          <nav className="flex flex-1 flex-col">
-            <ul role="list" className="flex flex-1 flex-col gap-y-2">
-              <li>
-                <button
-                  type="button"
-                  onClick={startNewConversation}
-                  className={`group flex gap-x-3 rounded-lg p-2 text-sm leading-5 font-medium transition-colors duration-200 w-full text-left ${isDarkMode
-                    ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                    : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
-                    }`}
-                >
-                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md transition-colors duration-200 ${isDarkMode
-                    ? 'bg-gray-600 text-gray-400 group-hover:bg-gray-500'
-                    : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
-                    }`}>
-                    +
-                  </span>
-                  <span className="truncate text-sm">New chat</span>
-                </button>
-              </li>
-
-              {orderedSessions.length > 0 && (
-                <li>
-                  <div className={`text-xs font-semibold leading-6 uppercase tracking-wider mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'
-                    }`}>Chats</div>
-                  <ul role="list" className="-mx-2 space-y-0.5">
-                    {orderedSessions.slice(0, 8).map((session) => (
-                      <li key={session.sessionId}>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedSessionId(session.sessionId)}
-                          className={`group flex gap-x-3 rounded-lg p-2 text-sm leading-5 font-medium transition-colors duration-200 w-full text-left ${isDarkMode
-                            ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                            : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
-                            }`}
-                        >
-                          <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md transition-colors duration-200 ${isDarkMode
-                            ? 'bg-gray-600 text-gray-400 group-hover:bg-gray-500'
-                            : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
-                            }`}>
-                            💬
-                          </span>
-                          <span className="truncate text-sm">{deriveTitle(session.entries)}</span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              )}
-            </ul>
-          </nav>
-
-          <div className={`flex items-center gap-x-4 px-3 py-4 border-t transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
-            }`}>
-            <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-sm font-semibold transition-colors duration-200 ${isDarkMode
-              ? 'from-gray-600 to-gray-700 text-gray-200'
-              : 'from-gray-200 to-gray-300 text-gray-700'
-              }`}>
-              {user?.pictureUrl ? (
-                <img src={user.pictureUrl} alt={user.name ?? 'User avatar'} className="h-full w-full rounded-full object-cover" />
-              ) : (
-                userInitial
-              )}
+            <div className="flex gap-4 justify-end">
+              <button
+                onClick={handleRejectTerms}
+                className={`px-6 py-2 rounded-lg font-medium transition-colors duration-200 ${isDarkMode
+                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+              >
+                I Don't Accept
+              </button>
+              <button
+                onClick={handleAcceptTerms}
+                className="px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors duration-200"
+              >
+                Accept
+              </button>
             </div>
-            <div className="flex-1 min-w-0">
-              <div className={`text-sm font-semibold truncate transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
-                }`}>{user?.name}</div>
-              <div className={`text-xs truncate transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                }`}>{user?.email}</div>
-            </div>
-            <button
-              type="button"
-              onClick={logout}
-              className={`text-xs transition-colors duration-200 ${isDarkMode
-                ? 'text-gray-400 hover:text-gray-200'
-                : 'text-gray-500 hover:text-gray-700'
-                }`}
-            >
-              Logout
-            </button>
           </div>
         </div>
-      </aside>
+      )}
 
-      {/* Main content area */}
-      <div className={`flex flex-1 flex-col ${sidebarOpen ? 'xl:pl-64' : ''}`}>
-        {/* Header */}
-        <div className={`sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 px-4 sm:gap-x-6 sm:px-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? '' : 'bg-white'
-          }`} style={{ backgroundColor: isDarkMode ? '#212121' : undefined }}>
-          <button type="button" className={`-m-2.5 p-2.5 xl:hidden transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
-            }`}>
-            <span className="sr-only">Open sidebar</span>
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
-          </button>
-          <div className={`h-6 w-px xl:hidden transition-colors duration-200 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'
-            }`} />
+      <div className={`flex h-screen transition-colors duration-200 ${isDarkMode
+        ? 'text-gray-100'
+        : 'text-gray-900'
+        }`} style={{ backgroundColor: isDarkMode ? '#212121' : '#FFFFFF' }}>
+        {/* Sidebar - optimized for large screens */}
+        <aside className={`${sidebarOpen ? 'flex' : 'hidden'} xl:w-64 xl:flex-col xl:fixed xl:inset-y-0 xl:z-50`}>
+          <div className={`flex grow flex-col gap-y-5 overflow-y-auto border-r px-6 pb-4 transition-colors duration-200 ${isDarkMode
+            ? 'border-gray-800'
+            : 'border-gray-200'
+            }`} style={{ backgroundColor: isDarkMode ? '#181818' : '#F7F7F8' }}>
+            <div className="flex h-16 shrink-0 items-center justify-between">
+              <div className="flex items-center justify-center">
+                <div className="flex h-12 w-12 items-center justify-center">
+                  <div className="text-center">
+                    <div className={`text-[8px] font-bold leading-tight transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                      }`}>FILE MY</div>
+                    <div className={`px-1 py-0.5 text-[9px] font-bold leading-tight transition-colors duration-200 ${isDarkMode ? 'bg-white text-black' : 'bg-gray-900 text-white'
+                      }`}>RTI</div>
+                  </div>
+                </div>
+              </div>
 
-          {/* Show sidebar toggle in navbar when sidebar is closed */}
-          {!sidebarOpen && (
-            <button
-              type="button"
-              onClick={() => {
-                console.log('Navbar toggle clicked, opening sidebar');
-                setSidebarOpen(true);
-              }}
-              className={`hidden xl:flex items-center justify-center p-2 transition-colors duration-200 ${isDarkMode
-                ? 'text-gray-400 hover:text-gray-200'
-                : 'text-gray-600 hover:text-gray-900'
-                }`}
-              title="Open sidebar"
-            >
-              <svg className="h-5 w-6" viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                {/* Rounded rectangle outline */}
-                <rect x="1" y="1" width="22" height="14" rx="3" ry="3" fill="none" stroke="currentColor" />
-                {/* Vertical divider line */}
-                <line x1="7" y1="1" x2="7" y2="15" stroke="currentColor" />
-                {/* Hamburger lines in left section */}
-                <line x1="3" y1="5" x2="5" y2="5" stroke="currentColor" strokeLinecap="round" />
-                <line x1="3" y1="8" x2="5" y2="8" stroke="currentColor" strokeLinecap="round" />
-              </svg>
-            </button>
-          )}
+              {/* Sidebar toggle button */}
+              <button
+                type="button"
+                onClick={() => {
+                  console.log('Sidebar toggle clicked, current state:', sidebarOpen);
+                  setSidebarOpen(!sidebarOpen);
+                }}
+                className="flex items-center justify-center p-2 text-gray-600 hover:text-gray-900 transition-colors"
+                title="Close sidebar"
+              >
+                <svg className="h-5 w-6" viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  {/* Rounded rectangle outline */}
+                  <rect x="1" y="1" width="22" height="14" rx="3" ry="3" fill="none" stroke="currentColor" />
+                  {/* Vertical divider line */}
+                  <line x1="7" y1="1" x2="7" y2="15" stroke="currentColor" />
+                  {/* Hamburger lines in left section */}
+                  <line x1="3" y1="5" x2="5" y2="5" stroke="currentColor" strokeLinecap="round" />
+                  <line x1="3" y1="8" x2="5" y2="8" stroke="currentColor" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
 
-          <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-            <div className="relative flex flex-1">
-              <div className="flex items-center gap-2">
-                <div className="relative" data-dropdown>
+            <nav className="flex flex-1 flex-col">
+              <ul role="list" className="flex flex-1 flex-col gap-y-2">
+                <li>
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      console.log('Dropdown button clicked, current state:', isModelDropdownOpen);
-                      setIsModelDropdownOpen(!isModelDropdownOpen);
-                    }}
-                    className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${isDarkMode
-                      ? 'text-gray-300 hover:text-gray-100'
-                      : 'text-gray-700 hover:text-gray-900'
+                    onClick={startNewConversation}
+                    className={`group flex gap-x-3 rounded-lg p-2 text-sm leading-5 font-medium transition-colors duration-200 w-full text-left ${isDarkMode
+                      ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                      : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
                       }`}
                   >
-                    <span>RTI-Dost</span>
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                    </svg>
+                    <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md transition-colors duration-200 ${isDarkMode
+                      ? 'bg-gray-600 text-gray-400 group-hover:bg-gray-500'
+                      : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
+                      }`}>
+                      +
+                    </span>
+                    <span className="truncate text-sm">New chat</span>
                   </button>
+                </li>
 
-                  {isModelDropdownOpen && (
-                    <div className={`absolute top-full left-0 mt-1 w-full min-w-[140px] max-h-60 overflow-y-auto rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 ${isDarkMode ? 'bg-gray-700' : 'bg-white'
-                      }`} data-dropdown>
-                      <div className="py-1">
-                        {availableModels.map((model) => (
+                {orderedSessions.length > 0 && (
+                  <li>
+                    <div className={`text-xs font-semibold leading-6 uppercase tracking-wider mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                      }`}>Chats</div>
+                    <ul role="list" className="-mx-2 space-y-0.5">
+                      {orderedSessions.slice(0, 8).map((session) => (
+                        <li key={session.sessionId}>
                           <button
-                            key={model}
                             type="button"
-                            onClick={() => {
-                              setSelectedModel(model);
-                              setIsModelDropdownOpen(false);
-                            }}
-                            className={`block w-full text-left px-4 py-2 text-sm transition-colors duration-200 ${model === selectedModel
-                              ? isDarkMode
-                                ? 'bg-gray-600 text-white'
-                                : 'bg-gray-100 text-gray-900'
-                              : isDarkMode
-                                ? 'text-gray-300 hover:bg-gray-600 hover:text-white'
-                                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                            onClick={() => setSelectedSessionId(session.sessionId)}
+                            className={`group flex gap-x-3 rounded-lg p-2 text-sm leading-5 font-medium transition-colors duration-200 w-full text-left ${isDarkMode
+                              ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                              : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
                               }`}
                           >
-                            {model}
+                            <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md transition-colors duration-200 ${isDarkMode
+                              ? 'bg-gray-600 text-gray-400 group-hover:bg-gray-500'
+                              : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
+                              }`}>
+                              💬
+                            </span>
+                            <span className="truncate text-sm">{deriveTitle(session.entries)}</span>
                           </button>
-                        ))}
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                )}
+              </ul>
+            </nav>
+
+            <div className={`flex items-center gap-x-4 px-3 py-4 border-t transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
+              }`}>
+              <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-sm font-semibold transition-colors duration-200 ${isDarkMode
+                ? 'from-gray-600 to-gray-700 text-gray-200'
+                : 'from-gray-200 to-gray-300 text-gray-700'
+                }`}>
+                {user?.pictureUrl ? (
+                  <img src={user.pictureUrl} alt={user.name ?? 'User avatar'} className="h-full w-full rounded-full object-cover" />
+                ) : (
+                  userInitial
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className={`text-sm font-semibold truncate transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>{user?.name}</div>
+                <div className={`text-xs truncate transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                  }`}>{user?.email}</div>
+              </div>
+              <button
+                type="button"
+                onClick={logout}
+                className={`text-xs transition-colors duration-200 ${isDarkMode
+                  ? 'text-gray-400 hover:text-gray-200'
+                  : 'text-gray-500 hover:text-gray-700'
+                  }`}
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main content area */}
+        <div className={`flex flex-1 flex-col ${sidebarOpen ? 'xl:pl-64' : ''}`}>
+          {/* Header */}
+          <div className={`sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 px-4 sm:gap-x-6 sm:px-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? '' : 'bg-white'
+            }`} style={{ backgroundColor: isDarkMode ? '#212121' : undefined }}>
+            <button type="button" className={`-m-2.5 p-2.5 xl:hidden transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
+              }`}>
+              <span className="sr-only">Open sidebar</span>
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+              </svg>
+            </button>
+            <div className={`h-6 w-px xl:hidden transition-colors duration-200 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'
+              }`} />
+
+            {/* Show sidebar toggle in navbar when sidebar is closed */}
+            {!sidebarOpen && (
+              <button
+                type="button"
+                onClick={() => {
+                  console.log('Navbar toggle clicked, opening sidebar');
+                  setSidebarOpen(true);
+                }}
+                className={`hidden xl:flex items-center justify-center p-2 transition-colors duration-200 ${isDarkMode
+                  ? 'text-gray-400 hover:text-gray-200'
+                  : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                title="Open sidebar"
+              >
+                <svg className="h-5 w-6" viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  {/* Rounded rectangle outline */}
+                  <rect x="1" y="1" width="22" height="14" rx="3" ry="3" fill="none" stroke="currentColor" />
+                  {/* Vertical divider line */}
+                  <line x1="7" y1="1" x2="7" y2="15" stroke="currentColor" />
+                  {/* Hamburger lines in left section */}
+                  <line x1="3" y1="5" x2="5" y2="5" stroke="currentColor" strokeLinecap="round" />
+                  <line x1="3" y1="8" x2="5" y2="8" stroke="currentColor" strokeLinecap="round" />
+                </svg>
+              </button>
+            )}
+
+            <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+              <div className="relative flex flex-1">
+                <div className="flex items-center gap-2">
+                  <div className="relative" data-dropdown>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log('Dropdown button clicked, current state:', isModelDropdownOpen);
+                        setIsModelDropdownOpen(!isModelDropdownOpen);
+                      }}
+                      className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${isDarkMode
+                        ? 'text-gray-300 hover:text-gray-100'
+                        : 'text-gray-700 hover:text-gray-900'
+                        }`}
+                    >
+                      <span>RTI-Dost</span>
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                      </svg>
+                    </button>
+
+                    {isModelDropdownOpen && (
+                      <div className={`absolute top-full left-0 mt-1 w-full min-w-[140px] max-h-60 overflow-y-auto rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 ${isDarkMode ? 'bg-gray-700' : 'bg-white'
+                        }`} data-dropdown>
+                        <div className="py-1">
+                          {availableModels.map((model) => (
+                            <button
+                              key={model}
+                              type="button"
+                              onClick={() => {
+                                setSelectedModel(model);
+                                setIsModelDropdownOpen(false);
+                              }}
+                              className={`block w-full text-left px-4 py-2 text-sm transition-colors duration-200 ${model === selectedModel
+                                ? isDarkMode
+                                  ? 'bg-gray-600 text-white'
+                                  : 'bg-gray-100 text-gray-900'
+                                : isDarkMode
+                                  ? 'text-gray-300 hover:bg-gray-600 hover:text-white'
+                                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                                }`}
+                            >
+                              {model}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-x-4 lg:gap-x-6">
+              </div>
+            </div>
+          </div>
+
+          {/* Chat area */}
+          <div className="flex flex-1 flex-col overflow-hidden">
+            {/* Main content area */}
+            <div className="flex-1 overflow-hidden">
+              {(error || globalNotice) && (
+                <div className={`border-b px-6 py-3 text-sm ${error
+                  ? 'border-red-100 bg-red-50 text-red-600'
+                  : 'border-green-100 bg-green-50 text-green-600'
+                  }`}>
+                  <div className="mx-auto max-w-4xl">{error || globalNotice}</div>
+                </div>
+              )}
+
+              <div className="flex-1 overflow-y-auto">
+                <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+                  {loading && (
+                    <div className="flex items-center justify-center py-16">
+                      <div className="flex items-center gap-3">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent"></div>
+                        <div className="text-sm text-gray-500">Loading...</div>
                       </div>
                     </div>
                   )}
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-x-4 lg:gap-x-6">
-            </div>
-          </div>
-        </div>
 
-        {/* Chat area */}
-        <div className="flex flex-1 flex-col overflow-hidden">
-          {/* Main content area */}
-          <div className="flex-1 overflow-hidden">
-            {(error || globalNotice) && (
-              <div className={`border-b px-6 py-3 text-sm ${error
-                ? 'border-red-100 bg-red-50 text-red-600'
-                : 'border-green-100 bg-green-50 text-green-600'
-                }`}>
-                <div className="mx-auto max-w-4xl">{error || globalNotice}</div>
-              </div>
-            )}
+                  {showEmptyState && (
+                    <div className="flex flex-col items-center justify-center py-20 text-center">
+                      <h3 className={`text-4xl font-semibold mb-8 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                        }`}>Welcome to RTI Dost</h3>
 
-            <div className="flex-1 overflow-y-auto">
-              <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-                {loading && (
-                  <div className="flex items-center justify-center py-16">
-                    <div className="flex items-center gap-3">
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent"></div>
-                      <div className="text-sm text-gray-500">Loading...</div>
-                    </div>
-                  </div>
-                )}
+                      {/* Centered input box for empty state */}
+                      <div className="w-full max-w-2xl">
+                        <form onSubmit={handleSend} className="relative">
+                          <div className={`flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-4 min-h-14 transition-colors duration-200 ${isDarkMode
+                            ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
+                            : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
+                            }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
+                            <button
+                              type="button"
+                              className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
+                                ? 'text-gray-400 hover:text-gray-200'
+                                : 'text-gray-600 hover:text-gray-800'
+                                }`}
+                              disabled={sending}
+                            >
+                              <PaperclipIcon className="h-4 w-4" />
+                              <span className="sr-only">Attach a file</span>
+                            </button>
 
-                {showEmptyState && (
-                  <div className="flex flex-col items-center justify-center py-20 text-center">
-                    <h3 className={`text-4xl font-semibold mb-8 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
-                      }`}>Welcome to RTI Dost</h3>
-
-                    {/* Centered input box for empty state */}
-                    <div className="w-full max-w-2xl">
-                      <form onSubmit={handleSend} className="relative">
-                        <div className={`flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-4 min-h-14 transition-colors duration-200 ${isDarkMode
-                          ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
-                          : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
-                          }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
-                          <button
-                            type="button"
-                            className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
-                              ? 'text-gray-400 hover:text-gray-200'
-                              : 'text-gray-600 hover:text-gray-800'
-                              }`}
-                            disabled={sending}
-                          >
-                            <PaperclipIcon className="h-4 w-4" />
-                            <span className="sr-only">Attach a file</span>
-                          </button>
-
-                          <textarea
-                            ref={textareaRef}
-                            name="message"
-                            id="message"
-                            rows={1}
-                            className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-colors duration-200 ${isDarkMode
-                              ? 'text-gray-100 placeholder:text-gray-500'
-                              : 'text-gray-900 placeholder:text-gray-400'
-                              }`}
-                            placeholder="Message RTI Dost..."
-                            value={message}
-                            onChange={e => setMessage(e.target.value)}
-                            onKeyDown={e => {
-                              if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                if (!disableSend) {
-                                  handleSend(e);
+                            <textarea
+                              ref={textareaRef}
+                              name="message"
+                              id="message"
+                              rows={1}
+                              className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-colors duration-200 ${isDarkMode
+                                ? 'text-gray-100 placeholder:text-gray-500'
+                                : 'text-gray-900 placeholder:text-gray-400'
+                                }`}
+                              placeholder="Message RTI Dost..."
+                              value={message}
+                              onChange={e => setMessage(e.target.value)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                  e.preventDefault();
+                                  if (!disableSend) {
+                                    handleSend(e);
+                                  }
                                 }
-                              }
-                            }}
-                            disabled={sending}
-                          />
+                              }}
+                              disabled={sending}
+                            />
 
-                          <button
-                            type="button"
-                            className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
-                              ? 'text-gray-400 hover:text-gray-200'
-                              : 'text-gray-600 hover:text-gray-800'
-                              }`}
-                            disabled={sending}
-                          >
-                            <MicrophoneIcon className="h-4 w-4" />
-                            <span className="sr-only">Voice input</span>
-                          </button>
+                            <button
+                              type="button"
+                              className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
+                                ? 'text-gray-400 hover:text-gray-200'
+                                : 'text-gray-600 hover:text-gray-800'
+                                }`}
+                              disabled={sending}
+                            >
+                              <MicrophoneIcon className="h-4 w-4" />
+                              <span className="sr-only">Voice input</span>
+                            </button>
 
-                          <button
-                            type="submit"
-                            className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${isDarkMode
-                              ? 'text-gray-400 hover:text-gray-200 focus-visible:outline-gray-400'
-                              : 'text-gray-600 hover:text-gray-800 focus-visible:outline-gray-500'
-                              }`}
-                            disabled={disableSend}
-                            title="Send"
-                          >
-                            {sending ? (
-                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                            ) : (
-                              <SendIcon className="h-4 w-4" />
-                            )}
-                          </button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                )}
-
-                <div className="space-y-6">
-                  {!loading && currentSession?.entries.map((entry) => (
-                    <div
-                      key={entry.id}
-                      className={`flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-4xl rounded-2xl px-6 py-4 ${entry.role === 'user'
-                          ? 'text-gray-900'
-                          : isDarkMode ? 'text-gray-100' : 'bg-white text-gray-900'
-                          }`}
-                        style={{
-                          backgroundColor: entry.role === 'user'
-                            ? '#F7F7F8'
-                            : isDarkMode
-                              ? '#212121'
-                              : undefined
-                        }}
-                      >
-                        <div className="whitespace-pre-wrap text-base leading-relaxed">{entry.text}</div>
+                            <button
+                              type="submit"
+                              className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${isDarkMode
+                                ? 'text-gray-400 hover:text-gray-200 focus-visible:outline-gray-400'
+                                : 'text-gray-600 hover:text-gray-800 focus-visible:outline-gray-500'
+                                }`}
+                              disabled={disableSend}
+                              title="Send"
+                            >
+                              {sending ? (
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                              ) : (
+                                <SendIcon className="h-4 w-4" />
+                              )}
+                            </button>
+                          </div>
+                        </form>
                       </div>
                     </div>
-                  ))}
+                  )}
+
+                  <div className="space-y-6">
+                    {!loading && currentSession?.entries.map((entry) => (
+                      <div
+                        key={entry.id}
+                        className={`flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-4xl rounded-2xl px-6 py-4 ${entry.role === 'user'
+                            ? 'text-gray-900'
+                            : isDarkMode ? 'text-gray-100' : 'bg-white text-gray-900'
+                            }`}
+                          style={{
+                            backgroundColor: entry.role === 'user'
+                              ? '#F7F7F8'
+                              : isDarkMode
+                                ? '#212121'
+                                : undefined
+                          }}
+                        >
+                          <div className="whitespace-pre-wrap text-base leading-relaxed">{entry.text}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
+
+              {/* Input area - only show when not in empty state */}
+              {!showEmptyState && (
+                <div className={`px-4 py-4 sm:px-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? '' : 'bg-white'
+                  }`} style={{ backgroundColor: isDarkMode ? '#212121' : undefined }}>
+                  <div className="mx-auto max-w-4xl">
+                    <form onSubmit={handleSend} className="relative">
+                      <div className={`flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-4 min-h-14 transition-colors duration-200 ${isDarkMode
+                        ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
+                        : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
+                        }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
+                        <button
+                          type="button"
+                          className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
+                            ? 'text-gray-400 hover:text-gray-200'
+                            : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          disabled={sending}
+                        >
+                          <PaperclipIcon className="h-4 w-4" />
+                          <span className="sr-only">Attach a file</span>
+                        </button>
+
+                        <textarea
+                          ref={textareaRef}
+                          name="message"
+                          id="message"
+                          rows={1}
+                          className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-colors duration-200 ${isDarkMode
+                            ? 'text-gray-100 placeholder:text-gray-500'
+                            : 'text-gray-900 placeholder:text-gray-400'
+                            }`}
+                          placeholder="Message RTI Dost..."
+                          value={message}
+                          onChange={e => setMessage(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              if (!disableSend) {
+                                handleSend(e);
+                              }
+                            }
+                          }}
+                          disabled={sending}
+                        />
+
+                        <button
+                          type="button"
+                          className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
+                            ? 'text-gray-400 hover:text-gray-200'
+                            : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                          disabled={sending}
+                        >
+                          <MicrophoneIcon className="h-4 w-4" />
+                          <span className="sr-only">Voice input</span>
+                        </button>
+
+                        <button
+                          type="submit"
+                          className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${isDarkMode
+                            ? 'text-gray-400 hover:text-gray-200 focus-visible:outline-gray-400'
+                            : 'text-gray-600 hover:text-gray-800 focus-visible:outline-gray-500'
+                            }`}
+                          disabled={disableSend}
+                          title="Send"
+                        >
+                          {sending ? (
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                          ) : (
+                            <SendIcon className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Input area - only show when not in empty state */}
-            {!showEmptyState && (
-              <div className={`px-4 py-4 sm:px-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? '' : 'bg-white'
-                }`} style={{ backgroundColor: isDarkMode ? '#212121' : undefined }}>
-                <div className="mx-auto max-w-4xl">
-                  <form onSubmit={handleSend} className="relative">
-                    <div className={`flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-4 min-h-14 transition-colors duration-200 ${isDarkMode
-                      ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
-                      : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
-                      }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
-                      <button
-                        type="button"
-                        className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
-                          ? 'text-gray-400 hover:text-gray-200'
-                          : 'text-gray-600 hover:text-gray-800'
-                          }`}
-                        disabled={sending}
-                      >
-                        <PaperclipIcon className="h-4 w-4" />
-                        <span className="sr-only">Attach a file</span>
-                      </button>
-
-                      <textarea
-                        ref={textareaRef}
-                        name="message"
-                        id="message"
-                        rows={1}
-                        className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-colors duration-200 ${isDarkMode
-                          ? 'text-gray-100 placeholder:text-gray-500'
-                          : 'text-gray-900 placeholder:text-gray-400'
-                          }`}
-                        placeholder="Message RTI Dost..."
-                        value={message}
-                        onChange={e => setMessage(e.target.value)}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            if (!disableSend) {
-                              handleSend(e);
-                            }
-                          }
-                        }}
-                        disabled={sending}
-                      />
-
-                      <button
-                        type="button"
-                        className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
-                          ? 'text-gray-400 hover:text-gray-200'
-                          : 'text-gray-600 hover:text-gray-800'
-                          }`}
-                        disabled={sending}
-                      >
-                        <MicrophoneIcon className="h-4 w-4" />
-                        <span className="sr-only">Voice input</span>
-                      </button>
-
-                      <button
-                        type="submit"
-                        className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${isDarkMode
-                          ? 'text-gray-400 hover:text-gray-200 focus-visible:outline-gray-400'
-                          : 'text-gray-600 hover:text-gray-800 focus-visible:outline-gray-500'
-                          }`}
-                        disabled={disableSend}
-                        title="Send"
-                      >
-                        {sending ? (
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                        ) : (
-                          <SendIcon className="h-4 w-4" />
-                        )}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Footer - always at bottom */}
-          <div className={`border-t px-6 py-4 text-center transition-colors duration-200 ${isDarkMode
-            ? 'border-gray-800 bg-gray-800'
-            : 'border-gray-200 bg-gray-50'
-            }`}>
-            <div className={`text-xs transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
+            {/* Footer - always at bottom */}
+            <div className={`border-t px-6 py-4 text-center transition-colors duration-200 ${isDarkMode
+              ? 'border-gray-800 bg-gray-800'
+              : 'border-gray-200 bg-gray-50'
               }`}>
-              <p>RTI-DOST AI assistance for drafting RTIs. <a
-                href="https://filemyrti.com/privacy-policy"
-                target="_blank"
-                rel="noreferrer"
-                className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
-                  }`}
-              >
-                Privacy Policy
-              </a> • <a
-                href="https://filemyrti.com/terms-of-service"
-                target="_blank"
-                rel="noreferrer"
-                className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
-                  }`}
-              >
-                  Terms & Conditions
-                </a></p>
+              <div className={`text-xs transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                }`}>
+                <p>RTI-DOST AI assistance for drafting RTIs. <a
+                  href="https://filemyrti.com/privacy-policy"
+                  target="_blank"
+                  rel="noreferrer"
+                  className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
+                    }`}
+                >
+                  Privacy Policy
+                </a> • <a
+                  href="https://filemyrti.com/terms-of-service"
+                  target="_blank"
+                  rel="noreferrer"
+                  className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
+                    }`}
+                >
+                    Terms & Conditions
+                  </a></p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
