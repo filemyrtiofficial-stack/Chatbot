@@ -888,9 +888,9 @@ export default function Chat() {
           </div>
 
           {/* Chat area */}
-          <div className="flex flex-1 flex-col min-h-0">
+          <div className="flex flex-1 flex-col min-h-0 h-full">
             {/* Main content area */}
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-hidden min-h-0">
               {(error || globalNotice) && (
                 <div className={`border-b px-6 py-3 text-sm ${error
                   ? 'border-red-100 bg-red-50 text-red-600'
@@ -900,7 +900,7 @@ export default function Chat() {
                 </div>
               )}
 
-              <div ref={chatMessagesRef} className="flex-1 overflow-y-auto scroll-smooth">
+              <div ref={chatMessagesRef} className="flex-1 overflow-y-auto scroll-smooth min-h-0" style={{ maxHeight: 'calc(100vh - 200px)', minHeight: '400px' }}>
                 <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
                   {loading && (
                     <div className="flex items-center justify-center py-16">
