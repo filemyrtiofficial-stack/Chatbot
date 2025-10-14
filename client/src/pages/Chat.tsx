@@ -989,7 +989,7 @@ export default function Chat() {
             {!showEmptyState && (
               <div className={`px-4 py-4 sm:px-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? '' : 'bg-white'
                 }`} style={{ backgroundColor: isDarkMode ? '#212121' : undefined }}>
-                <div className="mx-auto max-w-4xl">
+                <div className="mx-auto max-w-2xl">
                   <form onSubmit={e => {
                     e.preventDefault();
                     if (!disableSend) {
