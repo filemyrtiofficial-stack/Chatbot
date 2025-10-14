@@ -732,248 +732,238 @@ export default function Chat() {
 
         {/* Chat area */}
         <div className="flex flex-1 flex-col overflow-hidden">
-          {(error || globalNotice) && (
-            <div className={`border-b px-6 py-3 text-sm ${error
-              ? 'border-red-100 bg-red-50 text-red-600'
-              : 'border-green-100 bg-green-50 text-green-600'
-              }`}>
-              <div className="mx-auto max-w-4xl">{error || globalNotice}</div>
-            </div>
-          )}
+          {/* Main content area */}
+          <div className="flex-1 overflow-hidden">
+            {(error || globalNotice) && (
+              <div className={`border-b px-6 py-3 text-sm ${error
+                ? 'border-red-100 bg-red-50 text-red-600'
+                : 'border-green-100 bg-green-50 text-green-600'
+                }`}>
+                <div className="mx-auto max-w-4xl">{error || globalNotice}</div>
+              </div>
+            )}
 
-          <div className="flex-1 overflow-y-auto">
-            <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-              {loading && (
-                <div className="flex items-center justify-center py-16">
-                  <div className="flex items-center gap-3">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent"></div>
-                    <div className="text-sm text-gray-500">Loading...</div>
+            <div className="flex-1 overflow-y-auto">
+              <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+                {loading && (
+                  <div className="flex items-center justify-center py-16">
+                    <div className="flex items-center gap-3">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent"></div>
+                      <div className="text-sm text-gray-500">Loading...</div>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {showEmptyState && (
-                <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <h3 className={`text-2xl font-semibold mb-8 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>Welcome to RTI Dost</h3>
+                {showEmptyState && (
+                  <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <h3 className={`text-2xl font-semibold mb-8 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                      }`}>Welcome to RTI Dost</h3>
 
-                  {/* Centered input box for empty state */}
-                  <div className="w-full max-w-2xl">
-                    <form onSubmit={handleSend} className="relative">
-                      <div className={`flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-3 h-12 transition-colors duration-200 ${isDarkMode
-                        ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
-                        : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
-                        }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
-                        <button
-                          type="button"
-                          className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
-                            ? 'text-gray-400 hover:text-gray-200'
-                            : 'text-gray-600 hover:text-gray-800'
-                            }`}
-                          disabled={sending}
-                        >
-                          <PaperclipIcon className="h-4 w-4" />
-                          <span className="sr-only">Attach a file</span>
-                        </button>
+                    {/* Centered input box for empty state */}
+                    <div className="w-full max-w-2xl">
+                      <form onSubmit={handleSend} className="relative">
+                        <div className={`flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-3 h-12 transition-colors duration-200 ${isDarkMode
+                          ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
+                          : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
+                          }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
+                          <button
+                            type="button"
+                            className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
+                              ? 'text-gray-400 hover:text-gray-200'
+                              : 'text-gray-600 hover:text-gray-800'
+                              }`}
+                            disabled={sending}
+                          >
+                            <PaperclipIcon className="h-4 w-4" />
+                            <span className="sr-only">Attach a file</span>
+                          </button>
 
-                        <input
-                          type="text"
-                          name="message"
-                          id="message"
-                          className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 transition-colors duration-200 ${isDarkMode
-                            ? 'text-gray-100 placeholder:text-gray-500'
-                            : 'text-gray-900 placeholder:text-gray-400'
-                            }`}
-                          placeholder="Message RTI Dost..."
-                          value={message}
-                          onChange={e => setMessage(e.target.value)}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              if (!disableSend) {
-                                handleSend(e);
+                          <input
+                            type="text"
+                            name="message"
+                            id="message"
+                            className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 transition-colors duration-200 ${isDarkMode
+                              ? 'text-gray-100 placeholder:text-gray-500'
+                              : 'text-gray-900 placeholder:text-gray-400'
+                              }`}
+                            placeholder="Message RTI Dost..."
+                            value={message}
+                            onChange={e => setMessage(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (!disableSend) {
+                                  handleSend(e);
+                                }
                               }
-                            }
-                          }}
-                          disabled={sending}
-                        />
+                            }}
+                            disabled={sending}
+                          />
 
-                        <button
-                          type="button"
-                          className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
-                            ? 'text-gray-400 hover:text-gray-200'
-                            : 'text-gray-600 hover:text-gray-800'
-                            }`}
-                          disabled={sending}
-                        >
-                          <MicrophoneIcon className="h-4 w-4" />
-                          <span className="sr-only">Voice input</span>
-                        </button>
+                          <button
+                            type="button"
+                            className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
+                              ? 'text-gray-400 hover:text-gray-200'
+                              : 'text-gray-600 hover:text-gray-800'
+                              }`}
+                            disabled={sending}
+                          >
+                            <MicrophoneIcon className="h-4 w-4" />
+                            <span className="sr-only">Voice input</span>
+                          </button>
 
-                        <button
-                          type="submit"
-                          className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${isDarkMode
-                            ? 'text-gray-400 hover:text-gray-200 focus-visible:outline-gray-400'
-                            : 'text-gray-600 hover:text-gray-800 focus-visible:outline-gray-500'
-                            }`}
-                          disabled={disableSend}
-                          title="Send"
-                        >
-                          {sending ? (
-                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                          ) : (
-                            <SendIcon className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                    </form>
-                    <div className={`mt-2 text-xs text-center transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                      }`}>
-                      <p>RTI-DOST AI assistance for drafting RTIs. <a
-                        href="https://filemyrti.com/privacy-policy"
-                        target="_blank"
-                        rel="noreferrer"
-                        className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
-                          }`}
-                      >
-                        Privacy Policy
-                      </a> • <a
-                        href="https://filemyrti.com/terms-of-service"
-                        target="_blank"
-                        rel="noreferrer"
-                        className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
-                          }`}
-                      >
-                          Terms & Conditions
-                        </a></p>
+                          <button
+                            type="submit"
+                            className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${isDarkMode
+                              ? 'text-gray-400 hover:text-gray-200 focus-visible:outline-gray-400'
+                              : 'text-gray-600 hover:text-gray-800 focus-visible:outline-gray-500'
+                              }`}
+                            disabled={disableSend}
+                            title="Send"
+                          >
+                            {sending ? (
+                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                            ) : (
+                              <SendIcon className="h-4 w-4" />
+                            )}
+                          </button>
+                        </div>
+                      </form>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              <div className="space-y-6">
-                {!loading && currentSession?.entries.map((entry) => (
-                  <div
-                    key={entry.id}
-                    className={`flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
+                <div className="space-y-6">
+                  {!loading && currentSession?.entries.map((entry) => (
                     <div
-                      className={`max-w-4xl rounded-2xl px-6 py-4 ${entry.role === 'user'
-                        ? 'text-gray-900'
-                        : isDarkMode ? 'text-gray-100' : 'bg-white text-gray-900'
-                        }`}
-                      style={{
-                        backgroundColor: entry.role === 'user'
-                          ? '#F7F7F8'
-                          : isDarkMode
-                            ? '#212121'
-                            : undefined
-                      }}
+                      key={entry.id}
+                      className={`flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
-                      <div className="whitespace-pre-wrap text-base leading-relaxed">{entry.text}</div>
+                      <div
+                        className={`max-w-4xl rounded-2xl px-6 py-4 ${entry.role === 'user'
+                          ? 'text-gray-900'
+                          : isDarkMode ? 'text-gray-100' : 'bg-white text-gray-900'
+                          }`}
+                        style={{
+                          backgroundColor: entry.role === 'user'
+                            ? '#F7F7F8'
+                            : isDarkMode
+                              ? '#212121'
+                              : undefined
+                        }}
+                      >
+                        <div className="whitespace-pre-wrap text-base leading-relaxed">{entry.text}</div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
+
+            {/* Input area - only show when not in empty state */}
+            {!showEmptyState && (
+              <div className={`px-4 py-4 sm:px-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? '' : 'bg-white'
+                }`} style={{ backgroundColor: isDarkMode ? '#212121' : undefined }}>
+                <div className="mx-auto max-w-4xl">
+                  <form onSubmit={handleSend} className="relative">
+                    <div className={`flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-3 h-12 transition-colors duration-200 ${isDarkMode
+                      ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
+                      : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
+                      }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
+                      <button
+                        type="button"
+                        className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
+                          ? 'text-gray-400 hover:text-gray-200'
+                          : 'text-gray-600 hover:text-gray-800'
+                          }`}
+                        disabled={sending}
+                      >
+                        <PaperclipIcon className="h-4 w-4" />
+                        <span className="sr-only">Attach a file</span>
+                      </button>
+
+                      <input
+                        type="text"
+                        name="message"
+                        id="message"
+                        className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 transition-colors duration-200 ${isDarkMode
+                          ? 'text-gray-100 placeholder:text-gray-500'
+                          : 'text-gray-900 placeholder:text-gray-400'
+                          }`}
+                        placeholder="Message RTI Dost..."
+                        value={message}
+                        onChange={e => setMessage(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (!disableSend) {
+                              handleSend(e);
+                            }
+                          }
+                        }}
+                        disabled={sending}
+                      />
+
+                      <button
+                        type="button"
+                        className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
+                          ? 'text-gray-400 hover:text-gray-200'
+                          : 'text-gray-600 hover:text-gray-800'
+                          }`}
+                        disabled={sending}
+                      >
+                        <MicrophoneIcon className="h-4 w-4" />
+                        <span className="sr-only">Voice input</span>
+                      </button>
+
+                      <button
+                        type="submit"
+                        className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${isDarkMode
+                          ? 'text-gray-400 hover:text-gray-200 focus-visible:outline-gray-400'
+                          : 'text-gray-600 hover:text-gray-800 focus-visible:outline-gray-500'
+                          }`}
+                        disabled={disableSend}
+                        title="Send"
+                      >
+                        {sending ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        ) : (
+                          <SendIcon className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Input area - only show when not in empty state */}
-          {!showEmptyState && (
-            <div className={`px-4 py-4 sm:px-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? '' : 'bg-white'
-              }`} style={{ backgroundColor: isDarkMode ? '#212121' : undefined }}>
-              <div className="mx-auto max-w-4xl">
-                <form onSubmit={handleSend} className="relative">
-                  <div className={`flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-3 h-12 transition-colors duration-200 ${isDarkMode
-                    ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
-                    : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
-                    }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
-                    <button
-                      type="button"
-                      className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
-                        ? 'text-gray-400 hover:text-gray-200'
-                        : 'text-gray-600 hover:text-gray-800'
-                        }`}
-                      disabled={sending}
-                    >
-                      <PaperclipIcon className="h-4 w-4" />
-                      <span className="sr-only">Attach a file</span>
-                    </button>
-
-                    <input
-                      type="text"
-                      name="message"
-                      id="message"
-                      className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 transition-colors duration-200 ${isDarkMode
-                        ? 'text-gray-100 placeholder:text-gray-500'
-                        : 'text-gray-900 placeholder:text-gray-400'
-                        }`}
-                      placeholder="Message RTI Dost..."
-                      value={message}
-                      onChange={e => setMessage(e.target.value)}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          if (!disableSend) {
-                            handleSend(e);
-                          }
-                        }
-                      }}
-                      disabled={sending}
-                    />
-
-                    <button
-                      type="button"
-                      className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
-                        ? 'text-gray-400 hover:text-gray-200'
-                        : 'text-gray-600 hover:text-gray-800'
-                        }`}
-                      disabled={sending}
-                    >
-                      <MicrophoneIcon className="h-4 w-4" />
-                      <span className="sr-only">Voice input</span>
-                    </button>
-
-                    <button
-                      type="submit"
-                      className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${isDarkMode
-                        ? 'text-gray-400 hover:text-gray-200 focus-visible:outline-gray-400'
-                        : 'text-gray-600 hover:text-gray-800 focus-visible:outline-gray-500'
-                        }`}
-                      disabled={disableSend}
-                      title="Send"
-                    >
-                      {sending ? (
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                      ) : (
-                        <SendIcon className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-                </form>
-                <div className={`mt-2 text-xs text-center transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                  }`}>
-                  <p>RTI-DOST AI assistance for drafting RTIs. <a
-                    href="https://filemyrti.com/privacy-policy"
-                    target="_blank"
-                    rel="noreferrer"
-                    className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
-                      }`}
-                  >
-                    Privacy Policy
-                  </a> • <a
-                    href="https://filemyrti.com/terms-of-service"
-                    target="_blank"
-                    rel="noreferrer"
-                    className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
-                      }`}
-                  >
-                      Terms & Conditions
-                    </a></p>
-                </div>
-              </div>
+          {/* Footer - always at bottom */}
+          <div className={`border-t px-6 py-4 text-center transition-colors duration-200 ${isDarkMode
+            ? 'border-gray-800 bg-gray-800'
+            : 'border-gray-200 bg-gray-50'
+            }`}>
+            <div className={`text-xs transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
+              }`}>
+              <p>RTI-DOST AI assistance for drafting RTIs. <a
+                href="https://filemyrti.com/privacy-policy"
+                target="_blank"
+                rel="noreferrer"
+                className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
+                  }`}
+              >
+                Privacy Policy
+              </a> • <a
+                href="https://filemyrti.com/terms-of-service"
+                target="_blank"
+                rel="noreferrer"
+                className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
+                  }`}
+              >
+                  Terms & Conditions
+                </a></p>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
