@@ -162,6 +162,7 @@ export default function Chat() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [selectedModel, setSelectedModel] = useState('Dost1.0');
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const availableModels = [
     'Dost1.0',
@@ -248,6 +249,14 @@ export default function Chat() {
       mediaQuery.removeEventListener('change', handleChange);
     };
   }, []);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [message]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -762,7 +771,7 @@ export default function Chat() {
                     {/* Centered input box for empty state */}
                     <div className="w-full max-w-2xl">
                       <form onSubmit={handleSend} className="relative">
-                        <div className={`flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-3 h-12 transition-colors duration-200 ${isDarkMode
+                        <div className={`flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-4 min-h-14 transition-colors duration-200 ${isDarkMode
                           ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
                           : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
                           }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
@@ -778,11 +787,12 @@ export default function Chat() {
                             <span className="sr-only">Attach a file</span>
                           </button>
 
-                          <input
-                            type="text"
+                          <textarea
+                            ref={textareaRef}
                             name="message"
                             id="message"
-                            className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 transition-colors duration-200 ${isDarkMode
+                            rows={1}
+                            className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-colors duration-200 ${isDarkMode
                               ? 'text-gray-100 placeholder:text-gray-500'
                               : 'text-gray-900 placeholder:text-gray-400'
                               }`}
@@ -790,7 +800,7 @@ export default function Chat() {
                             value={message}
                             onChange={e => setMessage(e.target.value)}
                             onKeyDown={e => {
-                              if (e.key === 'Enter') {
+                              if (e.key === 'Enter' && !e.shiftKey) {
                                 e.preventDefault();
                                 if (!disableSend) {
                                   handleSend(e);
@@ -866,7 +876,7 @@ export default function Chat() {
                 }`} style={{ backgroundColor: isDarkMode ? '#212121' : undefined }}>
                 <div className="mx-auto max-w-4xl">
                   <form onSubmit={handleSend} className="relative">
-                    <div className={`flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-3 h-12 transition-colors duration-200 ${isDarkMode
+                    <div className={`flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-4 min-h-14 transition-colors duration-200 ${isDarkMode
                       ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
                       : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
                       }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
@@ -882,11 +892,12 @@ export default function Chat() {
                         <span className="sr-only">Attach a file</span>
                       </button>
 
-                      <input
-                        type="text"
+                      <textarea
+                        ref={textareaRef}
                         name="message"
                         id="message"
-                        className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 transition-colors duration-200 ${isDarkMode
+                        rows={1}
+                        className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-colors duration-200 ${isDarkMode
                           ? 'text-gray-100 placeholder:text-gray-500'
                           : 'text-gray-900 placeholder:text-gray-400'
                           }`}
@@ -894,7 +905,7 @@ export default function Chat() {
                         value={message}
                         onChange={e => setMessage(e.target.value)}
                         onKeyDown={e => {
-                          if (e.key === 'Enter') {
+                          if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
                             if (!disableSend) {
                               handleSend(e);
