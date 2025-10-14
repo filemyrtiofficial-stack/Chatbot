@@ -921,7 +921,7 @@ export default function Chat() {
                                 }
                               }}
                               disabled={sending}
-                              style={{ minHeight: '32px', maxHeight: '200px' }}
+                              style={{ minHeight: '30px', maxHeight: '200px' }}
                             />
 
                             <button
