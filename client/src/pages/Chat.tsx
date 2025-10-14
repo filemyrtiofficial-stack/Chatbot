@@ -798,7 +798,7 @@ export default function Chat() {
                         console.log('Dropdown button clicked, current state:', isModelDropdownOpen);
                         setIsModelDropdownOpen(!isModelDropdownOpen);
                       }}
-                      className={`inline-flex items-center gap-2 pl-6 pr-3 py-2 text-base font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${isDarkMode
+                      className={`inline-flex items-center gap-2 pl-6 pr-3 py-2 text-lg font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${isDarkMode
                         ? 'text-gray-300 hover:text-gray-100'
                         : 'text-gray-700 hover:text-gray-900'
                         }`}
