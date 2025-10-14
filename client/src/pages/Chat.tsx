@@ -875,7 +875,13 @@ export default function Chat() {
 
                       {/* Centered input box for empty state */}
                       <div className="w-full max-w-2xl">
-                        <form onSubmit={handleSend} className="relative">
+                        <form onSubmit={e => {
+                          e.preventDefault();
+                          if (!disableSend) {
+                            setHasStartedConversation(true);
+                            handleSend(e);
+                          }
+                        }} className="relative">
                           <div className={`flex items-end gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-4 transition-colors duration-200 ${isDarkMode
                             ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
                             : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
@@ -908,6 +914,8 @@ export default function Chat() {
                                 if (e.key === 'Enter' && !e.shiftKey) {
                                   e.preventDefault();
                                   if (!disableSend) {
+                                    // Set conversation started immediately to move input to bottom
+                                    setHasStartedConversation(true);
                                     handleSend(e);
                                   }
                                 }
@@ -981,7 +989,13 @@ export default function Chat() {
                 <div className={`px-4 py-4 sm:px-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? '' : 'bg-white'
                   }`} style={{ backgroundColor: isDarkMode ? '#212121' : undefined }}>
                   <div className="mx-auto max-w-4xl">
-                    <form onSubmit={handleSend} className="relative">
+                    <form onSubmit={e => {
+                      e.preventDefault();
+                      if (!disableSend) {
+                        setHasStartedConversation(true);
+                        handleSend(e);
+                      }
+                    }} className="relative">
                       <div className={`flex items-end gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-4 transition-colors duration-200 ${isDarkMode
                         ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
                         : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
@@ -1014,6 +1028,8 @@ export default function Chat() {
                             if (e.key === 'Enter' && !e.shiftKey) {
                               e.preventDefault();
                               if (!disableSend) {
+                                // Set conversation started immediately to move input to bottom
+                                setHasStartedConversation(true);
                                 handleSend(e);
                               }
                             }
