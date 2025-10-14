@@ -163,6 +163,7 @@ export default function Chat() {
   const [selectedModel, setSelectedModel] = useState('Dost1.0');
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const chatMessagesRef = useRef<HTMLDivElement>(null);
   const [hasStartedConversation, setHasStartedConversation] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -267,6 +268,21 @@ export default function Chat() {
       textarea.style.height = `${newHeight}px`;
     }
   }, [message]);
+
+  // Auto-scroll to bottom when new messages are added
+  useEffect(() => {
+    if (chatMessagesRef.current && currentSession?.entries) {
+      // Use setTimeout to ensure DOM is updated
+      setTimeout(() => {
+        if (chatMessagesRef.current) {
+          chatMessagesRef.current.scrollTo({
+            top: chatMessagesRef.current.scrollHeight,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+    }
+  }, [currentSession?.entries]);
 
   // Check if user has accepted terms
   useEffect(() => {
@@ -857,7 +873,7 @@ export default function Chat() {
                 </div>
               )}
 
-              <div className="flex-1 overflow-y-auto">
+              <div ref={chatMessagesRef} className="flex-1 overflow-y-auto scroll-smooth">
                 <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
                   {loading && (
                     <div className="flex items-center justify-center py-16">
@@ -957,7 +973,7 @@ export default function Chat() {
                     </div>
                   )}
 
-                  <div className="space-y-6">
+                  <div className="space-y-6 pb-8">
                     {!loading && currentSession?.entries.map((entry) => (
                       <div
                         key={entry.id}
