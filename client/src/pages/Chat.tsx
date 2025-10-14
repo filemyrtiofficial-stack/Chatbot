@@ -869,12 +869,12 @@ export default function Chat() {
                   )}
 
                   {showEmptyState && (
-                    <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
                       <h3 className={`text-4xl font-semibold mb-8 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
                         }`}>Welcome to RTI Dost</h3>
 
                       {/* Centered input box for empty state */}
-                      <div className="w-full max-w-2xl">
+                      <div className="w-full max-w-2xl mx-auto">
                         <form onSubmit={e => {
                           e.preventDefault();
                           if (!disableSend) {
