@@ -581,7 +581,7 @@ export default function Chat() {
               {orderedSessions.length > 0 && (
                 <li>
                   <div className={`text-xs font-semibold leading-6 uppercase tracking-wider mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'
-                    }`}>Recent conversations</div>
+                    }`}>Chats</div>
                   <ul role="list" className="-mx-2 space-y-0.5">
                     {orderedSessions.slice(0, 8).map((session) => (
                       <li key={session.sessionId}>
