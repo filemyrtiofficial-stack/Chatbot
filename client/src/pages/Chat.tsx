@@ -516,7 +516,7 @@ export default function Chat() {
           }`} style={{ backgroundColor: isDarkMode ? '#181818' : '#F7F7F8' }}>
           <div className="flex h-16 shrink-0 items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-14 items-center justify-center text-xs font-bold">
+              <div className="flex h-10 w-10 items-center justify-center text-xs font-bold">
                 <div className="text-center">
                   <div className={`text-[8px] font-bold leading-tight transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
                     }`}>FILE MY</div>
