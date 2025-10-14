@@ -163,6 +163,7 @@ export default function Chat() {
   const [selectedModel, setSelectedModel] = useState('Dost1.0');
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [hasStartedConversation, setHasStartedConversation] = useState(false);
 
   const availableModels = [
     'Dost1.0',
@@ -352,6 +353,7 @@ export default function Chat() {
     setMessage('');
     setGlobalNotice(null);
     setError(null);
+    setHasStartedConversation(false);
   }
 
   async function handleSend(e: FormEvent) {
@@ -419,6 +421,7 @@ export default function Chat() {
 
       setSelectedSessionId(finalSessionId);
       setMessage('');
+      setHasStartedConversation(true);
 
       if (data.draftAvailable) {
         await refreshApplications();
@@ -503,7 +506,7 @@ export default function Chat() {
   const showEmptyState =
     !loading &&
     selectedSessionId === NEW_SESSION_SENTINEL &&
-    orderedSessions.length === 0;
+    !hasStartedConversation;
 
   const mobileSessionValue =
     selectedSessionId && selectedSessionId !== NEW_SESSION_SENTINEL
