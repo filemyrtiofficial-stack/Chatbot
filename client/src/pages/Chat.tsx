@@ -253,11 +253,18 @@ export default function Chat() {
     };
   }, []);
 
-  // Auto-resize textarea
+  // Auto-resize textarea - ChatGPT-like behavior
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+      const textarea = textareaRef.current;
+      // Reset height to auto to get the correct scrollHeight
+      textarea.style.height = 'auto';
+      // Set height to scrollHeight, but respect min/max constraints
+      const scrollHeight = textarea.scrollHeight;
+      const minHeight = 24; // 24px minimum height
+      const maxHeight = 200; // 200px maximum height
+      const newHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
+      textarea.style.height = `${newHeight}px`;
     }
   }, [message]);
 
@@ -869,7 +876,7 @@ export default function Chat() {
                       {/* Centered input box for empty state */}
                       <div className="w-full max-w-2xl">
                         <form onSubmit={handleSend} className="relative">
-                          <div className={`flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-4 min-h-14 transition-colors duration-200 ${isDarkMode
+                          <div className={`flex items-end gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-4 transition-colors duration-200 ${isDarkMode
                             ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
                             : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
                             }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
@@ -890,7 +897,7 @@ export default function Chat() {
                               name="message"
                               id="message"
                               rows={1}
-                              className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-colors duration-200 ${isDarkMode
+                              className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-all duration-200 overflow-hidden ${isDarkMode
                                 ? 'text-gray-100 placeholder:text-gray-500'
                                 : 'text-gray-900 placeholder:text-gray-400'
                                 }`}
@@ -906,6 +913,7 @@ export default function Chat() {
                                 }
                               }}
                               disabled={sending}
+                              style={{ minHeight: '24px', maxHeight: '200px' }}
                             />
 
                             <button
@@ -922,9 +930,9 @@ export default function Chat() {
 
                             <button
                               type="submit"
-                              className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${isDarkMode
-                                ? 'text-gray-400 hover:text-gray-200 focus-visible:outline-gray-400'
-                                : 'text-gray-600 hover:text-gray-800 focus-visible:outline-gray-500'
+                              className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 transition-all duration-200 ${isDarkMode
+                                ? disableSend ? 'text-gray-600 cursor-not-allowed' : 'text-gray-300 hover:text-white hover:bg-gray-600 cursor-pointer'
+                                : disableSend ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100 cursor-pointer'
                                 }`}
                               disabled={disableSend}
                               title="Send"
@@ -974,7 +982,7 @@ export default function Chat() {
                   }`} style={{ backgroundColor: isDarkMode ? '#212121' : undefined }}>
                   <div className="mx-auto max-w-4xl">
                     <form onSubmit={handleSend} className="relative">
-                      <div className={`flex items-center gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-4 min-h-14 transition-colors duration-200 ${isDarkMode
+                      <div className={`flex items-end gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-4 transition-colors duration-200 ${isDarkMode
                         ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
                         : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
                         }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
@@ -995,7 +1003,7 @@ export default function Chat() {
                           name="message"
                           id="message"
                           rows={1}
-                          className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-colors duration-200 ${isDarkMode
+                          className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-all duration-200 overflow-hidden ${isDarkMode
                             ? 'text-gray-100 placeholder:text-gray-500'
                             : 'text-gray-900 placeholder:text-gray-400'
                             }`}
@@ -1011,6 +1019,7 @@ export default function Chat() {
                             }
                           }}
                           disabled={sending}
+                          style={{ minHeight: '24px', maxHeight: '200px' }}
                         />
 
                         <button
@@ -1027,9 +1036,9 @@ export default function Chat() {
 
                         <button
                           type="submit"
-                          className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${isDarkMode
-                            ? 'text-gray-400 hover:text-gray-200 focus-visible:outline-gray-400'
-                            : 'text-gray-600 hover:text-gray-800 focus-visible:outline-gray-500'
+                          className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 transition-all duration-200 ${isDarkMode
+                            ? disableSend ? 'text-gray-600 cursor-not-allowed' : 'text-gray-300 hover:text-white hover:bg-gray-600 cursor-pointer'
+                            : disableSend ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100 cursor-pointer'
                             }`}
                           disabled={disableSend}
                           title="Send"
