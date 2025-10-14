@@ -577,20 +577,20 @@ export default function Chat() {
 
               {orderedSessions.length > 0 && (
                 <li>
-                  <div className={`text-xs font-semibold leading-6 uppercase tracking-wider mb-3 transition-colors duration-200 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                  <div className={`text-xs font-semibold leading-6 uppercase tracking-wider mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'
                     }`}>Recent conversations</div>
-                  <ul role="list" className="-mx-2 space-y-1">
+                  <ul role="list" className="-mx-2 space-y-0.5">
                     {orderedSessions.slice(0, 8).map((session) => (
                       <li key={session.sessionId}>
                         <button
                           type="button"
                           onClick={() => setSelectedSessionId(session.sessionId)}
-                          className={`group flex gap-x-3 rounded-lg p-3 text-sm leading-6 font-medium transition-colors duration-200 w-full text-left ${isDarkMode
+                          className={`group flex gap-x-3 rounded-lg p-2 text-sm leading-5 font-medium transition-colors duration-200 w-full text-left ${isDarkMode
                             ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
                             : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
                             }`}
                         >
-                          <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors duration-200 ${isDarkMode
+                          <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md transition-colors duration-200 ${isDarkMode
                             ? 'bg-gray-600 text-gray-400 group-hover:bg-gray-500'
                             : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
                             }`}>
