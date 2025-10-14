@@ -765,7 +765,7 @@ export default function Chat() {
 
                 {showEmptyState && (
                   <div className="flex flex-col items-center justify-center py-20 text-center">
-                    <h3 className={`text-2xl font-semibold mb-8 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                    <h3 className={`text-4xl font-semibold mb-8 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
                       }`}>Welcome to RTI Dost</h3>
 
                     {/* Centered input box for empty state */}
