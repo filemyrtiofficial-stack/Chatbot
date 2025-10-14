@@ -726,25 +726,6 @@ export default function Chat() {
               </div>
             </div>
             <div className="flex items-center gap-x-4 lg:gap-x-6">
-              <button
-                type="button"
-                onClick={startNewConversation}
-                className={`inline-flex items-center justify-center rounded-lg p-2 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500 ${isDarkMode
-                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                title="Temporary Chat"
-              >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                  {/* Segmented dot pattern - 6 dots in hexagonal arrangement */}
-                  <circle cx="12" cy="4" r="2" fill="currentColor" />
-                  <circle cx="18" cy="8" r="2" fill="currentColor" />
-                  <circle cx="18" cy="16" r="2" fill="currentColor" />
-                  <circle cx="12" cy="20" r="2" fill="currentColor" />
-                  <circle cx="6" cy="16" r="2" fill="currentColor" />
-                  <circle cx="6" cy="8" r="2" fill="currentColor" />
-                </svg>
-              </button>
             </div>
           </div>
         </div>
