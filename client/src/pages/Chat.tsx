@@ -925,8 +925,8 @@ export default function Chat() {
                             <button
                               type="submit"
                               className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${isDarkMode
-                                ? 'text-gray-400 hover:text-gray-200 focus-visible:outline-gray-400'
-                                : 'text-gray-600 hover:text-gray-800 focus-visible:outline-gray-500'
+                                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 focus-visible:outline-gray-400'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 focus-visible:outline-gray-500'
                                 }`}
                               disabled={disableSend}
                               title="Send"
@@ -1030,8 +1030,8 @@ export default function Chat() {
                         <button
                           type="submit"
                           className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 ${isDarkMode
-                            ? 'text-gray-400 hover:text-gray-200 focus-visible:outline-gray-400'
-                            : 'text-gray-600 hover:text-gray-800 focus-visible:outline-gray-500'
+                            ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 focus-visible:outline-gray-400'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 focus-visible:outline-gray-500'
                             }`}
                           disabled={disableSend}
                           title="Send"
