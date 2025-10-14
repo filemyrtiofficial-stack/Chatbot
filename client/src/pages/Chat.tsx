@@ -617,11 +617,11 @@ export default function Chat() {
         }`} style={{ backgroundColor: isDarkMode ? '#212121' : '#FFFFFF' }}>
         {/* Sidebar - optimized for large screens */}
         <aside className={`${sidebarOpen ? 'flex' : 'hidden'} xl:w-64 xl:flex-col xl:fixed xl:inset-y-0 xl:z-50`}>
-          <div className={`flex grow flex-col gap-y-5 overflow-y-auto border-r px-6 pb-4 transition-colors duration-200 ${isDarkMode
+          <div className={`flex grow flex-col gap-y-5 overflow-y-auto border-r transition-colors duration-200 ${isDarkMode
             ? 'border-gray-800'
             : 'border-gray-200'
             }`} style={{ backgroundColor: isDarkMode ? '#181818' : '#F7F7F8' }}>
-            <div className="flex h-12 shrink-0 items-center justify-between">
+            <div className="flex h-12 shrink-0 items-center justify-between px-6">
               <div className="flex items-center justify-center">
                 <div className="flex h-12 w-12 items-center justify-center">
                   <div className="text-center">
@@ -655,7 +655,7 @@ export default function Chat() {
               </button>
             </div>
 
-            <nav className="flex flex-1 flex-col">
+            <nav className="flex flex-1 flex-col px-6">
               <ul role="list" className="flex flex-1 flex-col gap-y-2">
                 <li>
                   <button
@@ -707,7 +707,7 @@ export default function Chat() {
               </ul>
             </nav>
 
-            <div className={`flex items-center gap-x-4 px-3 py-2 border-t transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
+            <div className={`flex items-center gap-x-4 px-6 py-2 border-t transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
               }`}>
               <div className={`flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br text-sm font-semibold transition-colors duration-200 ${isDarkMode
                 ? 'from-gray-600 to-gray-700 text-gray-200'
