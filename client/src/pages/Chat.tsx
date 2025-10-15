@@ -161,7 +161,6 @@ export default function Chat() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [selectedModel, setSelectedModel] = useState('Dost1.0');
-  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chatMessagesRef = useRef<HTMLDivElement>(null);
   const [hasStartedConversation, setHasStartedConversation] = useState(false);
@@ -179,28 +178,6 @@ export default function Chat() {
     }
   };
 
-  const availableModels = [
-    'Dost1.0',
-    'Dost1.1',
-    'Dost1.2',
-    'Dost1.3',
-    'Dost1.4',
-    'Dost1.5',
-    'Dost2.0',
-    'Dost2.1',
-    'Dost2.2',
-    'Dost2.3',
-    'Dost3.0',
-    'Dost3.1',
-    'Dost3.2',
-    'Dost4.0',
-    'Dost Pro',
-    'Dost Lite',
-    'Dost Advanced',
-    'Dost Enterprise',
-    'Dost Beta',
-    'Dost Alpha'
-  ];
 
   const messageListRef = useRef<HTMLDivElement | null>(null);
 
@@ -318,24 +295,6 @@ export default function Chat() {
     }
   }, []);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      const dropdown = target.closest('[data-dropdown]');
-      if (isModelDropdownOpen && !dropdown) {
-        setIsModelDropdownOpen(false);
-      }
-    };
-
-    if (isModelDropdownOpen) {
-      document.addEventListener('click', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, [isModelDropdownOpen]);
 
   useEffect(() => {
     let active = true;
@@ -827,52 +786,13 @@ export default function Chat() {
             <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
               <div className="relative flex flex-1">
                 <div className="flex items-center gap-2 -ml-2">
-                  <div className="relative" data-dropdown>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        console.log('Dropdown button clicked, current state:', isModelDropdownOpen);
-                        setIsModelDropdownOpen(!isModelDropdownOpen);
-                      }}
-                      className={`inline-flex items-center gap-2 pl-6 pr-3 py-2 text-lg font-normal transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${isDarkMode
-                        ? 'text-gray-300 hover:text-gray-100'
-                        : 'text-gray-700 hover:text-gray-900'
-                        }`}
-                    >
-                      <span>RTI-Dost</span>
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                      </svg>
-                    </button>
-
-                    {isModelDropdownOpen && (
-                      <div className={`absolute top-full left-0 mt-1 w-full min-w-[140px] max-h-60 overflow-y-auto rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 ${isDarkMode ? 'bg-gray-700' : 'bg-white'
-                        }`} data-dropdown>
-                        <div className="py-1">
-                          {availableModels.map((model) => (
-                            <button
-                              key={model}
-                              type="button"
-                              onClick={() => {
-                                setSelectedModel(model);
-                                setIsModelDropdownOpen(false);
-                              }}
-                              className={`block w-full text-left px-4 py-2 text-sm transition-colors duration-200 ${model === selectedModel
-                                ? isDarkMode
-                                  ? 'bg-gray-600 text-white'
-                                  : 'bg-gray-100 text-gray-900'
-                                : isDarkMode
-                                  ? 'text-gray-300 hover:bg-gray-600 hover:text-white'
-                                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                                }`}
-                            >
-                              {model}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                  <div className="flex items-center gap-2 pl-6 pr-3 py-2">
+                    <span className={`text-lg font-normal ${isDarkMode
+                      ? 'text-gray-300'
+                      : 'text-gray-700'
+                      }`}>
+                      {selectedModel}
+                    </span>
                   </div>
                 </div>
               </div>
