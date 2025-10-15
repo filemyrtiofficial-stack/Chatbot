@@ -674,12 +674,11 @@ export default function Chat() {
             <div className="flex h-12 shrink-0 items-center justify-between px-6">
               <div className="flex items-center justify-center">
                 <div className="flex h-12 w-12 items-center justify-center">
-                  <div className="text-center">
-                    <div className={`text-[8px] font-bold leading-tight transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
-                      }`}>FILE MY</div>
-                    <div className={`px-1 py-0.5 text-[9px] font-bold leading-tight transition-colors duration-200 ${isDarkMode ? 'bg-white text-black' : 'bg-gray-900 text-white'
-                      }`}>RTI</div>
-                  </div>
+                  <img
+                    src="/logo/image.png"
+                    alt="File My RTI Logo"
+                    className="h-10 w-10 object-contain"
+                  />
                 </div>
               </div>
 
