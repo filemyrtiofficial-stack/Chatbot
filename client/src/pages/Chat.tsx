@@ -170,16 +170,8 @@ export default function Chat() {
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   const availableModels = [
-    'RTI-DOST',
-    'RTI-DOST Pro',
-    'RTI-DOST Lite',
-    'RTI-DOST Advanced',
-    'RTI-DOST Enterprise',
-    'RTI-DOST Beta',
-    'RTI-DOST Alpha',
-    'RTI-Mitra',
-    'RTI-Mitra Pro',
-    'RTI-Mitra Lite'
+    'RTI-Dost',
+
   ];
 
   const filteredModels = availableModels.filter(model =>
