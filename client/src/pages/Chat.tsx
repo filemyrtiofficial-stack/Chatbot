@@ -826,7 +826,7 @@ export default function Chat() {
                           setSearchQuery('');
                         }
                       }}
-                      className={`inline-flex items-center gap-2 pl-6 pr-3 py-2 text-lg font-normal transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${isDarkMode
+                      className={`inline-flex items-center gap-2 pl-6 pr-3 py-2 text-lg font-normal transition-colors duration-200 focus:outline-none ${isDarkMode
                         ? 'text-gray-300 hover:text-gray-100'
                         : 'text-gray-700 hover:text-gray-900'
                         }`}
@@ -846,7 +846,7 @@ export default function Chat() {
                             placeholder="Search models..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className={`w-full px-3 py-2 text-sm rounded-md border-0 focus:ring-2 focus:ring-indigo-500 ${isDarkMode
+                            className={`w-full px-3 py-2 text-sm rounded-md border-0 focus:outline-none ${isDarkMode
                               ? 'bg-gray-600 text-gray-200 placeholder-gray-400'
                               : 'bg-gray-50 text-gray-900 placeholder-gray-500'
                               }`}
