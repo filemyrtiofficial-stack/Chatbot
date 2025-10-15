@@ -919,8 +919,8 @@ export default function Chat() {
                           }
                         }} className="relative">
                           <div className={`flex items-end gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-4 transition-colors duration-200 ${isDarkMode
-                            ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
-                            : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
+                            ? 'ring-gray-600'
+                            : 'ring-gray-300 bg-white'
                             }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
                             <button
                               type="button"
@@ -1034,8 +1034,8 @@ export default function Chat() {
                     }
                   }} className="relative">
                     <div className={`flex items-end gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-4 transition-colors duration-200 ${isDarkMode
-                      ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
-                      : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
+                      ? 'ring-gray-600'
+                      : 'ring-gray-300 bg-white'
                       }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
                       <button
                         type="button"
