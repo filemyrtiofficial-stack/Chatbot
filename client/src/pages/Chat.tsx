@@ -599,11 +599,38 @@ export default function Chat() {
         chunks.push(e.data);
       };
 
-      recorder.onstop = () => {
+      recorder.onstop = async () => {
         const blob = new Blob(chunks, { type: 'audio/wav' });
-        // Convert audio to text (you'll need to implement speech-to-text)
-        // For now, we'll just show a placeholder message
-        setMessage(prev => prev + ' [Voice message recorded]');
+
+        try {
+          // Convert audio to text using Web Speech API
+          const recognition = new (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+          if (recognition) {
+            const speechRecognition = new recognition();
+            speechRecognition.continuous = false;
+            speechRecognition.interimResults = false;
+            speechRecognition.lang = 'en-US';
+
+            speechRecognition.onresult = (event: any) => {
+              const transcript = event.results[0][0].transcript;
+              setMessage(prev => prev + (prev ? ' ' : '') + transcript);
+            };
+
+            speechRecognition.onerror = (event: any) => {
+              console.error('Speech recognition error:', event.error);
+              setMessage(prev => prev + (prev ? ' ' : '') + '[Voice message - transcription failed]');
+            };
+
+            speechRecognition.start();
+          } else {
+            // Fallback if speech recognition is not available
+            setMessage(prev => prev + (prev ? ' ' : '') + '[Voice message recorded]');
+          }
+        } catch (error) {
+          console.error('Speech recognition error:', error);
+          setMessage(prev => prev + (prev ? ' ' : '') + '[Voice message - transcription failed]');
+        }
+
         stream.getTracks().forEach(track => track.stop());
       };
 
@@ -779,16 +806,34 @@ export default function Chat() {
                     <ul role="list" className="-mx-2 space-y-0.5">
                       {orderedSessions.slice(0, 8).map((session) => (
                         <li key={session.sessionId}>
-                          <button
-                            type="button"
-                            onClick={() => setSelectedSessionId(session.sessionId)}
-                            className={`group flex rounded-lg p-2 text-sm leading-5 font-medium transition-colors duration-200 w-full text-left ${isDarkMode
-                              ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                              : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
-                              }`}
-                          >
-                            <span className="truncate text-sm">{deriveTitle(session.entries)}</span>
-                          </button>
+                          <div className={`group flex items-center rounded-lg p-2 text-sm leading-5 font-medium transition-colors duration-200 ${isDarkMode
+                            ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                            : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
+                            }`}>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedSessionId(session.sessionId)}
+                              className="flex-1 text-left truncate"
+                            >
+                              <span className="truncate text-sm">{deriveTitle(session.entries)}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteSession(session.sessionId);
+                              }}
+                              className={`ml-2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${isDarkMode
+                                ? 'text-gray-400 hover:text-red-400 hover:bg-gray-600'
+                                : 'text-gray-500 hover:text-red-500 hover:bg-gray-300'
+                                }`}
+                              title="Delete conversation"
+                            >
+                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                              </svg>
+                            </button>
+                          </div>
                         </li>
                       ))}
                     </ul>
