@@ -918,13 +918,13 @@ export default function Chat() {
                             handleSend(e);
                           }
                         }} className="relative">
-                          <div className={`flex items-end gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-4 transition-colors duration-200 ${isDarkMode
+                          <div className={`flex items-end gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-6 transition-colors duration-200 ${isDarkMode
                             ? 'ring-gray-600 focus-within:ring-2 focus-within:ring-gray-500'
                             : 'ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600 bg-white'
                             }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
                             <button
                               type="button"
-                              className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
+                              className={`inline-flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
                                 ? 'text-gray-400 hover:text-gray-200'
                                 : 'text-gray-600 hover:text-gray-800'
                                 }`}
@@ -938,8 +938,8 @@ export default function Chat() {
                               ref={textareaRef}
                               name="message"
                               id="message"
-                              rows={1}
-                              className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-all duration-200 overflow-hidden text-left flex items-center ${isDarkMode
+                              rows={2}
+                              className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-base leading-7 resize-none transition-all duration-200 overflow-hidden text-left flex items-center ${isDarkMode
                                 ? 'text-gray-100 placeholder:text-gray-500'
                                 : 'text-gray-900 placeholder:text-gray-400'
                                 }`}
@@ -957,12 +957,12 @@ export default function Chat() {
                                 }
                               }}
                               disabled={sending}
-                              style={{ minHeight: '30px', maxHeight: '200px' }}
+                              style={{ minHeight: '48px', maxHeight: '200px' }}
                             />
 
                             <button
                               type="button"
-                              className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
+                              className={`inline-flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
                                 ? 'text-gray-400 hover:text-gray-200'
                                 : 'text-gray-600 hover:text-gray-800'
                                 }`}
