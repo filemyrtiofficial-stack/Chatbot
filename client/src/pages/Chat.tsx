@@ -991,11 +991,6 @@ export default function Chat() {
                           </div>
                         </form>
                       </div>
-
-                      {/* Simple footer text */}
-                      <div className={`mt-8 text-xs transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                        RTI-DOST AI assistance for drafting RTIs. Privacy Policy • Terms & Conditions
-                      </div>
                     </div>
                   )}
 
@@ -1114,6 +1109,12 @@ export default function Chat() {
               </div>
             )}
 
+            {/* Simple footer text - always at bottom */}
+            <div className={`px-6 py-3 text-center transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              <div className="text-xs">
+                RTI-DOST AI assistance for drafting RTIs. Privacy Policy • Terms & Conditions
+              </div>
+            </div>
           </div>
         </div>
       </div>
