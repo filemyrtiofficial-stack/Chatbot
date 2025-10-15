@@ -160,12 +160,31 @@ export default function Chat() {
   const [downloadingSession, setDownloadingSession] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('Dost1.0');
+  const [selectedModel, setSelectedModel] = useState('RTI-DOST');
+  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chatMessagesRef = useRef<HTMLDivElement>(null);
   const [hasStartedConversation, setHasStartedConversation] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+
+  const availableModels = [
+    'RTI-DOST',
+    'RTI-DOST Pro',
+    'RTI-DOST Lite',
+    'RTI-DOST Advanced',
+    'RTI-DOST Enterprise',
+    'RTI-DOST Beta',
+    'RTI-DOST Alpha',
+    'RTI-Mitra',
+    'RTI-Mitra Pro',
+    'RTI-Mitra Lite'
+  ];
+
+  const filteredModels = availableModels.filter(model =>
+    model.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Function to scroll to bottom
   const scrollToBottom = () => {
@@ -295,6 +314,25 @@ export default function Chat() {
     }
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      const dropdown = target.closest('[data-dropdown]');
+      if (isModelDropdownOpen && !dropdown) {
+        setIsModelDropdownOpen(false);
+        setSearchQuery('');
+      }
+    };
+
+    if (isModelDropdownOpen) {
+      document.addEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isModelDropdownOpen]);
 
   useEffect(() => {
     let active = true;
@@ -786,13 +824,78 @@ export default function Chat() {
             <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
               <div className="relative flex flex-1">
                 <div className="flex items-center gap-2 -ml-2">
-                  <div className="flex items-center gap-2 pl-6 pr-3 py-2">
-                    <span className={`text-lg font-normal ${isDarkMode
-                      ? 'text-gray-300'
-                      : 'text-gray-700'
-                      }`}>
-                      {selectedModel}
-                    </span>
+                  <div className="relative" data-dropdown>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsModelDropdownOpen(!isModelDropdownOpen);
+                        if (!isModelDropdownOpen) {
+                          setSearchQuery('');
+                        }
+                      }}
+                      className={`inline-flex items-center gap-2 pl-6 pr-3 py-2 text-lg font-normal transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${isDarkMode
+                        ? 'text-gray-300 hover:text-gray-100'
+                        : 'text-gray-700 hover:text-gray-900'
+                        }`}
+                    >
+                      <span>{selectedModel}</span>
+                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                      </svg>
+                    </button>
+
+                    {isModelDropdownOpen && (
+                      <div className={`absolute top-full left-0 mt-1 w-full min-w-[200px] max-h-60 overflow-y-auto rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 ${isDarkMode ? 'bg-gray-700' : 'bg-white'
+                        }`} data-dropdown>
+                        <div className="p-2">
+                          <input
+                            type="text"
+                            placeholder="Search models..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className={`w-full px-3 py-2 text-sm rounded-md border-0 focus:ring-2 focus:ring-indigo-500 ${isDarkMode
+                              ? 'bg-gray-600 text-gray-200 placeholder-gray-400'
+                              : 'bg-gray-50 text-gray-900 placeholder-gray-500'
+                              }`}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                        <div className="py-1">
+                          {filteredModels.map((model) => (
+                            <button
+                              key={model}
+                              type="button"
+                              onClick={() => {
+                                setSelectedModel(model);
+                                setIsModelDropdownOpen(false);
+                                setSearchQuery('');
+                              }}
+                              className={`flex items-center justify-between w-full text-left px-4 py-2 text-sm transition-colors duration-200 ${model === selectedModel
+                                ? isDarkMode
+                                  ? 'bg-gray-600 text-white'
+                                  : 'bg-gray-100 text-gray-900'
+                                : isDarkMode
+                                  ? 'text-gray-300 hover:bg-gray-600 hover:text-white'
+                                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                                }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+                                </svg>
+                                <span>{model}</span>
+                              </div>
+                              {model === selectedModel && (
+                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                </svg>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
