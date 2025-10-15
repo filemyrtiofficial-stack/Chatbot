@@ -160,7 +160,7 @@ export default function Chat() {
   const [downloadingSession, setDownloadingSession] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('RTI-DOST');
+  const [selectedModel, setSelectedModel] = useState('RTI-Dost');
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -1135,7 +1135,7 @@ export default function Chat() {
             {/* Simple footer text - always at bottom */}
             <div className={`px-6 py-3 text-center transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
               <div className="text-xs">
-                RTI-DOST AI assistance for drafting RTIs. Privacy Policy • Terms & Conditions
+                RTI-Dost AI assistance for drafting RTIs. Privacy Policy • Terms & Conditions
               </div>
             </div>
           </div>
