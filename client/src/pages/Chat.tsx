@@ -910,7 +910,7 @@ export default function Chat() {
                         }`}>Welcome to RTI Dost</h3>
 
                       {/* Centered input box for empty state */}
-                      <div className="w-full max-w-4xl">
+                      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                         <form onSubmit={e => {
                           e.preventDefault();
                           if (!disableSend) {
@@ -1023,9 +1023,9 @@ export default function Chat() {
 
             {/* Input area - only show when not in empty state */}
             {!showEmptyState && (
-              <div className={`px-4 py-4 sm:px-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? '' : 'bg-white'
+              <div className={`transition-colors duration-200 ${isDarkMode ? '' : 'bg-white'
                 }`} style={{ backgroundColor: isDarkMode ? '#212121' : undefined }}>
-                <div className="mx-auto max-w-4xl">
+                <div className="mx-auto max-w-4xl px-4 py-4 sm:px-6 lg:px-8">
                   <form onSubmit={e => {
                     e.preventDefault();
                     if (!disableSend) {
