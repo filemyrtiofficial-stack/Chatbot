@@ -165,7 +165,7 @@ export default function Chat() {
   const [searchQuery, setSearchQuery] = useState('');
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const [isRecording, setIsRecording] = useState(false);
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | any>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chatMessagesRef = useRef<HTMLDivElement>(null);
   const [hasStartedConversation, setHasStartedConversation] = useState(false);
@@ -591,61 +591,97 @@ export default function Chat() {
   // Microphone recording functions
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      const chunks: BlobPart[] = [];
+      // Check if speech recognition is available
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
-      recorder.ondataavailable = (e) => {
-        chunks.push(e.data);
-      };
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+        recognition.maxAlternatives = 1;
 
-      recorder.onstop = async () => {
-        const blob = new Blob(chunks, { type: 'audio/wav' });
+        recognition.onstart = () => {
+          console.log('Speech recognition started');
+          setIsRecording(true);
+        };
 
-        try {
-          // Convert audio to text using Web Speech API
-          const recognition = new (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-          if (recognition) {
-            const speechRecognition = new recognition();
-            speechRecognition.continuous = false;
-            speechRecognition.interimResults = false;
-            speechRecognition.lang = 'en-US';
+        recognition.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          console.log('Speech recognition result:', transcript);
+          setMessage(prev => prev + (prev ? ' ' : '') + transcript);
+        };
 
-            speechRecognition.onresult = (event: any) => {
-              const transcript = event.results[0][0].transcript;
-              setMessage(prev => prev + (prev ? ' ' : '') + transcript);
-            };
+        recognition.onerror = (event: any) => {
+          console.error('Speech recognition error:', event.error);
+          setIsRecording(false);
 
-            speechRecognition.onerror = (event: any) => {
-              console.error('Speech recognition error:', event.error);
-              setMessage(prev => prev + (prev ? ' ' : '') + '[Voice message - transcription failed]');
-            };
-
-            speechRecognition.start();
-          } else {
-            // Fallback if speech recognition is not available
-            setMessage(prev => prev + (prev ? ' ' : '') + '[Voice message recorded]');
+          // Show specific error messages
+          switch (event.error) {
+            case 'no-speech':
+              alert('No speech detected. Please try again.');
+              break;
+            case 'audio-capture':
+              alert('Microphone not found. Please check your microphone.');
+              break;
+            case 'not-allowed':
+              alert('Microphone permission denied. Please allow microphone access.');
+              break;
+            case 'network':
+              alert('Network error. Please check your internet connection.');
+              break;
+            default:
+              alert('Speech recognition failed. Please try again.');
           }
-        } catch (error) {
-          console.error('Speech recognition error:', error);
-          setMessage(prev => prev + (prev ? ' ' : '') + '[Voice message - transcription failed]');
-        }
+        };
 
-        stream.getTracks().forEach(track => track.stop());
-      };
+        recognition.onend = () => {
+          console.log('Speech recognition ended');
+          setIsRecording(false);
+        };
 
-      recorder.start();
-      setMediaRecorder(recorder);
-      setIsRecording(true);
+        // Start speech recognition
+        recognition.start();
+        setMediaRecorder(recognition); // Store recognition instance
+
+      } else {
+        // Fallback: try to get microphone access for recording
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const recorder = new MediaRecorder(stream);
+        const chunks: BlobPart[] = [];
+
+        recorder.ondataavailable = (e) => {
+          chunks.push(e.data);
+        };
+
+        recorder.onstop = () => {
+          const blob = new Blob(chunks, { type: 'audio/wav' });
+          console.log('Audio recorded:', blob);
+          setMessage(prev => prev + (prev ? ' ' : '') + '[Voice message recorded - speech recognition not available]');
+          stream.getTracks().forEach(track => track.stop());
+        };
+
+        recorder.start();
+        setMediaRecorder(recorder);
+        setIsRecording(true);
+      }
+
     } catch (error) {
       console.error('Error accessing microphone:', error);
-      alert('Could not access microphone. Please check permissions.');
+      setIsRecording(false);
+      alert('Could not access microphone. Please check permissions and try again.');
     }
   };
 
   const stopRecording = () => {
     if (mediaRecorder && isRecording) {
-      mediaRecorder.stop();
+      if (mediaRecorder.stop) {
+        // It's a MediaRecorder
+        mediaRecorder.stop();
+      } else if (mediaRecorder.abort) {
+        // It's a SpeechRecognition
+        mediaRecorder.abort();
+      }
       setIsRecording(false);
       setMediaRecorder(null);
     }
@@ -1098,13 +1134,26 @@ export default function Chat() {
                               </div>
                             )}
 
+                            {isRecording && (
+                              <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${isDarkMode ? 'bg-red-900' : 'bg-red-100'}`}>
+                                <div className="flex space-x-1">
+                                  <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce"></div>
+                                  <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                  <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                </div>
+                                <span className={`text-sm ${isDarkMode ? 'text-red-300' : 'text-red-700'}`}>
+                                  Listening... Speak now
+                                </span>
+                              </div>
+                            )}
+
                             <button
                               type="button"
                               onClick={isRecording ? stopRecording : startRecording}
                               className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
                                 ? 'text-gray-400 hover:text-gray-200'
                                 : 'text-gray-600 hover:text-gray-800'
-                                } ${isRecording ? 'bg-red-500 text-white' : ''}`}
+                                } ${isRecording ? 'bg-red-500 text-white animate-pulse' : ''}`}
                               disabled={sending}
                             >
                               <MicrophoneIcon className="h-5 w-5" />
@@ -1234,13 +1283,26 @@ export default function Chat() {
                         </div>
                       )}
 
+                      {isRecording && (
+                        <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${isDarkMode ? 'bg-red-900' : 'bg-red-100'}`}>
+                          <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                            <div className="w-2 h-2 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                          </div>
+                          <span className={`text-sm ${isDarkMode ? 'text-red-300' : 'text-red-700'}`}>
+                            Listening... Speak now
+                          </span>
+                        </div>
+                      )}
+
                       <button
                         type="button"
                         onClick={isRecording ? stopRecording : startRecording}
                         className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
                           ? 'text-gray-400 hover:text-gray-200'
                           : 'text-gray-600 hover:text-gray-800'
-                          } ${isRecording ? 'bg-red-500 text-white' : ''}`}
+                          } ${isRecording ? 'bg-red-500 text-white animate-pulse' : ''}`}
                         disabled={sending}
                       >
                         <MicrophoneIcon className="h-5 w-5" />
