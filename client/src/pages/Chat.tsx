@@ -163,6 +163,9 @@ export default function Chat() {
   const [selectedModel, setSelectedModel] = useState('RTI-Dost');
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chatMessagesRef = useRef<HTMLDivElement>(null);
   const [hasStartedConversation, setHasStartedConversation] = useState(false);
@@ -567,6 +570,60 @@ export default function Chat() {
     }
   }
 
+  // File attachment functions
+  const handleFileAttach = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        setAttachedFile(file);
+      }
+    };
+    input.click();
+  };
+
+  const removeAttachedFile = () => {
+    setAttachedFile(null);
+  };
+
+  // Microphone recording functions
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const chunks: BlobPart[] = [];
+
+      recorder.ondataavailable = (e) => {
+        chunks.push(e.data);
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/wav' });
+        // Convert audio to text (you'll need to implement speech-to-text)
+        // For now, we'll just show a placeholder message
+        setMessage(prev => prev + ' [Voice message recorded]');
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      recorder.start();
+      setMediaRecorder(recorder);
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+      alert('Could not access microphone. Please check permissions.');
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder && isRecording) {
+      mediaRecorder.stop();
+      setIsRecording(false);
+      setMediaRecorder(null);
+    }
+  };
+
   const showEmptyState =
     selectedSessionId === NEW_SESSION_SENTINEL &&
     !hasStartedConversation;
@@ -940,6 +997,7 @@ export default function Chat() {
                             }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
                             <button
                               type="button"
+                              onClick={handleFileAttach}
                               className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
                                 ? 'text-gray-400 hover:text-gray-200'
                                 : 'text-gray-600 hover:text-gray-800'
@@ -976,12 +1034,32 @@ export default function Chat() {
                               style={{ minHeight: '30px', maxHeight: '200px' }}
                             />
 
+                            {attachedFile && (
+                              <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                                <svg className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                </svg>
+                                <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                  {attachedFile.name}
+                                </span>
+                                <button
+                                  onClick={removeAttachedFile}
+                                  className={`ml-2 text-gray-500 hover:text-gray-700 ${isDarkMode ? 'hover:text-gray-300' : ''}`}
+                                >
+                                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              </div>
+                            )}
+
                             <button
                               type="button"
+                              onClick={isRecording ? stopRecording : startRecording}
                               className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
                                 ? 'text-gray-400 hover:text-gray-200'
                                 : 'text-gray-600 hover:text-gray-800'
-                                }`}
+                                } ${isRecording ? 'bg-red-500 text-white' : ''}`}
                               disabled={sending}
                             >
                               <MicrophoneIcon className="h-5 w-5" />
@@ -1055,6 +1133,7 @@ export default function Chat() {
                       }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
                       <button
                         type="button"
+                        onClick={handleFileAttach}
                         className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
                           ? 'text-gray-400 hover:text-gray-200'
                           : 'text-gray-600 hover:text-gray-800'
@@ -1091,12 +1170,32 @@ export default function Chat() {
                         style={{ minHeight: '32px', maxHeight: '200px' }}
                       />
 
+                      {attachedFile && (
+                        <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                          <svg className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                          </svg>
+                          <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            {attachedFile.name}
+                          </span>
+                          <button
+                            onClick={removeAttachedFile}
+                            className={`ml-2 text-gray-500 hover:text-gray-700 ${isDarkMode ? 'hover:text-gray-300' : ''}`}
+                          >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+
                       <button
                         type="button"
+                        onClick={isRecording ? stopRecording : startRecording}
                         className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
                           ? 'text-gray-400 hover:text-gray-200'
                           : 'text-gray-600 hover:text-gray-800'
-                          }`}
+                          } ${isRecording ? 'bg-red-500 text-white' : ''}`}
                         disabled={sending}
                       >
                         <MicrophoneIcon className="h-5 w-5" />
