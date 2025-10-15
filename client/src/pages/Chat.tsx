@@ -910,7 +910,7 @@ export default function Chat() {
                         }`}>Welcome to RTI Dost</h3>
 
                       {/* Centered input box for empty state */}
-                      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                      <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
                         <form onSubmit={e => {
                           e.preventDefault();
                           if (!disableSend) {
