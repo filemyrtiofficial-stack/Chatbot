@@ -991,6 +991,11 @@ export default function Chat() {
                           </div>
                         </form>
                       </div>
+
+                      {/* Simple footer text */}
+                      <div className={`mt-8 text-xs transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                        RTI-DOST AI assistance for drafting RTIs. Privacy Policy • Terms & Conditions
+                      </div>
                     </div>
                   )}
 
@@ -1109,32 +1114,6 @@ export default function Chat() {
               </div>
             )}
 
-            {/* Footer - always at bottom */}
-            <div className={`border-t px-6 py-4 text-center transition-colors duration-200 ${isDarkMode
-              ? 'border-gray-800 bg-gray-800'
-              : 'border-gray-200 bg-gray-50'
-              }`}>
-              <div className={`text-xs transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                }`}>
-                <p>RTI-DOST AI assistance for drafting RTIs. <a
-                  href="https://filemyrti.com/privacy-policy"
-                  target="_blank"
-                  rel="noreferrer"
-                  className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
-                    }`}
-                >
-                  Privacy Policy
-                </a> • <a
-                  href="https://filemyrti.com/terms-of-service"
-                  target="_blank"
-                  rel="noreferrer"
-                  className={`transition duration-200 ${isDarkMode ? 'hover:text-gray-200' : 'hover:text-gray-700'
-                    }`}
-                >
-                    Terms & Conditions
-                  </a></p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
