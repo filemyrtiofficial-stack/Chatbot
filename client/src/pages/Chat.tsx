@@ -677,7 +677,8 @@ export default function Chat() {
                   <img
                     src="/logo/image.png"
                     alt="File My RTI Logo"
-                    className="h-10 w-10 object-contain"
+                    className="object-contain"
+                    style={{ width: '1.8rem', height: '1.8rem' }}
                   />
                 </div>
               </div>
