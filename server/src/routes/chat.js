@@ -81,6 +81,37 @@ const APPLICATION_TRIGGER_REGEX = /(file|draft|submit)\s+(an?\s+)?rti|rti\s+appl
 
 // Lightweight in-memory session store so the assistant can remember user details during a chat.
 const sessionMemory = new Map();
+const SESSION_TTL = 30 * 60 * 1000; // 30 minutes
+const MAX_SESSIONS = 1000; // Maximum number of sessions to keep in memory
+const CLEANUP_INTERVAL = 5 * 60 * 1000; // Cleanup every 5 minutes
+
+// Session cleanup mechanism
+function cleanupExpiredSessions() {
+  const now = Date.now();
+  const expiredKeys = [];
+
+  for (const [userId, session] of sessionMemory.entries()) {
+    if (now - session.lastUpdated > SESSION_TTL) {
+      expiredKeys.push(userId);
+    }
+  }
+
+  expiredKeys.forEach(userId => sessionMemory.delete(userId));
+
+  // If still over limit, remove oldest sessions
+  if (sessionMemory.size > MAX_SESSIONS) {
+    const entries = Array.from(sessionMemory.entries());
+    entries.sort((a, b) => a[1].lastUpdated - b[1].lastUpdated);
+
+    const toRemove = entries.slice(0, sessionMemory.size - MAX_SESSIONS);
+    toRemove.forEach(([userId]) => sessionMemory.delete(userId));
+  }
+
+  console.log(`[Session Cleanup] Removed ${expiredKeys.length} expired sessions. Current sessions: ${sessionMemory.size}`);
+}
+
+// Start periodic cleanup
+setInterval(cleanupExpiredSessions, CLEANUP_INTERVAL);
 const GREETING_PATTERNS = [
   /^hi(?: there)?$/i,
   /^hello(?: there)?$/i,
@@ -125,6 +156,10 @@ function getSession(userId) {
       information_request: '',
       lastUpdated: Date.now(),
     });
+  } else {
+    // Update last accessed time
+    const session = sessionMemory.get(userId);
+    session.lastUpdated = Date.now();
   }
   return sessionMemory.get(userId);
 }
@@ -223,61 +258,61 @@ function isRTIRelated(text) {
   if (!text) return false;
   const t = text.toLowerCase();
   const keywords = [
-  // Core RTI terms
-  'rti',
-  'right to information',
-  'information act',
-  'rti act',
-  'rti application',
-  'rti draft',
-  'rti appeal',
-  'rti filing',
-  'file rti',
-  'how to file rti',
-  'write rti',
-  'rti format',
-  'rti sample',
-  'rti example',
+    // Core RTI terms
+    'rti',
+    'right to information',
+    'information act',
+    'rti act',
+    'rti application',
+    'rti draft',
+    'rti appeal',
+    'rti filing',
+    'file rti',
+    'how to file rti',
+    'write rti',
+    'rti format',
+    'rti sample',
+    'rti example',
 
-  // Key authorities
-  'central information commission',
-  'state information commission',
-  'information commission',
-  'public information officer',
-  'pio',
-  'appellate authority',
-  'first appeal',
-  'second appeal',
-  'cic',
-  'sic',
+    // Key authorities
+    'central information commission',
+    'state information commission',
+    'information commission',
+    'public information officer',
+    'pio',
+    'appellate authority',
+    'first appeal',
+    'second appeal',
+    'cic',
+    'sic',
 
-  // Legal sections
-  'section 6',
-  'section 7',
-  'section 8',
-  'section 19',
+    // Legal sections
+    'section 6',
+    'section 7',
+    'section 8',
+    'section 19',
 
-  // General RTI context
-  'govt information',
-  'government information',
-  'government office',
-  'public authority',
-  'information request',
-  'application for information',
-  'transparency law',
-  'citizen information request',
+    // General RTI context
+    'govt information',
+    'government information',
+    'government office',
+    'public authority',
+    'information request',
+    'application for information',
+    'transparency law',
+    'citizen information request',
 
-  // Common user intents (natural phrasing)
-  'how to get information from government',
-  'how to ask government for details',
-  'delay in government service',
-  'passport delay information',
-  'municipal complaint information',
-  'file complaint under rti',
-  'status of my application',
-  'information not received',
-  'appeal under rti'
-];
+    // Common user intents (natural phrasing)
+    'how to get information from government',
+    'how to ask government for details',
+    'delay in government service',
+    'passport delay information',
+    'municipal complaint information',
+    'file complaint under rti',
+    'status of my application',
+    'information not received',
+    'appeal under rti'
+  ];
 
   return keywords.some(k => t.includes(k));
 }
@@ -1053,7 +1088,9 @@ Wrap up each response by offering optional next steps or asking whether the user
       draftAvailable: false,
     });
   } catch (err) {
-    console.error(err);
+    console.error('[Chat Error]', err);
+    console.error('[Session Memory Size]', sessionMemory.size);
+    console.error('[Memory Usage]', process.memoryUsage());
     return res.status(500).json({ error: 'Server error' });
   }
 });
