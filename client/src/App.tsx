@@ -9,7 +9,14 @@ import './style.css';
 function PrivateRoute({ children }: { children: React.ReactElement }) {
   const { user, initializing } = useAuth();
   if (initializing) {
-    return <div className="flex h-screen items-center justify-center text-sm text-slate-500">Loading...</div>;
+    return (
+      <div className="flex h-screen items-center justify-center text-sm text-slate-500">
+        <div className="flex items-center gap-3">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-sky-600 border-t-transparent"></div>
+          <span>Loading...</span>
+        </div>
+      </div>
+    );
   }
   return user ? children : <Navigate to="/login" replace />;
 }

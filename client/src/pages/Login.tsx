@@ -34,26 +34,26 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-slate-100 via-white to-slate-200 px-4 py-10">
-      <div className="absolute right-4 top-4 flex items-center gap-3">
+    <div className="relative min-h-screen bg-gradient-to-b from-slate-100 via-white to-slate-200 px-4 py-6 sm:py-10">
+      <div className="absolute right-2 top-2 sm:right-4 sm:top-4 flex items-center gap-3">
         <Link
           to="/signup"
-          className="hidden rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-white md:inline-flex"
+          className="rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-white"
         >
           Sign up
         </Link>
       </div>
-      <div className="mx-auto flex min-h-[calc(100vh-80px)] w-full max-w-5xl flex-col items-center justify-center">
+      <div className="mx-auto flex min-h-[calc(100vh-60px)] sm:min-h-[calc(100vh-80px)] w-full max-w-5xl flex-col items-center justify-center">
         <form
-          className="w-full max-w-md space-y-6 rounded-3xl bg-white/80 p-10 shadow-xl ring-1 ring-slate-200 backdrop-blur"
+          className="w-full max-w-md space-y-4 sm:space-y-6 rounded-2xl sm:rounded-3xl bg-white/80 p-6 sm:p-8 md:p-10 shadow-xl ring-1 ring-slate-200 backdrop-blur"
           onSubmit={onSubmit}
         >
           <div className="space-y-2">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-sky-600">
+            <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.18em] text-sky-600">
               FileMyRTI
             </p>
-            <h1 className="text-2xl font-semibold">Welcome back</h1>
-            <p className="text-sm text-slate-500">
+            <h1 className="text-xl sm:text-2xl font-semibold">Welcome back</h1>
+            <p className="text-xs sm:text-sm text-slate-500">
               Sign in to continue your RTI conversations.
             </p>
           </div>
@@ -63,12 +63,12 @@ export default function Login() {
             </div>
           )}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-600" htmlFor="email">
+            <label className="text-xs sm:text-sm font-medium text-slate-600" htmlFor="email">
               Email
             </label>
             <input
               id="email"
-              className="input-field"
+              className="input-field text-sm sm:text-base"
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
@@ -78,12 +78,12 @@ export default function Login() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-600" htmlFor="password">
+            <label className="text-xs sm:text-sm font-medium text-slate-600" htmlFor="password">
               Password
             </label>
             <input
               id="password"
-              className="input-field"
+              className="input-field text-sm sm:text-base"
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
@@ -92,7 +92,7 @@ export default function Login() {
               required
             />
           </div>
-          <button className="btn-primary w-full" disabled={loading}>
+          <button className="btn-primary w-full text-sm sm:text-base py-2.5 sm:py-2" disabled={loading}>
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
           <div className="relative">
@@ -104,7 +104,7 @@ export default function Login() {
           <button
             type="button"
             onClick={handleGoogleLogin}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl sm:rounded-2xl border border-slate-200 bg-white px-3 sm:px-4 py-2.5 sm:py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-white/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
               <path
@@ -127,7 +127,7 @@ export default function Login() {
             </svg>
             Continue with Google
           </button>
-          <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
+          <div className="flex items-center justify-center gap-2 text-xs sm:text-sm text-slate-500">
             <span>New to FileMyRTI?</span>
             <Link to="/signup" className="font-semibold text-sky-600 transition hover:text-sky-500">
               Create account

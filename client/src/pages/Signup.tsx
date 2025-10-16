@@ -31,26 +31,26 @@ export default function Signup() {
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-slate-100 via-white to-slate-200 px-4 py-10">
-      <div className="absolute right-4 top-4 flex items-center gap-3">
+    <div className="relative min-h-screen bg-gradient-to-b from-slate-100 via-white to-slate-200 px-4 py-6 sm:py-10">
+      <div className="absolute right-2 top-2 sm:right-4 sm:top-4 flex items-center gap-3">
         <Link
           to="/login"
-          className="hidden rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-white md:inline-flex"
+          className="rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-white"
         >
           Sign in
         </Link>
       </div>
-      <div className="mx-auto flex min-h-[calc(100vh-80px)] w-full max-w-5xl flex-col items-center justify-center">
+      <div className="mx-auto flex min-h-[calc(100vh-60px)] sm:min-h-[calc(100vh-80px)] w-full max-w-5xl flex-col items-center justify-center">
         <form
-          className="w-full max-w-md space-y-6 rounded-3xl bg-white/80 p-10 shadow-xl ring-1 ring-slate-200 backdrop-blur"
+          className="w-full max-w-md space-y-4 sm:space-y-6 rounded-2xl sm:rounded-3xl bg-white/80 p-6 sm:p-8 md:p-10 shadow-xl ring-1 ring-slate-200 backdrop-blur"
           onSubmit={onSubmit}
         >
           <div className="space-y-2">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-sky-600">
+            <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.18em] text-sky-600">
               FileMyRTI
             </p>
-            <h1 className="text-2xl font-semibold">Create your account</h1>
-            <p className="text-sm text-slate-500">
+            <h1 className="text-xl sm:text-2xl font-semibold">Create your account</h1>
+            <p className="text-xs sm:text-sm text-slate-500">
               Get started with personalised RTI guidance.
             </p>
           </div>
@@ -60,12 +60,12 @@ export default function Signup() {
             </div>
           )}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-600" htmlFor="name">
+            <label className="text-xs sm:text-sm font-medium text-slate-600" htmlFor="name">
               Full name
             </label>
             <input
               id="name"
-              className="input-field"
+              className="input-field text-sm sm:text-base"
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="Priya Sharma"
@@ -74,12 +74,12 @@ export default function Signup() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-600" htmlFor="signup-email">
+            <label className="text-xs sm:text-sm font-medium text-slate-600" htmlFor="signup-email">
               Email
             </label>
             <input
               id="signup-email"
-              className="input-field"
+              className="input-field text-sm sm:text-base"
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
@@ -89,12 +89,12 @@ export default function Signup() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-600" htmlFor="signup-password">
+            <label className="text-xs sm:text-sm font-medium text-slate-600" htmlFor="signup-password">
               Password
             </label>
             <input
               id="signup-password"
-              className="input-field"
+              className="input-field text-sm sm:text-base"
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
@@ -103,10 +103,10 @@ export default function Signup() {
               required
             />
           </div>
-          <button className="btn-primary w-full" disabled={loading}>
+          <button className="btn-primary w-full text-sm sm:text-base py-2.5 sm:py-2" disabled={loading}>
             {loading ? 'Creating...' : 'Create account'}
           </button>
-          <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
+          <div className="flex items-center justify-center gap-2 text-xs sm:text-sm text-slate-500">
             <span>Already have an account?</span>
             <Link to="/login" className="font-semibold text-sky-600 transition hover:text-sky-500">
               Sign in

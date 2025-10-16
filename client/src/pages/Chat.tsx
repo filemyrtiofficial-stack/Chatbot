@@ -774,20 +774,28 @@ export default function Chat() {
         ? 'text-gray-100'
         : 'text-gray-900'
         }`} style={{ backgroundColor: isDarkMode ? '#212121' : '#FFFFFF' }}>
-        {/* Sidebar - optimized for large screens */}
-        <aside className={`${sidebarOpen ? 'flex' : 'hidden'} xl:w-64 xl:flex-col xl:fixed xl:inset-y-0 xl:z-50`}>
+        {/* Mobile sidebar overlay */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* Sidebar - responsive design */}
+        <aside className={`${sidebarOpen ? 'flex' : 'hidden'} lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:z-50 lg:w-64`}>
           <div className={`flex grow flex-col gap-y-5 overflow-y-auto border-r transition-colors duration-200 ${isDarkMode
             ? 'border-gray-800'
             : 'border-gray-200'
             }`} style={{ backgroundColor: isDarkMode ? '#181818' : '#F7F7F8' }}>
-            <div className="flex h-12 shrink-0 items-center justify-between px-6">
+            <div className="flex h-12 shrink-0 items-center justify-between px-4 sm:px-6">
               <div className="flex items-center justify-center">
-                <div className="flex h-12 w-12 items-center justify-center">
+                <div className="flex h-8 w-8 sm:h-12 sm:w-12 items-center justify-center">
                   <img
                     src="/logo/image.png"
                     alt="File My RTI Logo"
                     className="object-contain"
-                    style={{ width: '1.8rem', height: '1.8rem' }}
+                    style={{ width: '1.5rem', height: '1.5rem' }}
                   />
                 </div>
               </div>
@@ -799,7 +807,10 @@ export default function Chat() {
                   console.log('Sidebar toggle clicked, current state:', sidebarOpen);
                   setSidebarOpen(!sidebarOpen);
                 }}
-                className="flex items-center justify-center p-2 text-gray-600 hover:text-gray-900 transition-colors"
+                className={`flex items-center justify-center p-2 transition-colors ${isDarkMode
+                  ? 'text-gray-400 hover:text-gray-200'
+                  : 'text-gray-600 hover:text-gray-900'
+                  }`}
                 title="Close sidebar"
               >
                 <svg className="h-5 w-6" viewBox="0 0 24 16" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -814,7 +825,7 @@ export default function Chat() {
               </button>
             </div>
 
-            <nav className="flex flex-1 flex-col px-6">
+            <nav className="flex flex-1 flex-col px-4 sm:px-6">
               <ul role="list" className="flex flex-1 flex-col gap-y-2">
                 <li>
                   <button
@@ -878,9 +889,9 @@ export default function Chat() {
               </ul>
             </nav>
 
-            <div className={`flex items-center gap-x-4 px-6 py-2 border-t transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
+            <div className={`flex items-center gap-x-3 px-4 sm:px-6 py-2 border-t transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
               }`}>
-              <div className={`flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br text-sm font-semibold transition-colors duration-200 ${isDarkMode
+              <div className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-gradient-to-br text-xs sm:text-sm font-semibold transition-colors duration-200 ${isDarkMode
                 ? 'from-gray-600 to-gray-700 text-gray-200'
                 : 'from-gray-200 to-gray-300 text-gray-700'
                 }`}>
@@ -891,7 +902,7 @@ export default function Chat() {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <div className={`text-sm font-semibold truncate transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                <div className={`text-xs sm:text-sm font-semibold truncate transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
                   }`}>{user?.name}</div>
                 <div className={`text-xs truncate transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
                   }`}>{user?.email}</div>
@@ -911,18 +922,22 @@ export default function Chat() {
         </aside>
 
         {/* Main content area */}
-        <div className={`flex flex-1 flex-col min-h-0 ${sidebarOpen ? 'xl:pl-64' : ''}`}>
+        <div className={`flex flex-1 flex-col min-h-0 ${sidebarOpen ? 'lg:pl-64' : ''}`}>
           {/* Header */}
-          <div className={`sticky top-0 z-40 flex h-12 shrink-0 items-center gap-x-4 px-4 sm:gap-x-6 sm:px-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? '' : 'bg-white'
+          <div className={`sticky top-0 z-40 flex h-12 shrink-0 items-center gap-x-4 px-3 sm:px-4 sm:gap-x-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? '' : 'bg-white'
             }`} style={{ backgroundColor: isDarkMode ? '#212121' : undefined }}>
-            <button type="button" className={`-m-2.5 p-2.5 xl:hidden transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
-              }`}>
+            <button
+              type="button"
+              className={`-m-2.5 p-2.5 lg:hidden transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                }`}
+              onClick={() => setSidebarOpen(true)}
+            >
               <span className="sr-only">Open sidebar</span>
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
               </svg>
             </button>
-            <div className={`h-6 w-px xl:hidden transition-colors duration-200 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'
+            <div className={`h-6 w-px lg:hidden transition-colors duration-200 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'
               }`} />
 
             {/* Show sidebar toggle in navbar when sidebar is closed */}
@@ -933,7 +948,7 @@ export default function Chat() {
                   console.log('Navbar toggle clicked, opening sidebar');
                   setSidebarOpen(true);
                 }}
-                className={`hidden xl:flex items-center justify-center p-2 transition-colors duration-200 ${isDarkMode
+                className={`hidden lg:flex items-center justify-center p-2 transition-colors duration-200 ${isDarkMode
                   ? 'text-gray-400 hover:text-gray-200'
                   : 'text-gray-600 hover:text-gray-900'
                   }`}
@@ -1047,8 +1062,8 @@ export default function Chat() {
                 </div>
               )}
 
-              <div ref={chatMessagesRef} className="flex-1 overflow-y-auto scroll-smooth min-h-0" style={{ maxHeight: 'calc(100vh - 200px)', minHeight: '400px' }}>
-                <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+              <div ref={chatMessagesRef} className="flex-1 overflow-y-auto scroll-smooth min-h-0" style={{ maxHeight: 'calc(100vh - 200px)', minHeight: '300px' }}>
+                <div className="mx-auto max-w-4xl px-3 py-6 sm:px-4 sm:py-8 lg:px-8">
                   {loading && (
                     <div className="flex items-center justify-center py-16">
                       <div className="flex items-center gap-3">
@@ -1059,12 +1074,12 @@ export default function Chat() {
                   )}
 
                   {showEmptyState && (
-                    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-                      <h3 className={`text-4xl font-semibold mb-8 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                    <div className="flex flex-col items-center justify-center min-h-[50vh] sm:min-h-[60vh] text-center">
+                      <h3 className={`text-2xl sm:text-3xl lg:text-4xl font-semibold mb-6 sm:mb-8 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
                         }`}>Welcome to RTI Dost</h3>
 
                       {/* Centered input box for empty state */}
-                      <div className="mx-auto px-4 sm:px-6 lg:px-8" style={{ width: '850px' }}>
+                      <div className="w-full max-w-2xl mx-auto px-3 sm:px-4 lg:px-8">
                         <form onSubmit={e => {
                           e.preventDefault();
                           if (!disableSend) {
@@ -1072,20 +1087,20 @@ export default function Chat() {
                             handleSend(e);
                           }
                         }} className="relative">
-                          <div className={`flex items-end gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-4 transition-colors duration-200 ${isDarkMode
+                          <div className={`flex items-end gap-2 sm:gap-3 rounded-xl sm:rounded-2xl shadow-sm ring-1 ring-inset p-3 sm:p-4 transition-colors duration-200 ${isDarkMode
                             ? 'ring-gray-600'
                             : 'ring-gray-300 bg-white'
                             }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
                             <button
                               type="button"
                               onClick={handleFileAttach}
-                              className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
+                              className={`inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
                                 ? 'text-gray-400 hover:text-gray-200'
                                 : 'text-gray-600 hover:text-gray-800'
                                 }`}
                               disabled={sending}
                             >
-                              <PaperclipIcon className="h-5 w-5" />
+                              <PaperclipIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                               <span className="sr-only">Attach a file</span>
                             </button>
 
@@ -1094,7 +1109,7 @@ export default function Chat() {
                               name="message"
                               id="message"
                               rows={1}
-                              className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-all duration-200 overflow-hidden text-left flex items-center ${isDarkMode
+                              className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm sm:text-base leading-6 resize-none transition-all duration-200 overflow-hidden text-left flex items-center ${isDarkMode
                                 ? 'text-gray-100 placeholder:text-gray-500'
                                 : 'text-gray-900 placeholder:text-gray-400'
                                 }`}
@@ -1112,7 +1127,7 @@ export default function Chat() {
                                 }
                               }}
                               disabled={sending}
-                              style={{ minHeight: '30px', maxHeight: '200px' }}
+                              style={{ minHeight: '28px', maxHeight: '200px' }}
                             />
 
                             {attachedFile && (
@@ -1150,19 +1165,19 @@ export default function Chat() {
                             <button
                               type="button"
                               onClick={isRecording ? stopRecording : startRecording}
-                              className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
+                              className={`inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
                                 ? 'text-gray-400 hover:text-gray-200'
                                 : 'text-gray-600 hover:text-gray-800'
                                 } ${isRecording ? 'bg-red-500 text-white animate-pulse' : ''}`}
                               disabled={sending}
                             >
-                              <MicrophoneIcon className="h-5 w-5" />
+                              <MicrophoneIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                               <span className="sr-only">Voice input</span>
                             </button>
 
                             <button
                               type="submit"
-                              className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 transition-all duration-200 ${isDarkMode
+                              className={`inline-flex items-center justify-center rounded-lg p-1.5 sm:p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 transition-all duration-200 ${isDarkMode
                                 ? disableSend ? 'text-gray-600 cursor-not-allowed' : 'text-gray-300 hover:text-white hover:bg-gray-600 cursor-pointer'
                                 : disableSend ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100 cursor-pointer'
                                 }`}
@@ -1170,9 +1185,9 @@ export default function Chat() {
                               title="Send"
                             >
                               {sending ? (
-                                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                <div className="h-4 w-4 sm:h-5 sm:w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                               ) : (
-                                <SendIcon className="h-5 w-5" />
+                                <SendIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                               )}
                             </button>
                           </div>
@@ -1181,14 +1196,14 @@ export default function Chat() {
                     </div>
                   )}
 
-                  <div className="space-y-6 pb-8">
+                  <div className="space-y-4 sm:space-y-6 pb-6 sm:pb-8">
                     {!loading && currentSession?.entries.map((entry) => (
                       <div
                         key={entry.id}
                         className={`flex ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
-                          className={`max-w-4xl rounded-2xl px-6 py-4 ${entry.role === 'user'
+                          className={`max-w-[85%] sm:max-w-4xl rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 ${entry.role === 'user'
                             ? 'text-gray-900'
                             : isDarkMode ? 'text-gray-100' : 'bg-white text-gray-900'
                             }`}
@@ -1200,7 +1215,7 @@ export default function Chat() {
                                 : undefined
                           }}
                         >
-                          <div className="whitespace-pre-wrap text-base leading-relaxed">{entry.text}</div>
+                          <div className="whitespace-pre-wrap text-sm sm:text-base leading-relaxed">{entry.text}</div>
                         </div>
                       </div>
                     ))}
@@ -1213,7 +1228,7 @@ export default function Chat() {
             {!showEmptyState && (
               <div className={`transition-colors duration-200 ${isDarkMode ? '' : 'bg-white'
                 }`} style={{ backgroundColor: isDarkMode ? '#212121' : undefined }}>
-                <div className="mx-auto px-4 py-4 sm:px-6 lg:px-8" style={{ width: '850px' }}>
+                <div className="w-full max-w-2xl mx-auto px-3 py-3 sm:px-4 sm:py-4 lg:px-8">
                   <form onSubmit={e => {
                     e.preventDefault();
                     if (!disableSend) {
@@ -1221,20 +1236,20 @@ export default function Chat() {
                       handleSend(e);
                     }
                   }} className="relative">
-                    <div className={`flex items-end gap-3 rounded-2xl shadow-sm ring-1 ring-inset p-4 transition-colors duration-200 ${isDarkMode
+                    <div className={`flex items-end gap-2 sm:gap-3 rounded-xl sm:rounded-2xl shadow-sm ring-1 ring-inset p-3 sm:p-4 transition-colors duration-200 ${isDarkMode
                       ? 'ring-gray-600'
                       : 'ring-gray-300 bg-white'
                       }`} style={{ backgroundColor: isDarkMode ? '#1a1a1a' : undefined }}>
                       <button
                         type="button"
                         onClick={handleFileAttach}
-                        className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
+                        className={`inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
                           ? 'text-gray-400 hover:text-gray-200'
                           : 'text-gray-600 hover:text-gray-800'
                           }`}
                         disabled={sending}
                       >
-                        <PaperclipIcon className="h-5 w-5" />
+                        <PaperclipIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                         <span className="sr-only">Attach a file</span>
                       </button>
 
@@ -1243,7 +1258,7 @@ export default function Chat() {
                         name="message"
                         id="message"
                         rows={1}
-                        className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm leading-6 resize-none transition-all duration-200 overflow-hidden text-left flex items-center ${isDarkMode
+                        className={`flex-1 border-0 bg-transparent focus:ring-0 focus:outline-none text-sm sm:text-base leading-6 resize-none transition-all duration-200 overflow-hidden text-left flex items-center ${isDarkMode
                           ? 'text-gray-100 placeholder:text-gray-500'
                           : 'text-gray-900 placeholder:text-gray-400'
                           }`}
@@ -1261,7 +1276,7 @@ export default function Chat() {
                           }
                         }}
                         disabled={sending}
-                        style={{ minHeight: '32px', maxHeight: '200px' }}
+                        style={{ minHeight: '30px', maxHeight: '200px' }}
                       />
 
                       {attachedFile && (
@@ -1299,19 +1314,19 @@ export default function Chat() {
                       <button
                         type="button"
                         onClick={isRecording ? stopRecording : startRecording}
-                        className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
+                        className={`inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full transition-colors duration-200 ${isDarkMode
                           ? 'text-gray-400 hover:text-gray-200'
                           : 'text-gray-600 hover:text-gray-800'
                           } ${isRecording ? 'bg-red-500 text-white animate-pulse' : ''}`}
                         disabled={sending}
                       >
-                        <MicrophoneIcon className="h-5 w-5" />
+                        <MicrophoneIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                         <span className="sr-only">Voice input</span>
                       </button>
 
                       <button
                         type="submit"
-                        className={`inline-flex items-center justify-center rounded-lg p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 transition-all duration-200 ${isDarkMode
+                        className={`inline-flex items-center justify-center rounded-lg p-1.5 sm:p-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 transition-all duration-200 ${isDarkMode
                           ? disableSend ? 'text-gray-600 cursor-not-allowed' : 'text-gray-300 hover:text-white hover:bg-gray-600 cursor-pointer'
                           : disableSend ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100 cursor-pointer'
                           }`}
@@ -1319,9 +1334,9 @@ export default function Chat() {
                         title="Send"
                       >
                         {sending ? (
-                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                          <div className="h-4 w-4 sm:h-5 sm:w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                         ) : (
-                          <SendIcon className="h-5 w-5" />
+                          <SendIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                         )}
                       </button>
                     </div>
@@ -1331,7 +1346,7 @@ export default function Chat() {
             )}
 
             {/* Simple footer text - always at bottom */}
-            <div className={`px-6 py-3 text-center transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            <div className={`px-3 sm:px-6 py-2 sm:py-3 text-center transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
               <div className="text-xs">
                 RTI-Dost AI assistance for drafting RTIs. Privacy Policy • Terms & Conditions
               </div>

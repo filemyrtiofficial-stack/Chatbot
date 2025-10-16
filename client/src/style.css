@@ -16,6 +16,21 @@
   ::selection {
     @apply bg-sky-500/80 text-white;
   }
+
+  /* Mobile-specific improvements */
+  @media (max-width: 640px) {
+    body {
+      -webkit-text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Prevent zoom on input focus */
+    input,
+    textarea,
+    select {
+      font-size: 16px;
+    }
+  }
 }
 
 @layer components {
@@ -29,5 +44,27 @@
 
   .input-field {
     @apply block w-full rounded-xl border border-slate-300 bg-white/90 px-3 py-2 text-sm text-slate-900 shadow-sm transition-colors duration-200 placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200;
+  }
+
+  /* Responsive sidebar */
+  .sidebar-mobile {
+    @apply fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out;
+  }
+
+  .sidebar-mobile.closed {
+    @apply -translate-x-full;
+  }
+
+  /* Mobile-friendly touch targets */
+  @media (max-width: 640px) {
+
+    .btn-primary,
+    .btn-secondary {
+      @apply min-h-[44px] px-4 py-3;
+    }
+
+    .input-field {
+      @apply min-h-[44px] px-4 py-3;
+    }
   }
 }
