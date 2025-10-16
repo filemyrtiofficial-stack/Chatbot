@@ -169,8 +169,6 @@ export default function Chat() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chatMessagesRef = useRef<HTMLDivElement>(null);
   const [hasStartedConversation, setHasStartedConversation] = useState(false);
-  const [showTermsModal, setShowTermsModal] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const availableModels = [
     'RTI-Dost',
@@ -299,15 +297,6 @@ export default function Chat() {
     }
   }, [message, hasStartedConversation]);
 
-  // Check if user has accepted terms
-  useEffect(() => {
-    const hasAcceptedTerms = localStorage.getItem('rti-dost-terms-accepted');
-    if (!hasAcceptedTerms) {
-      setShowTermsModal(true);
-    } else {
-      setTermsAccepted(true);
-    }
-  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -407,18 +396,6 @@ export default function Chat() {
     setHasStartedConversation(false);
   }
 
-  function handleAcceptTerms() {
-    localStorage.setItem('rti-dost-terms-accepted', 'true');
-    setTermsAccepted(true);
-    setShowTermsModal(false);
-  }
-
-  function handleRejectTerms() {
-    // Redirect to logout or show message
-    alert('You must accept the terms and conditions to use RTI Dost.');
-    // You can also redirect to logout or home page
-    // window.location.href = '/logout';
-  }
 
   async function handleSend(e: FormEvent) {
     e.preventDefault();
@@ -700,75 +677,6 @@ export default function Chat() {
 
   return (
     <>
-      {/* Terms and Conditions Modal */}
-      {showTermsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className={`mx-4 max-w-2xl rounded-lg p-6 shadow-xl transition-colors duration-200 ${isDarkMode
-            ? 'bg-gray-800 text-gray-100'
-            : 'bg-white text-gray-900'
-            }`}>
-            <div className="mb-6">
-              <h2 className={`text-2xl font-bold mb-4 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
-                }`}>Terms and Conditions</h2>
-
-              <div className={`max-h-96 overflow-y-auto text-sm leading-relaxed transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'
-                }`}>
-                <p className="mb-4">
-                  Welcome to RTI Dost, an AI-powered assistant designed to help you draft Right to Information (RTI) applications in India.
-                </p>
-
-                <h3 className={`font-semibold mb-2 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>1. Service Description</h3>
-                <p className="mb-4">
-                  RTI Dost provides AI assistance for drafting RTI applications. The service is designed to help users understand RTI procedures and create well-structured applications.
-                </p>
-
-                <h3 className={`font-semibold mb-2 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>2. User Responsibilities</h3>
-                <p className="mb-4">
-                  Users are responsible for verifying all information provided in their RTI applications. RTI Dost is a tool to assist in drafting, not a substitute for legal advice.
-                </p>
-
-                <h3 className={`font-semibold mb-2 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>3. Data Privacy</h3>
-                <p className="mb-4">
-                  We respect your privacy and handle your data in accordance with our Privacy Policy. Your conversations and RTI drafts are processed securely.
-                </p>
-
-                <h3 className={`font-semibold mb-2 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>4. Limitation of Liability</h3>
-                <p className="mb-4">
-                  RTI Dost is provided "as is" without warranties. We are not liable for any outcomes resulting from the use of drafted RTI applications.
-                </p>
-
-                <h3 className={`font-semibold mb-2 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>5. Acceptance</h3>
-                <p className="mb-4">
-                  By using RTI Dost, you agree to these terms and conditions. If you do not agree, please discontinue use of the service.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-4 justify-end">
-              <button
-                onClick={handleRejectTerms}
-                className={`px-6 py-2 rounded-lg font-medium transition-colors duration-200 ${isDarkMode
-                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-              >
-                I Don't Accept
-              </button>
-              <button
-                onClick={handleAcceptTerms}
-                className="px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors duration-200"
-              >
-                Accept
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className={`flex h-screen transition-colors duration-200 ${isDarkMode
         ? 'text-gray-100'
@@ -1348,7 +1256,7 @@ export default function Chat() {
             {/* Simple footer text - always at bottom */}
             <div className={`px-3 sm:px-6 py-2 sm:py-3 text-center transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
               <div className="text-xs">
-                RTI-Dost AI assistance for drafting RTIs. Privacy Policy • Terms & Conditions
+                RTI-Dost AI assistance for drafting RTIs. Privacy Policy
               </div>
             </div>
           </div>
