@@ -1052,7 +1052,7 @@ export default function Chat() {
                                   ? 'text-white'
                                   : 'text-gray-900'
                                   }`}
-                                placeholder="Message RTI Dost..."
+                                placeholder="Type your question or describe your RTI issue…"
                                 value={message}
                                 onChange={e => setMessage(e.target.value)}
                                 onKeyDown={e => {
