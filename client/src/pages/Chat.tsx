@@ -720,8 +720,8 @@ export default function Chat() {
             : 'border-gray-200 bg-gray-50'
             }`}>
             <div className="flex h-12 shrink-0 items-center justify-between px-4 sm:px-6">
-              <div className="flex items-center justify-center">
-                <div className="flex h-8 w-8 sm:h-12 sm:w-12 items-center justify-center">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center">
                   <img
                     src="/logo/image.png"
                     alt="File My RTI Logo"
@@ -729,6 +729,9 @@ export default function Chat() {
                     style={{ width: '1.5rem', height: '1.5rem' }}
                   />
                 </div>
+                <span className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  RTI Dost
+                </span>
               </div>
 
               {/* Sidebar toggle button */}
@@ -993,7 +996,7 @@ export default function Chat() {
                 </div>
               )}
 
-              <div ref={chatMessagesRef} className="flex-1 overflow-y-auto scroll-smooth min-h-0" style={{ maxHeight: 'calc(100vh - 200px)', minHeight: '300px' }}>
+              <div ref={chatMessagesRef} className={`flex-1 min-h-0 ${showEmptyState ? 'overflow-hidden' : 'overflow-y-auto scroll-smooth'}`} style={{ maxHeight: 'calc(100vh - 200px)', minHeight: '300px' }}>
                 <div className={`mx-auto max-w-3xl px-4 py-8 ${isDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
                   {loading && (
                     <div className="flex items-center justify-center py-16">
