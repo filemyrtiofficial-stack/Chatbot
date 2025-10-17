@@ -715,7 +715,7 @@ export default function Chat() {
 
         {/* Sidebar - responsive design */}
         <aside className={`${sidebarOpen ? 'flex' : 'hidden'} lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:z-50 lg:w-64`}>
-          <div className={`flex grow flex-col gap-y-5 overflow-y-auto border-r transition-colors duration-200 ${isDarkMode
+          <div className={`flex grow flex-col border-r transition-colors duration-200 ${isDarkMode
             ? 'border-gray-800 bg-gray-800'
             : 'border-gray-200 bg-gray-50'
             }`}>
@@ -759,7 +759,7 @@ export default function Chat() {
               </button>
             </div>
 
-            <nav className="flex flex-1 flex-col px-4 sm:px-6 overflow-hidden">
+            <nav className="flex flex-1 flex-col px-4 sm:px-6 py-4 overflow-hidden">
               <ul role="list" className="flex flex-1 flex-col gap-y-2 overflow-y-auto">
                 <li>
                   <button
