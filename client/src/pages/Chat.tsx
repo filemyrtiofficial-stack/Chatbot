@@ -1042,6 +1042,20 @@ export default function Chat() {
                             ? 'border-gray-600 bg-gray-800'
                             : 'border-gray-200 bg-white'
                             }`}>
+                            <button
+                              type="button"
+                              onClick={handleFileAttach}
+                              className={`p-2 rounded-lg transition-colors duration-200 ${isDarkMode
+                                ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
+                                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                                }`}
+                              disabled={sending}
+                            >
+                              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                              </svg>
+                            </button>
+
                             <div className="flex-1 p-4">
                               <textarea
                                 ref={textareaRef}
@@ -1052,7 +1066,7 @@ export default function Chat() {
                                   ? 'text-white'
                                   : 'text-gray-900'
                                   }`}
-                                placeholder="Write your RTI — what do you wish to know"
+                                placeholder="Write your RTI — what do you wish to know"
                                 value={message}
                                 onChange={e => setMessage(e.target.value)}
                                 onKeyDown={e => {
@@ -1070,20 +1084,6 @@ export default function Chat() {
                             </div>
 
                             <div className="flex items-center gap-2 p-2">
-                              <button
-                                type="button"
-                                onClick={handleFileAttach}
-                                className={`p-2 rounded-lg transition-colors duration-200 ${isDarkMode
-                                  ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
-                                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                                  }`}
-                                disabled={sending}
-                              >
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                </svg>
-                              </button>
-
                               <button
                                 type="button"
                                 onClick={isRecording ? stopRecording : startRecording}
@@ -1177,6 +1177,20 @@ export default function Chat() {
                       ? 'border-gray-600 bg-gray-800'
                       : 'border-gray-200 bg-white'
                       }`}>
+                      <button
+                        type="button"
+                        onClick={handleFileAttach}
+                        className={`p-2 rounded-lg transition-colors duration-200 ${isDarkMode
+                          ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
+                          : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                          }`}
+                        disabled={sending}
+                      >
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                      </button>
+
                       <div className="flex-1 p-4">
                         <textarea
                           ref={textareaRef}
@@ -1205,20 +1219,6 @@ export default function Chat() {
                       </div>
 
                       <div className="flex items-center gap-2 p-2">
-                        <button
-                          type="button"
-                          onClick={handleFileAttach}
-                          className={`p-2 rounded-lg transition-colors duration-200 ${isDarkMode
-                            ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
-                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                            }`}
-                          disabled={sending}
-                        >
-                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                          </svg>
-                        </button>
-
                         <button
                           type="button"
                           onClick={isRecording ? stopRecording : startRecording}
