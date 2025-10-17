@@ -626,7 +626,7 @@ export default function Chat() {
         recognition.onresult = (event: any) => {
           const transcript = event.results[0][0].transcript;
           console.log('Speech recognition result:', transcript);
-          setMessage(prev => prev + (prev ? ' ' : '') + transcript);
+          setMessage(prev => prev  (prev ? ' ' : '') + transcript);
         };
 
         recognition.onerror = (event: any) => {
