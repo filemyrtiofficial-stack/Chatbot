@@ -158,7 +158,7 @@ export default function Chat() {
   const [error, setError] = useState<string | null>(null);
   const [globalNotice, setGlobalNotice] = useState<string | null>(null);
   const [downloadingSession, setDownloadingSession] = useState<string | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [selectedModel, setSelectedModel] = useState('RTI-Dost');
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
@@ -245,6 +245,29 @@ export default function Chat() {
     // Listen for changes
     const handleChange = (e: MediaQueryListEvent) => {
       setIsDarkMode(e.matches);
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, []);
+
+  // Auto-show sidebar on desktop screens
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const mediaQuery = window.matchMedia('(min-width: 1024px)');
+
+    // Set initial state
+    if (mediaQuery.matches) {
+      setSidebarOpen(true);
+    }
+
+    // Listen for changes
+    const handleChange = (e: MediaQueryListEvent) => {
+      setSidebarOpen(e.matches);
     };
 
     mediaQuery.addEventListener('change', handleChange);
