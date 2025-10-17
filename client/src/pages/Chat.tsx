@@ -1025,7 +1025,7 @@ export default function Chat() {
                           Welcome to RTI-Dost
                         </h3>
                         <p className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                          Your AI assistant for drafting Right to Information applications
+                        Draft your RTI in seconds — just tell me what you need information about.
                         </p>
                       </div>
 
