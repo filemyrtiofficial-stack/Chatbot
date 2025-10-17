@@ -1038,14 +1038,14 @@ export default function Chat() {
                             handleSend(e);
                           }
                         }} className="relative">
-                          <div className={`relative flex items-center gap-2 rounded-2xl border shadow-sm transition-all duration-200 ${isDarkMode
+                          <div className={`relative flex items-center gap-1 rounded-2xl border shadow-sm transition-all duration-200 ${isDarkMode
                             ? 'border-gray-600 bg-gray-800'
                             : 'border-gray-200 bg-white'
                             }`}>
                             <button
                               type="button"
                               onClick={handleFileAttach}
-                              className={`pr-1 pl-2 py-2 rounded-lg transition-colors duration-200 ${isDarkMode
+                              className={`pr-0 pl-1 py-2 rounded-lg transition-colors duration-200 ${isDarkMode
                                 ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
                                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                                 }`}
@@ -1056,7 +1056,7 @@ export default function Chat() {
                               </svg>
                             </button>
 
-                            <div className="flex-1 pl-2 pr-4 py-4">
+                            <div className="flex-1 pl-1 pr-4 py-4">
                               <textarea
                                 ref={textareaRef}
                                 name="message"
@@ -1173,14 +1173,14 @@ export default function Chat() {
                       handleSend(e);
                     }
                   }} className="relative">
-                    <div className={`relative flex items-center gap-2 rounded-2xl border shadow-sm transition-all duration-200 ${isDarkMode
+                    <div className={`relative flex items-center gap-1 rounded-2xl border shadow-sm transition-all duration-200 ${isDarkMode
                       ? 'border-gray-600 bg-gray-800'
                       : 'border-gray-200 bg-white'
                       }`}>
                       <button
                         type="button"
                         onClick={handleFileAttach}
-                        className={`pr-1 pl-2 py-2 rounded-lg transition-colors duration-200 ${isDarkMode
+                        className={`pr-0 pl-1 py-2 rounded-lg transition-colors duration-200 ${isDarkMode
                           ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
                           : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
                           }`}
@@ -1191,7 +1191,7 @@ export default function Chat() {
                         </svg>
                       </button>
 
-                      <div className="flex-1 pl-2 pr-4 py-4">
+                      <div className="flex-1 pl-1 pr-4 py-4">
                         <textarea
                           ref={textareaRef}
                           name="message"
