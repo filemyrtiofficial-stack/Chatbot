@@ -4,7 +4,7 @@ const config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'Roboto', 'system-ui', '-apple-system', 'sans-serif'],
       },
       colors: {
         'surface-light': '#f1f5f9',

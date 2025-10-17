@@ -4,17 +4,49 @@
 
 @layer base {
   html {
-    font-family: 'Helvetica Neue', 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-family: 'Inter', 'Roboto', 'Helvetica Neue', 'Segoe UI', system-ui, -apple-system, sans-serif;
     scroll-behavior: smooth;
   }
 
   body {
     font-feature-settings: 'liga' 1, 'kern' 1;
-    @apply bg-[#f9fafc] text-slate-900 antialiased transition-colors duration-300 ease-out;
+    @apply bg-white text-gray-900 antialiased transition-colors duration-300 ease-out;
+    line-height: 1.6;
   }
 
   ::selection {
-    @apply bg-sky-500/80 text-white;
+    @apply bg-blue-500/20 text-blue-900;
+  }
+
+  /* Dark mode selection */
+  .dark ::selection {
+    @apply bg-blue-400/20 text-blue-100;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: #4b5563;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
   }
 
   /* Mobile-specific improvements */
