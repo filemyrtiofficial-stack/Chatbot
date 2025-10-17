@@ -984,13 +984,6 @@ export default function Chat() {
                   {showEmptyState && (
                     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
                       <div className="mb-8">
-                        <div className="flex items-center justify-center mb-4">
-                          <div className={`w-16 h-16 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
-                            <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                            </svg>
-                          </div>
-                        </div>
                         <h3 className={`text-2xl font-semibold mb-2 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                           Welcome to RTI Dost
                         </h3>
@@ -1080,10 +1073,10 @@ export default function Chat() {
                           {/* Avatar */}
                           <div className="flex-shrink-0">
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${entry.role === 'user'
-                                ? 'bg-blue-500 text-white'
-                                : isDarkMode
-                                  ? 'bg-gray-700 text-gray-300'
-                                  : 'bg-gray-200 text-gray-600'
+                              ? 'bg-blue-500 text-white'
+                              : isDarkMode
+                                ? 'bg-gray-700 text-gray-300'
+                                : 'bg-gray-200 text-gray-600'
                               }`}>
                               {entry.role === 'user' ? (
                                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
