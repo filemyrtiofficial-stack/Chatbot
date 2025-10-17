@@ -1096,6 +1096,18 @@ export default function Chat() {
                                   <SendIcon className="h-5 w-5" />
                                 )}
                               </button>
+
+                              <button
+                                type="button"
+                                onClick={isRecording ? stopRecording : startRecording}
+                                className={`p-2 rounded-lg transition-colors duration-200 ${isRecording
+                                  ? isDarkMode ? 'text-red-400 hover:text-red-300 hover:bg-gray-700' : 'text-red-500 hover:text-red-600 hover:bg-gray-100'
+                                  : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                                  }`}
+                                disabled={sending}
+                              >
+                                <MicrophoneIcon className="h-5 w-5" />
+                              </button>
                             </div>
                           </div>
                         </form>
@@ -1217,6 +1229,18 @@ export default function Chat() {
                             <SendIcon className="h-5 w-5" />
                           )}
                         </button>
+
+                        <button
+                          type="button"
+                          onClick={isRecording ? stopRecording : startRecording}
+                          className={`p-2 rounded-lg transition-colors duration-200 ${isRecording
+                            ? isDarkMode ? 'text-red-400 hover:text-red-300 hover:bg-gray-700' : 'text-red-500 hover:text-red-600 hover:bg-gray-100'
+                            : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                            }`}
+                          disabled={sending}
+                        >
+                          <MicrophoneIcon className="h-5 w-5" />
+                        </button>
                       </div>
                     </div>
                   </form>
@@ -1237,7 +1261,7 @@ export default function Chat() {
                     Privacy Policy
                   </button>
                 </div>
-                
+
               </div>
             </div>
           </div>
