@@ -1025,7 +1025,7 @@ export default function Chat() {
                           Welcome to RTI-Dost
                         </h3>
                         <p className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                        Draft your RTI in seconds — just tell me what you need information about.
+                          Draft your RTI in seconds — just tell me what you need information about.
                         </p>
                       </div>
 
@@ -1226,23 +1226,23 @@ export default function Chat() {
 
             {/* Simple footer text - always at bottom */}
             <div className={`px-4 py-3 text-center transition-colors duration-200 ${isDarkMode ? 'text-gray-400 bg-gray-900' : 'text-gray-500 bg-white'}`}>
-              <div className="text-xs">
-                A product of Ranazonai Technologies |
-                <button
-                  type="button"
-                  onClick={() => setShowTermsModal(true)}
-                  className="hover:underline mx-1"
-                >
-                  Terms and Conditions
-                </button>
-                |
-                <button
-                  type="button"
-                  onClick={() => setShowPrivacyModal(true)}
-                  className="hover:underline ml-1"
-                >
-                  Privacy Policy
-                </button>
+              <div className="text-xs space-y-2">
+                <div>
+                  © 2025 FileMyRTI.com | Built by Ranazonai Tech |
+                  <button
+                    type="button"
+                    onClick={() => setShowPrivacyModal(true)}
+                    className="hover:underline ml-1"
+                  >
+                    Privacy Policy
+                  </button>
+                </div>
+                <div>
+                  Need help? Call <a href="tel:+919911100589" className="hover:underline">+91 99111 00589</a>
+                </div>
+                <div className="text-xs opacity-75">
+                  Made with ❤ in India
+                </div>
               </div>
             </div>
           </div>
