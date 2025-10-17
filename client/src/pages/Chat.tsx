@@ -833,48 +833,34 @@ export default function Chat() {
             </div>
 
             {/* Sticky Footer */}
-            <div className={`sticky bottom-0 z-10 flex flex-col gap-2 px-4 sm:px-6 py-2 border-t bg-inherit transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
+            <div className={`sticky bottom-0 z-10 flex items-center gap-x-3 px-4 sm:px-6 py-2 border-t bg-inherit transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
               }`}>
-              <div className="flex items-center gap-x-3">
-                <div className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-gradient-to-br text-xs sm:text-sm font-semibold transition-colors duration-200 ${isDarkMode
-                  ? 'from-gray-600 to-gray-700 text-gray-200'
-                  : 'from-gray-200 to-gray-300 text-gray-700'
-                  }`}>
-                  {user?.pictureUrl ? (
-                    <img src={user.pictureUrl} alt={user.name ?? 'User avatar'} className="h-full w-full rounded-full object-cover" />
-                  ) : (
-                    userInitial
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className={`text-xs sm:text-sm font-semibold truncate transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>{user?.name}</div>
-                  <div className={`text-xs truncate transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                    }`}>{user?.email}</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={logout}
-                  className={`text-xs transition-colors duration-200 ${isDarkMode
-                    ? 'text-gray-400 hover:text-gray-200'
-                    : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                >
-                  Logout
-                </button>
+              <div className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-gradient-to-br text-xs sm:text-sm font-semibold transition-colors duration-200 ${isDarkMode
+                ? 'from-gray-600 to-gray-700 text-gray-200'
+                : 'from-gray-200 to-gray-300 text-gray-700'
+                }`}>
+                {user?.pictureUrl ? (
+                  <img src={user.pictureUrl} alt={user.name ?? 'User avatar'} className="h-full w-full rounded-full object-cover" />
+                ) : (
+                  userInitial
+                )}
               </div>
-              <div className="flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => setShowTermsModal(true)}
-                  className={`text-xs transition-colors duration-200 ${isDarkMode
-                    ? 'text-gray-500 hover:text-gray-300'
-                    : 'text-gray-400 hover:text-gray-600'
-                    }`}
-                >
-                  Terms & Conditions
-                </button>
+              <div className="flex-1 min-w-0">
+                <div className={`text-xs sm:text-sm font-semibold truncate transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>{user?.name}</div>
+                <div className={`text-xs truncate transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                  }`}>{user?.email}</div>
               </div>
+              <button
+                type="button"
+                onClick={logout}
+                className={`text-xs transition-colors duration-200 ${isDarkMode
+                  ? 'text-gray-400 hover:text-gray-200'
+                  : 'text-gray-500 hover:text-gray-700'
+                  }`}
+              >
+                Logout
+              </button>
             </div>
           </div>
         </aside>
