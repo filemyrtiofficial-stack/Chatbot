@@ -761,8 +761,8 @@ export default function Chat() {
             </div>
 
             {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
-              <nav className="flex flex-col">
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 pb-6 min-h-0">
+              <nav className="flex flex-col h-full">
                 <ul role="list" className="flex flex-col gap-y-2">
                   <li>
                     <button
