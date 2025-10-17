@@ -331,12 +331,12 @@ export default function Chat() {
     }
   }, [message, hasStartedConversation]);
 
-  // Auto-focus textarea when empty state changes
+  // Auto-focus textarea when empty state changes or when starting conversation
   useEffect(() => {
-    if (textareaRef.current && showEmptyState) {
+    if (textareaRef.current) {
       textareaRef.current.focus();
     }
-  }, [showEmptyState]);
+  }, [showEmptyState, hasStartedConversation]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
