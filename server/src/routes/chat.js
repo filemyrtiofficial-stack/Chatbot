@@ -679,6 +679,19 @@ Would you like to download this draft as a Word document?
 
 
 
+  // FIX: The 'prompt' variable was undefined, causing ReferenceError
+  // SOLUTION: Construct the user prompt from application field values
+  // This creates a structured input for the AI to generate the RTI draft
+  const prompt = `Please create a formal RTI application letter with the following details:
+  
+Full Name: ${fieldValues.full_name}
+Contact Information: ${fieldValues.contact_info}
+Department/Authority: ${fieldValues.department}
+Reference Details: ${fieldValues.reference_details}
+Information Request: ${fieldValues.information_request}
+
+Please format this as a professional RTI application letter.`;
+
   const completion = await client.chat.completions.create({
     model: OPENAI_MODEL,
     messages: [
