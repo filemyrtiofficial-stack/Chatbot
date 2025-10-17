@@ -277,6 +277,20 @@ export default function Chat() {
     };
   }, []);
 
+  // Auto-focus textarea on component mount
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, []);
+
+  // Auto-focus textarea when empty state changes
+  useEffect(() => {
+    if (textareaRef.current && showEmptyState) {
+      textareaRef.current.focus();
+    }
+  }, [showEmptyState]);
+
   // Auto-resize textarea - ChatGPT-like behavior
   useEffect(() => {
     if (textareaRef.current) {
