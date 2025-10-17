@@ -733,7 +733,7 @@ export default function Chat() {
             : 'border-gray-200 bg-gray-50'
             }`}>
             {/* Sticky Header */}
-            <div className="sticky top-0 z-10 flex h-12 shrink-0 items-center justify-between px-4 sm:px-6 bg-inherit">
+            <div className="sticky top-0 z-10 flex h-12 shrink-0 items-center justify-between bg-inherit" style={{ paddingLeft: '18px', paddingRight: '18px' }}>
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center">
                   <img
@@ -778,7 +778,7 @@ export default function Chat() {
                     <button
                       type="button"
                       onClick={startNewConversation}
-                      className={`group flex items-center rounded-lg p-2 text-sm leading-5 font-medium transition-colors duration-200 w-full text-left ${isDarkMode
+                      className={`group flex items-center rounded-lg p-0 text-sm leading-5 font-medium transition-colors duration-200 w-full text-left ${isDarkMode
                         ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
                         : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
                         }`}
