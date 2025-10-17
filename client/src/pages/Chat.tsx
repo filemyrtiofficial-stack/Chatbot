@@ -170,6 +170,10 @@ export default function Chat() {
   const chatMessagesRef = useRef<HTMLDivElement>(null);
   const [hasStartedConversation, setHasStartedConversation] = useState(false);
 
+  const showEmptyState =
+    selectedSessionId === NEW_SESSION_SENTINEL &&
+    !hasStartedConversation;
+
   const availableModels = [
     'RTI-Dost',
 
@@ -284,13 +288,6 @@ export default function Chat() {
     }
   }, []);
 
-  // Auto-focus textarea when empty state changes
-  useEffect(() => {
-    if (textareaRef.current && showEmptyState) {
-      textareaRef.current.focus();
-    }
-  }, [showEmptyState]);
-
   // Auto-resize textarea - ChatGPT-like behavior
   useEffect(() => {
     if (textareaRef.current) {
@@ -334,6 +331,12 @@ export default function Chat() {
     }
   }, [message, hasStartedConversation]);
 
+  // Auto-focus textarea when empty state changes
+  useEffect(() => {
+    if (textareaRef.current && showEmptyState) {
+      textareaRef.current.focus();
+    }
+  }, [showEmptyState]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -700,10 +703,6 @@ export default function Chat() {
       setMediaRecorder(null);
     }
   };
-
-  const showEmptyState =
-    selectedSessionId === NEW_SESSION_SENTINEL &&
-    !hasStartedConversation;
 
   const mobileSessionValue =
     selectedSessionId && selectedSessionId !== NEW_SESSION_SENTINEL
