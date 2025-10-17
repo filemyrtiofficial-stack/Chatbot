@@ -759,8 +759,8 @@ export default function Chat() {
               </button>
             </div>
 
-            <nav className="flex flex-1 flex-col px-4 sm:px-6">
-              <ul role="list" className="flex flex-1 flex-col gap-y-2">
+            <nav className="flex flex-1 flex-col px-4 sm:px-6 overflow-hidden">
+              <ul role="list" className="flex flex-1 flex-col gap-y-2 overflow-y-auto">
                 <li>
                   <button
                     type="button"
@@ -785,7 +785,7 @@ export default function Chat() {
                     <div className={`text-xs font-semibold leading-6 uppercase tracking-wider mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'
                       }`}>Chats</div>
                     <ul role="list" className="-mx-2 space-y-0.5">
-                      {orderedSessions.slice(0, 8).map((session) => (
+                      {orderedSessions.map((session) => (
                         <li key={session.sessionId}>
                           <div className={`group flex items-center rounded-lg p-2 text-sm leading-5 font-medium transition-colors duration-200 ${isDarkMode
                             ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
