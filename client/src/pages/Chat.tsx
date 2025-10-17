@@ -1038,7 +1038,7 @@ export default function Chat() {
                             handleSend(e);
                           }
                         }} className="relative">
-                          <div className={`relative flex items-center gap-3 rounded-2xl border shadow-sm transition-all duration-200 ${isDarkMode
+                          <div className={`relative flex items-center gap-2 rounded-2xl border shadow-sm transition-all duration-200 ${isDarkMode
                             ? 'border-gray-600 bg-gray-800'
                             : 'border-gray-200 bg-white'
                             }`}>
@@ -1173,7 +1173,7 @@ export default function Chat() {
                       handleSend(e);
                     }
                   }} className="relative">
-                    <div className={`relative flex items-center gap-3 rounded-2xl border shadow-sm transition-all duration-200 ${isDarkMode
+                    <div className={`relative flex items-center gap-2 rounded-2xl border shadow-sm transition-all duration-200 ${isDarkMode
                       ? 'border-gray-600 bg-gray-800'
                       : 'border-gray-200 bg-white'
                       }`}>
