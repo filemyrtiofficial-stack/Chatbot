@@ -1248,7 +1248,22 @@ export default function Chat() {
             {/* Simple footer text - always at bottom */}
             <div className={`px-4 py-3 text-center transition-colors duration-200 ${isDarkMode ? 'text-gray-400 bg-gray-900' : 'text-gray-500 bg-white'}`}>
               <div className="text-xs">
-                RTI-Dost AI assistance for drafting RTIs. Privacy Policy
+                A product of Ranazonai Technologies |
+                <button
+                  type="button"
+                  onClick={() => setShowTermsModal(true)}
+                  className="hover:underline mx-1"
+                >
+                  Terms and Conditions
+                </button>
+                |
+                <button
+                  type="button"
+                  onClick={() => {/* Add privacy policy modal later */ }}
+                  className="hover:underline ml-1"
+                >
+                  Privacy Policy
+                </button>
               </div>
             </div>
           </div>
