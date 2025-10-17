@@ -760,7 +760,7 @@ export default function Chat() {
             </div>
 
             <nav className="flex flex-1 flex-col px-4 sm:px-6 py-4 overflow-hidden">
-              <ul role="list" className="flex flex-1 flex-col gap-y-2 overflow-y-auto">
+              <ul role="list" className="flex flex-1 flex-col gap-y-2 overflow-y-auto overflow-x-hidden">
                 <li>
                   <button
                     type="button"
