@@ -730,9 +730,6 @@ export default function Chat() {
                     style={{ width: '1.5rem', height: '1.5rem' }}
                   />
                 </div>
-                <span className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                  RTI Dost
-                </span>
               </div>
 
               {/* Sidebar toggle button */}
@@ -1016,7 +1013,7 @@ export default function Chat() {
                     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
                       <div className="mb-8">
                         <h3 className={`text-2xl font-semibold mb-2 transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                          Welcome to RTI Dost
+                          Welcome to RTI-Dost
                         </h3>
                         <p className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                           Your AI assistant for drafting Right to Information applications
