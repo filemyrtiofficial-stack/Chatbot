@@ -778,17 +778,11 @@ export default function Chat() {
                     <button
                       type="button"
                       onClick={startNewConversation}
-                      className={`group flex gap-x-3 rounded-lg p-2 text-sm leading-5 font-medium transition-colors duration-200 w-full text-left ${isDarkMode
+                      className={`group flex items-center rounded-lg p-2 text-sm leading-5 font-medium transition-colors duration-200 w-full text-left ${isDarkMode
                         ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
                         : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
                         }`}
                     >
-                      <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md transition-colors duration-200 ${isDarkMode
-                        ? 'bg-gray-600 text-gray-400 group-hover:bg-gray-500'
-                        : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
-                        }`}>
-                        +
-                      </span>
                       <span className="truncate text-sm">New chat</span>
                     </button>
                   </li>
