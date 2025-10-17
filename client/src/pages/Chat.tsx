@@ -1099,28 +1099,6 @@ export default function Chat() {
                           </div>
                         </form>
                       </div>
-
-                      {/* Footer for welcome page */}
-                      <div className="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700">
-                        <div className={`text-xs text-center ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
-                          A product of Ranazonai Technologies |
-                          <button
-                            type="button"
-                            onClick={() => setShowTermsModal(true)}
-                            className="hover:underline mx-1"
-                          >
-                            Terms and Conditions
-                          </button>
-                          |
-                          <button
-                            type="button"
-                            onClick={() => {/* Add privacy policy modal later */ }}
-                            className="hover:underline ml-1"
-                          >
-                            Privacy Policy
-                          </button>
-                        </div>
-                      </div>
                     </div>
                   )}
 
