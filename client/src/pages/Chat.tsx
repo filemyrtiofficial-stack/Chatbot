@@ -1241,7 +1241,7 @@ export default function Chat() {
                   Need help? Call <a href="tel:+919911100589" className="hover:underline">+91 99111 00589</a>
                 </div>
                 <div className="text-xs opacity-75">
-                  Made with ❤ in India
+                  Made with <span className="text-red-500">❤</span> in India
                 </div>
               </div>
             </div>
