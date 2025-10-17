@@ -170,6 +170,7 @@ export default function Chat() {
   const chatMessagesRef = useRef<HTMLDivElement>(null);
   const [hasStartedConversation, setHasStartedConversation] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   const showEmptyState =
     selectedSessionId === NEW_SESSION_SENTINEL &&
@@ -1237,7 +1238,7 @@ export default function Chat() {
                 |
                 <button
                   type="button"
-                  onClick={() => {/* Add privacy policy modal later */ }}
+                  onClick={() => setShowPrivacyModal(true)}
                   className="hover:underline ml-1"
                 >
                   Privacy Policy
@@ -1403,6 +1404,149 @@ export default function Chat() {
                   <ul className={`text-sm space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                     <li>• These Terms shall be governed by and construed in accordance with the laws of India.</li>
                     <li>• Jurisdiction: Hyderabad, Telangana.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Privacy Policy Modal */}
+      {showPrivacyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50"
+            onClick={() => setShowPrivacyModal(false)}
+          />
+          <div className={`relative max-w-4xl max-h-[90vh] overflow-y-auto rounded-lg shadow-xl ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <div className="sticky top-0 flex items-center justify-between p-6 border-b bg-inherit">
+              <h2 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                FileMyRTI AI Bot — Privacy Policy
+              </h2>
+              <button
+                onClick={() => setShowPrivacyModal(false)}
+                className={`p-2 rounded-lg transition-colors duration-200 ${isDarkMode
+                  ? 'text-gray-400 hover:text-white hover:bg-gray-700'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                  }`}
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                <strong>Effective Date:</strong> 9th Sep 2025
+              </p>
+
+              <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                At FileMyRTI, your privacy is important to us. This Privacy Policy explains how we collect, use, and safeguard your data when you use our AI Bot.
+              </p>
+
+              <div className="space-y-4">
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    1. Information We Collect
+                  </h3>
+                  <ul className={`text-sm space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <li>• <strong>Personal Information:</strong> Name, email, phone number, postal address (for drafting RTI applications).</li>
+                    <li>• <strong>RTI Application Details:</strong> Information you request under RTI (application numbers, department names, etc.).</li>
+                    <li>• <strong>Payment Information:</strong> Processed securely via third-party gateways (we do not store card/UPI details).</li>
+                    <li>• <strong>Usage Data:</strong> Device type, IP address, browser type, and interaction logs for security and analytics.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    2. How We Use Your Information
+                  </h3>
+                  <ul className={`text-sm space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <li>• To generate RTI drafts accurately.</li>
+                    <li>• To process and confirm payments (if you choose paid filing).</li>
+                    <li>• To file your RTI with the correct authority.</li>
+                    <li>• To send confirmation emails, updates, and tracking numbers.</li>
+                    <li>• To improve our AI bot's accuracy and user experience.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    3. Data Sharing
+                  </h3>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    We do not sell or rent your personal data.
+                  </p>
+                  <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    Your details are shared only with:
+                  </p>
+                  <ul className={`text-sm mt-2 space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <li>• The relevant government authority (for filing your RTI).</li>
+                    <li>• Payment gateways (for secure transaction processing).</li>
+                    <li>• Internal staff/RTI experts who handle filing are bound by strict confidentiality.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    4. Data Security
+                  </h3>
+                  <ul className={`text-sm space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <li>• All data is encrypted during transmission (HTTPS/TLS).</li>
+                    <li>• Stored data is protected with access controls and periodic audits.</li>
+                    <li>• Draft RTI chats may be anonymized and used for service improvement.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    5. Your Rights
+                  </h3>
+                  <ul className={`text-sm space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <li>• You may request deletion of your account and data at any time by contacting us.</li>
+                    <li>• You may request a copy of your stored RTI drafts and submissions.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    6. Data Retention
+                  </h3>
+                  <ul className={`text-sm space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <li>• RTI drafts and user details are retained for 90 days to allow tracking and appeals, after which they may be deleted or anonymized.</li>
+                    <li>• Payment and legal compliance data may be retained as per applicable laws.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    7. Third-Party Links
+                  </h3>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    Our platform may contain links to official government RTI portals or blogs. We are not responsible for the privacy practices of external sites.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    8. Changes to Policy
+                  </h3>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    We may update this Privacy Policy periodically. Changes will be posted on this page with the revised date.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    9. Contact Us
+                  </h3>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    For questions or requests about this policy, contact:
+                  </p>
+                  <ul className={`text-sm mt-2 space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <li>• 📧 admin@filemyrti.com</li>
+                    <li>• 📍 Hyderabad, Telangana, India</li>
                   </ul>
                 </div>
               </div>
