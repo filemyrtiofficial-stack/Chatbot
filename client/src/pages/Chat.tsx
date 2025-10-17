@@ -169,6 +169,7 @@ export default function Chat() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chatMessagesRef = useRef<HTMLDivElement>(null);
   const [hasStartedConversation, setHasStartedConversation] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   const showEmptyState =
     selectedSessionId === NEW_SESSION_SENTINEL &&
@@ -832,34 +833,48 @@ export default function Chat() {
             </div>
 
             {/* Sticky Footer */}
-            <div className={`sticky bottom-0 z-10 flex items-center gap-x-3 px-4 sm:px-6 py-2 border-t bg-inherit transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
+            <div className={`sticky bottom-0 z-10 flex flex-col gap-2 px-4 sm:px-6 py-2 border-t bg-inherit transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
               }`}>
-              <div className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-gradient-to-br text-xs sm:text-sm font-semibold transition-colors duration-200 ${isDarkMode
-                ? 'from-gray-600 to-gray-700 text-gray-200'
-                : 'from-gray-200 to-gray-300 text-gray-700'
-                }`}>
-                {user?.pictureUrl ? (
-                  <img src={user.pictureUrl} alt={user.name ?? 'User avatar'} className="h-full w-full rounded-full object-cover" />
-                ) : (
-                  userInitial
-                )}
+              <div className="flex items-center gap-x-3">
+                <div className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-gradient-to-br text-xs sm:text-sm font-semibold transition-colors duration-200 ${isDarkMode
+                  ? 'from-gray-600 to-gray-700 text-gray-200'
+                  : 'from-gray-200 to-gray-300 text-gray-700'
+                  }`}>
+                  {user?.pictureUrl ? (
+                    <img src={user.pictureUrl} alt={user.name ?? 'User avatar'} className="h-full w-full rounded-full object-cover" />
+                  ) : (
+                    userInitial
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className={`text-xs sm:text-sm font-semibold truncate transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
+                    }`}>{user?.name}</div>
+                  <div className={`text-xs truncate transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                    }`}>{user?.email}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className={`text-xs transition-colors duration-200 ${isDarkMode
+                    ? 'text-gray-400 hover:text-gray-200'
+                    : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                >
+                  Logout
+                </button>
               </div>
-              <div className="flex-1 min-w-0">
-                <div className={`text-xs sm:text-sm font-semibold truncate transition-colors duration-200 ${isDarkMode ? 'text-white' : 'text-gray-900'
-                  }`}>{user?.name}</div>
-                <div className={`text-xs truncate transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                  }`}>{user?.email}</div>
+              <div className="flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setShowTermsModal(true)}
+                  className={`text-xs transition-colors duration-200 ${isDarkMode
+                    ? 'text-gray-500 hover:text-gray-300'
+                    : 'text-gray-400 hover:text-gray-600'
+                    }`}
+                >
+                  Terms & Conditions
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={logout}
-                className={`text-xs transition-colors duration-200 ${isDarkMode
-                  ? 'text-gray-400 hover:text-gray-200'
-                  : 'text-gray-500 hover:text-gray-700'
-                  }`}
-              >
-                Logout
-              </button>
             </div>
           </div>
         </aside>
@@ -1231,6 +1246,169 @@ export default function Chat() {
           </div>
         </div>
       </div>
+
+      {/* Terms & Conditions Modal */}
+      {showTermsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50"
+            onClick={() => setShowTermsModal(false)}
+          />
+          <div className={`relative max-w-4xl max-h-[90vh] overflow-y-auto rounded-lg shadow-xl ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+            <div className="sticky top-0 flex items-center justify-between p-6 border-b bg-inherit">
+              <h2 className={`text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                FileMyRTI AI Bot — Terms & Conditions
+              </h2>
+              <button
+                onClick={() => setShowTermsModal(false)}
+                className={`p-2 rounded-lg transition-colors duration-200 ${isDarkMode
+                  ? 'text-gray-400 hover:text-white hover:bg-gray-700'
+                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                  }`}
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                <strong>Effective Date:</strong> 9th Sep 2025
+              </p>
+
+              <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                Welcome to FileMyRTI AI Bot ("we," "our," "us"). By using our AI-powered RTI drafting service available at filemyrti.com, you agree to the following Terms & Conditions. Please read carefully before proceeding.
+              </p>
+
+              <div className="space-y-4">
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    1. Nature of Service
+                  </h3>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    FileMyRTI AI Bot is a technology-enabled drafting assistant that helps users prepare Right to Information (RTI) applications.
+                  </p>
+                  <ul className={`text-sm mt-2 space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <li>• We are not a government portal and are not affiliated with any government department.</li>
+                    <li>• The service provides draft RTI applications in legally accepted formats which you can:</li>
+                    <li className="ml-4">- Download and file yourself, or</li>
+                    <li className="ml-4">- Request us to file on your behalf (paid service).</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    2. Eligibility
+                  </h3>
+                  <ul className={`text-sm space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <li>• Only Indian citizens are legally permitted to file RTI applications under the RTI Act, 2005.</li>
+                    <li>• By using this service, you confirm that you are an Indian citizen.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    3. User Responsibilities
+                  </h3>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    You agree to provide accurate and truthful information (name, address, email, phone number, details of your RTI request).
+                  </p>
+                  <p className={`text-sm mt-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    You agree not to misuse the service for:
+                  </p>
+                  <ul className={`text-sm mt-2 space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <li>• Submitting false or fraudulent information.</li>
+                    <li>• Requesting information outside the scope of the RTI Act (e.g., personal questions, reasons, opinions, or exempted information under Section 8).</li>
+                    <li>• Non-RTI related conversations (the bot is limited to RTI drafting only).</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    4. Drafting Limitations
+                  </h3>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    The AI Bot uses advanced language models to generate RTI drafts. However:
+                  </p>
+                  <ul className={`text-sm mt-2 space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <li>• Drafts are suggestions and may require review for accuracy.</li>
+                    <li>• You are responsible for ensuring correctness before submission.</li>
+                    <li>• We do not guarantee acceptance of every RTI application by the concerned Public Authority.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    5. Filing on Your Behalf
+                  </h3>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    If you opt for paid filing:
+                  </p>
+                  <ul className={`text-sm mt-2 space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <li>• Payment will be processed securely through Razorpay or similar gateways.</li>
+                    <li>• Once confirmed, an Application Number will be generated and sent to your email.</li>
+                    <li>• We commit to filing your RTI with the appropriate Public Information Officer (PIO) within 24 hours (excluding Sundays/holidays).</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    6. Refunds & Cancellations
+                  </h3>
+                  <ul className={`text-sm space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <li>• Draft downloads are free.</li>
+                    <li>• Paid filing service is non-refundable once the application is submitted to the authority.</li>
+                    <li>• If your payment is processed but filing cannot be completed due to reasons attributable to us, a full refund will be issued.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    7. Limitation of Liability
+                  </h3>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    We are not liable for:
+                  </p>
+                  <ul className={`text-sm mt-2 space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <li>• Delays or failures by government departments in responding to RTI applications.</li>
+                    <li>• Rejection of RTI applications by the PIO.</li>
+                    <li>• Losses arising from user-provided incorrect/incomplete information.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    8. Intellectual Property
+                  </h3>
+                  <ul className={`text-sm space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <li>• All content, design, and technology of FileMyRTI are protected by copyright and intellectual property laws.</li>
+                    <li>• You may use drafts generated solely for your personal RTI purposes.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    9. Modifications
+                  </h3>
+                  <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    We reserve the right to update these Terms & Conditions at any time. Updates will be posted on this page with a revised effective date.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                    10. Governing Law
+                  </h3>
+                  <ul className={`text-sm space-y-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <li>• These Terms shall be governed by and construed in accordance with the laws of India.</li>
+                    <li>• Jurisdiction: Hyderabad, Telangana.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
