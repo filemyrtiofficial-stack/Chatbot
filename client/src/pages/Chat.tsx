@@ -715,7 +715,7 @@ export default function Chat() {
 
         {/* Sidebar - responsive design */}
         <aside className={`${sidebarOpen ? 'flex' : 'hidden'} lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:z-50 lg:w-64`}>
-          <div className={`flex grow flex-col border-r transition-colors duration-200 ${isDarkMode
+          <div className={`flex h-full flex-col border-r transition-colors duration-200 ${isDarkMode
             ? 'border-gray-800 bg-gray-800'
             : 'border-gray-200 bg-gray-50'
             }`}>
@@ -761,8 +761,8 @@ export default function Chat() {
             </div>
 
             {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 pb-6 min-h-0">
-              <nav className="flex flex-col h-full">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-4 pb-6">
+              <nav className="flex flex-col">
                 <ul role="list" className="flex flex-col gap-y-2">
                   <li>
                     <button
