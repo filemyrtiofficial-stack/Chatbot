@@ -715,11 +715,12 @@ export default function Chat() {
 
         {/* Sidebar - responsive design */}
         <aside className={`${sidebarOpen ? 'flex' : 'hidden'} lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:z-50 lg:w-64`}>
-          <div className={`flex grow flex-col border-r transition-colors duration-200 overflow-y-auto ${isDarkMode
+          <div className={`flex grow flex-col border-r transition-colors duration-200 ${isDarkMode
             ? 'border-gray-800 bg-gray-800'
             : 'border-gray-200 bg-gray-50'
             }`}>
-            <div className="flex h-12 shrink-0 items-center justify-between px-4 sm:px-6">
+            {/* Sticky Header */}
+            <div className="sticky top-0 z-10 flex h-12 shrink-0 items-center justify-between px-4 sm:px-6 bg-inherit">
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center">
                   <img
@@ -759,71 +760,75 @@ export default function Chat() {
               </button>
             </div>
 
-            <nav className="flex flex-1 flex-col px-4 sm:px-6 py-4">
-              <ul role="list" className="flex flex-col gap-y-2">
-                <li>
-                  <button
-                    type="button"
-                    onClick={startNewConversation}
-                    className={`group flex gap-x-3 rounded-lg p-2 text-sm leading-5 font-medium transition-colors duration-200 w-full text-left ${isDarkMode
-                      ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                      : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
-                      }`}
-                  >
-                    <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md transition-colors duration-200 ${isDarkMode
-                      ? 'bg-gray-600 text-gray-400 group-hover:bg-gray-500'
-                      : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
-                      }`}>
-                      +
-                    </span>
-                    <span className="truncate text-sm">New chat</span>
-                  </button>
-                </li>
-
-                {orderedSessions.length > 0 && (
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+              <nav className="flex flex-col">
+                <ul role="list" className="flex flex-col gap-y-2">
                   <li>
-                    <div className={`text-xs font-semibold leading-6 uppercase tracking-wider mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'
-                      }`}>Chats</div>
-                    <ul role="list" className="-mx-2 space-y-0.5">
-                      {orderedSessions.map((session) => (
-                        <li key={session.sessionId}>
-                          <div className={`group flex items-center rounded-lg p-2 text-sm leading-5 font-medium transition-colors duration-200 ${isDarkMode
-                            ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                            : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
-                            }`}>
-                            <button
-                              type="button"
-                              onClick={() => setSelectedSessionId(session.sessionId)}
-                              className="flex-1 text-left truncate"
-                            >
-                              <span className="truncate text-sm">{deriveTitle(session.entries)}</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteSession(session.sessionId);
-                              }}
-                              className={`ml-2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${isDarkMode
-                                ? 'text-gray-400 hover:text-red-400 hover:bg-gray-600'
-                                : 'text-gray-500 hover:text-red-500 hover:bg-gray-300'
-                                }`}
-                              title="Delete conversation"
-                            >
-                              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                              </svg>
-                            </button>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
+                    <button
+                      type="button"
+                      onClick={startNewConversation}
+                      className={`group flex gap-x-3 rounded-lg p-2 text-sm leading-5 font-medium transition-colors duration-200 w-full text-left ${isDarkMode
+                        ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                        : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
+                        }`}
+                    >
+                      <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md transition-colors duration-200 ${isDarkMode
+                        ? 'bg-gray-600 text-gray-400 group-hover:bg-gray-500'
+                        : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
+                        }`}>
+                        +
+                      </span>
+                      <span className="truncate text-sm">New chat</span>
+                    </button>
                   </li>
-                )}
-              </ul>
-            </nav>
 
-            <div className={`flex items-center gap-x-3 px-4 sm:px-6 py-2 border-t transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
+                  {orderedSessions.length > 0 && (
+                    <li>
+                      <div className={`text-xs font-semibold leading-6 uppercase tracking-wider mb-2 transition-colors duration-200 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                        }`}>Chats</div>
+                      <ul role="list" className="-mx-2 space-y-0.5">
+                        {orderedSessions.map((session) => (
+                          <li key={session.sessionId}>
+                            <div className={`group flex items-center rounded-lg p-2 text-sm leading-5 font-medium transition-colors duration-200 ${isDarkMode
+                              ? 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                              : 'text-gray-700 hover:bg-gray-200 hover:text-gray-900'
+                              }`}>
+                              <button
+                                type="button"
+                                onClick={() => setSelectedSessionId(session.sessionId)}
+                                className="flex-1 text-left truncate"
+                              >
+                                <span className="truncate text-sm">{deriveTitle(session.entries)}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteSession(session.sessionId);
+                                }}
+                                className={`ml-2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${isDarkMode
+                                  ? 'text-gray-400 hover:text-red-400 hover:bg-gray-600'
+                                  : 'text-gray-500 hover:text-red-500 hover:bg-gray-300'
+                                  }`}
+                                title="Delete conversation"
+                              >
+                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                </svg>
+                              </button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  )}
+                </ul>
+              </nav>
+            </div>
+
+            {/* Sticky Footer */}
+            <div className={`sticky bottom-0 z-10 flex items-center gap-x-3 px-4 sm:px-6 py-2 border-t bg-inherit transition-colors duration-200 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
               }`}>
               <div className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-gradient-to-br text-xs sm:text-sm font-semibold transition-colors duration-200 ${isDarkMode
                 ? 'from-gray-600 to-gray-700 text-gray-200'
