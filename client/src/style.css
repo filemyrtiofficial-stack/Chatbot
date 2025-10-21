@@ -125,13 +125,13 @@
     @apply -translate-x-full;
   }
 
-  /* Wave animation for microphone recording */
+  /* Enhanced wave animation for microphone recording */
   @keyframes wave-pulse {
 
     0%,
     100% {
-      transform: scaleY(0.3);
-      opacity: 0.7;
+      transform: scaleY(0.2);
+      opacity: 0.6;
     }
 
     50% {
@@ -140,8 +140,68 @@
     }
   }
 
+  @keyframes wave-flow {
+    0% {
+      transform: translateX(-100%);
+    }
+
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
   .wave-bar {
-    animation: wave-pulse 1.2s ease-in-out infinite;
+    animation: wave-pulse 0.8s ease-in-out infinite;
+  }
+
+  .wave-container {
+    position: relative;
+    overflow: hidden;
+    width: 100px;
+    height: 20px;
+  }
+
+  .wave-flow {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ef4444, transparent);
+    transform: translateY(-50%);
+    animation: wave-flow 2s linear infinite;
+  }
+
+  .wave-bars {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    height: 20px;
+  }
+
+  .wave-bar-small {
+    width: 2px;
+    height: 4px;
+    background: #ef4444;
+    border-radius: 1px;
+    animation: wave-pulse 0.6s ease-in-out infinite;
+  }
+
+  .wave-bar-medium {
+    width: 2px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 1px;
+    animation: wave-pulse 0.8s ease-in-out infinite;
+  }
+
+  .wave-bar-large {
+    width: 2px;
+    height: 12px;
+    background: #ef4444;
+    border-radius: 1px;
+    animation: wave-pulse 1s ease-in-out infinite;
   }
 
   /* Mobile-friendly touch targets */

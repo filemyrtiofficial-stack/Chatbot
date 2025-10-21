@@ -89,12 +89,22 @@ function MicrophoneIcon(props: IconProps) {
 
 function WaveAnimation() {
   return (
-    <div className="flex items-center gap-1">
-      <div className="w-1 h-3 bg-red-500 rounded-full wave-bar" style={{ animationDelay: '0ms' }}></div>
-      <div className="w-1 h-4 bg-red-500 rounded-full wave-bar" style={{ animationDelay: '150ms' }}></div>
-      <div className="w-1 h-5 bg-red-500 rounded-full wave-bar" style={{ animationDelay: '300ms' }}></div>
-      <div className="w-1 h-4 bg-red-500 rounded-full wave-bar" style={{ animationDelay: '450ms' }}></div>
-      <div className="w-1 h-3 bg-red-500 rounded-full wave-bar" style={{ animationDelay: '600ms' }}></div>
+    <div className="wave-container">
+      <div className="wave-flow"></div>
+      <div className="wave-bars">
+        <div className="wave-bar-small" style={{ animationDelay: '0ms' }}></div>
+        <div className="wave-bar-medium" style={{ animationDelay: '100ms' }}></div>
+        <div className="wave-bar-large" style={{ animationDelay: '200ms' }}></div>
+        <div className="wave-bar-medium" style={{ animationDelay: '300ms' }}></div>
+        <div className="wave-bar-small" style={{ animationDelay: '400ms' }}></div>
+        <div className="wave-bar-large" style={{ animationDelay: '500ms' }}></div>
+        <div className="wave-bar-medium" style={{ animationDelay: '600ms' }}></div>
+        <div className="wave-bar-small" style={{ animationDelay: '700ms' }}></div>
+        <div className="wave-bar-medium" style={{ animationDelay: '800ms' }}></div>
+        <div className="wave-bar-large" style={{ animationDelay: '900ms' }}></div>
+        <div className="wave-bar-small" style={{ animationDelay: '1000ms' }}></div>
+        <div className="wave-bar-medium" style={{ animationDelay: '1100ms' }}></div>
+      </div>
     </div>
   );
 }
