@@ -87,6 +87,18 @@ function MicrophoneIcon(props: IconProps) {
   );
 }
 
+function WaveAnimation() {
+  return (
+    <div className="flex items-center gap-1">
+      <div className="w-1 h-3 bg-red-500 rounded-full wave-bar" style={{ animationDelay: '0ms' }}></div>
+      <div className="w-1 h-4 bg-red-500 rounded-full wave-bar" style={{ animationDelay: '150ms' }}></div>
+      <div className="w-1 h-5 bg-red-500 rounded-full wave-bar" style={{ animationDelay: '300ms' }}></div>
+      <div className="w-1 h-4 bg-red-500 rounded-full wave-bar" style={{ animationDelay: '450ms' }}></div>
+      <div className="w-1 h-3 bg-red-500 rounded-full wave-bar" style={{ animationDelay: '600ms' }}></div>
+    </div>
+  );
+}
+
 function SendIcon(props: IconProps) {
   return (
     <svg
@@ -1093,7 +1105,11 @@ export default function Chat() {
                                   }`}
                                 disabled={sending}
                               >
-                                <MicrophoneIcon className="h-5 w-5" />
+                                {isRecording ? (
+                                  <WaveAnimation />
+                                ) : (
+                                  <MicrophoneIcon className="h-5 w-5" />
+                                )}
                               </button>
 
                               <button
@@ -1228,7 +1244,11 @@ export default function Chat() {
                             }`}
                           disabled={sending}
                         >
-                          <MicrophoneIcon className="h-5 w-5" />
+                          {isRecording ? (
+                            <WaveAnimation />
+                          ) : (
+                            <MicrophoneIcon className="h-5 w-5" />
+                          )}
                         </button>
 
                         <button
