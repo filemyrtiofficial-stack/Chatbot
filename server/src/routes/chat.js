@@ -7,7 +7,7 @@ import { getConfig } from '../config.js';
 
 const router = express.Router();
 
-const FALLBACK = "I'm here to help—feel free to ask about India's RTI Act or anything else on your mind.";
+const FALLBACK = "I only help with questions related to India's Right to Information (RTI) Act.";
 const CLARIFY =
   'Please specify your RTI-related query or provide details on the information you seek, so I can guide you on the right RTI application, filing steps, or applicable rules in India.';
 const config = getConfig();
@@ -15,7 +15,7 @@ const openAiKey = config.OPENAI_API_KEY;
 const client = openAiKey ? new OpenAI({ apiKey: openAiKey }) : null;
 const OPENAI_MODEL = config.OPENAI_MODEL;
 // const REQUIRED_FIELD_KEYS = ['full_name', 'contact_info', 'department', 'information_request'];
-const REQUIRED_FIELD_KEYS = ['department', 'information_request']; // Removed full_name and contact_info
+//const REQUIRED_FIELD_KEYS = ['department', 'information_request']; // Removed full_name and contact_info
 
 const systemPrompt = `
 You are "FileMyRTI AI" — India's most trusted RTI assistant, built by FileMyRTI.com to help citizens understand, draft, and file applications under the Right to Information Act, 2005.
@@ -253,41 +253,10 @@ if (!client) {
   );
 }
 
-const APPLICATION_FIELDS = [
-  // Commented out: name and contact info fields - now using placeholders in drafts
-  // {
-  //   key: 'full_name',
-  //   label: 'full name',
-  //   prompt: 'Please share your full name as it should appear in the RTI application.',
-  // },
-  // {
-  //   key: 'contact_info',
-  //   label: 'contact information',
-  //   prompt: 'Please provide your complete postal address along with a phone number and/or email so the authority can contact you.',
-  // },
-  {
-    key: 'department',
-    label: 'department or public authority',
-    prompt: 'Which department, organisation, or public authority should this RTI be addressed to? Include the office/location if you know it.',
-  },
-  {
-    key: 'reference_details',
-    label: 'reference numbers or dates',
-    prompt: 'Share any reference numbers, account IDs, dates, or related documents that should be mentioned. If you have none, please say "None".',
-  },
-  {
-    key: 'information_request',
-    label: 'information you are requesting',
-    prompt: 'Describe clearly the information you are seeking. You can list questions or specific data points you want from the authority.',
-  },
-];
+// Removed APPLICATION_FIELDS - using AI directly to generate RTI drafts with placeholders
+// The AI will handle all RTI draft generation through conversation
 
-const APPLICATION_FIELD_MAP = APPLICATION_FIELDS.reduce((acc, field) => {
-  acc[field.key] = field;
-  return acc;
-}, {});
-
-const APPLICATION_TRIGGER_REGEX = /(file|draft|submit)\s+(an?\s+)?rti|rti\s+application|rti\s+draft/i;
+const APPLICATION_TRIGGER_REGEX = /(file|draft|submit|create|generate)\s+(an?\s+)?rti|rti\s+(application|draft)/i;
 
 // Lightweight in-memory session store so the assistant can remember user details during a chat.
 const sessionMemory = new Map();
@@ -330,23 +299,7 @@ const GREETING_PATTERNS = [
   /^good (morning|evening|afternoon)$/i,
 ];
 
-const GENERAL_SUPPORT_PATTERNS = [
-  {
-    regex: /\b(pf|provident\s+fund|epfo|epf|uan|universal\s+account\s+number)\b/i,
-    reply:
-      'It sounds like you are facing an Employee Provident Fund issue. You can check your PF status on the EPFO portal with your UAN, or raise a grievance at https://epfigms.gov.in/. If you would like to file an RTI to get an official update from a government department, just let me know.',
-  },
-  {
-    regex: /\b(salary|wages?|pay\s*slip|payroll|salary\s+delay|pending\s+payment)\b/i,
-    reply:
-      'Salary delays and payroll concerns are usually handled by writing to your employer and, if needed, escalating to the labour department. Keep copies of your appointment letter and previous payslips. If this is with a government employer and you need an RTI drafted, I can help with that once you are ready.',
-  },
-  {
-    regex: /\b(gratuity|bonus|leave\s+encashment|final\s+settlement)\b/i,
-    reply:
-      'For gratuity, bonus, or final settlement matters, start by writing a detailed representation to HR and keep proof of submission. If the employer is a public authority and you decide to pursue information via RTI, I can help prepare that application step by step.',
-  },
-];
+// Removed GENERAL_SUPPORT_PATTERNS - AI will handle all responses according to system prompt
 
 const NAME_RECALL_PATTERNS = [
   /\bwhat(?:'s|\s+is)\s+my\s+name\b/i,
@@ -358,11 +311,8 @@ const NAME_RECALL_PATTERNS = [
 
 function getSession(userId) {
   if (!sessionMemory.has(userId)) {
-    // Initialise per-user memory slots that map directly to RTI draft fields.
-    // Removed full_name and contact_info - now using placeholders in drafts
+    // Initialize simple session - AI will handle context through conversation
     sessionMemory.set(userId, {
-      department: '',
-      information_request: '',
       lastUpdated: Date.now(),
     });
   } else {
@@ -380,67 +330,14 @@ function isGreeting(message = '') {
 }
 
 function storeUserInfo(userId, message = '') {
-  if (!message || !userId) return [];
-  const session = getSession(userId);
-  const updatedFields = [];
-  const sanitized = message.trim();
-
-  // Commented out: No longer asking users for name and contact info - using placeholders instead
-  // Capture full name statements like "my name is ..." or "I am ..."
-  // const nameMatch = sanitized.match(/\b(?:my name is|i am|this is|call me)\s+([A-Za-z][A-Za-z\s'.-]{1,60})/i);
-  // if (nameMatch) {
-  //   const name = nameMatch[1].trim();
-  //   if (name && session.full_name !== name) {
-  //     session.full_name = name;
-  //     updatedFields.push('full_name');
-  //   }
-  // }
-
-  // Capture address/contact details.
-  // const addressMatch = sanitized.match(/\b(?:my address is|address is|address:|i live at|residing at|living at)\s+([^.\n\r]+)/i);
-  // if (addressMatch) {
-  //   const address = addressMatch[1].trim();
-  //   if (address && session.contact_info !== address) {
-  //     session.contact_info = address;
-  //     updatedFields.push('contact_info');
-  //   }
-  // }
-
-  // Capture department or authority names.
-  const departmentMatch = sanitized.match(/\b(?:department|authority|office|ministry)\s*(?:is|:)\s*([^.\n\r]+)/i);
-  if (departmentMatch) {
-    const department = departmentMatch[1].trim();
-    if (department && session.department !== department) {
-      session.department = department;
-      updatedFields.push('department');
-    }
-  }
-
-  // Capture information request sentences.
-  const infoMatch =
-    sanitized.match(/\b(?:i (?:am seeking|need|want)|please provide)\s+(?:the\s+)?(?:information|details)\s*(?:regarding|about|on)\s+([^.\n\r]+)/i) ||
-    sanitized.match(/\b(?:information request|information needed)\s*:?\s*([^.\n\r]+)/i);
-  if (infoMatch) {
-    const info = infoMatch[1].trim();
-    if (info && session.information_request !== info) {
-      session.information_request = info;
-      updatedFields.push('information_request');
-    }
-  }
-
-  if (updatedFields.length > 0) {
-    session.lastUpdated = Date.now();
-  }
-  return updatedFields;
+  // Removed - AI will handle context through conversation history
+  // No need to extract structured fields anymore
+  return [];
 }
 
 function getGeneralSupportResponse(message = '') {
-  if (!message) return null;
-  for (const pattern of GENERAL_SUPPORT_PATTERNS) {
-    if (pattern.regex.test(message)) {
-      return pattern.reply;
-    }
-  }
+  // Removed - AI will handle all responses according to system prompt
+  // AI will respond to non-RTI queries with the standard message
   return null;
 }
 
@@ -615,396 +512,87 @@ function shouldStartApplication(message) {
   return APPLICATION_TRIGGER_REGEX.test(message.toLowerCase());
 }
 
-function nextMissingField(application) {
-  if (!application) return null;
-  for (const field of APPLICATION_FIELDS) {
-    if (!application[field.key] || !String(application[field.key]).trim()) {
-      return field.key;
-    }
-  }
-  return null;
-}
-
-async function createApplication(userId, sessionId) {
-  const firstField = APPLICATION_FIELDS[0].key;
-  const [result] = await pool.query(
-    'INSERT INTO rti_applications (user_id, session_id, status, current_field) VALUES (?, ?, "collecting", ?)',
-    [userId, sessionId, firstField]
-  );
-  return getApplicationById(result.insertId);
-}
-
-function stripJsonCodeFences(text) {
-  if (!text) return '';
-  const trimmed = text.trim();
-  if (trimmed.startsWith('```')) {
-    return trimmed.replace(/```json|```/gi, '').trim();
-  }
-  return trimmed;
-}
-
-function normalizeExtractedFields(raw) {
-  if (!raw || typeof raw !== 'object') return null;
-  const normalized = {};
-  APPLICATION_FIELDS.forEach(field => {
-    const value = raw[field.key];
-    if (value === null || value === undefined) {
-      normalized[field.key] = '';
-      return;
-    }
-    if (Array.isArray(value)) {
-      normalized[field.key] = value.join(' ').trim();
-      return;
-    }
-    if (typeof value === 'object') {
-      normalized[field.key] = JSON.stringify(value);
-      return;
-    }
-    normalized[field.key] = String(value).trim();
-  });
-  return normalized;
-}
-
-function collectNonEmptyFields(fields) {
-  if (!fields) return {};
-  return Object.entries(fields).reduce((acc, [key, value]) => {
-    if (typeof value === 'string' && value.trim()) {
-      acc[key] = value.trim();
-    }
-    return acc;
-  }, {});
-}
-
-function updateSessionFromFields(userId, fields = {}) {
-  if (!userId || !fields) return;
-  const session = getSession(userId);
-  let updated = false;
-  // Removed 'full_name' and 'contact_info' - now using placeholders
-  ['department', 'information_request'].forEach(key => {
-    const value = fields[key];
-    if (typeof value === 'string' && value.trim() && session[key] !== value.trim()) {
-      session[key] = value.trim();
-      updated = true;
-    }
-  });
-  if (updated) {
-    session.lastUpdated = Date.now();
-  }
-}
-
-function hasAllRequiredFields(fields) {
-  if (!fields) return false;
-  return REQUIRED_FIELD_KEYS.every(key => {
-    const value = fields[key];
-    return typeof value === 'string' && value.trim();
-  });
-}
-
-async function extractApplicationDetailsFromMessage(message) {
-  if (!client) return null;
-
-  try {
-    const completion = await client.chat.completions.create({
-      model: OPENAI_MODEL,
-      messages: [
-        {
-          role: 'system',
-          content:
-            'Extract structured RTI application details. Return ONLY a JSON object with keys department, reference_details, information_request. Use empty strings for unknown values. Do not extract full_name or contact_info.',
-        },
-        { role: 'user', content: message },
-      ],
-      temperature: 0,
-      max_tokens: 400,
-    });
-
-    const content = completion.choices?.[0]?.message?.content;
-    if (!content) return null;
-    const cleaned = stripJsonCodeFences(content);
-    const parsed = JSON.parse(cleaned);
-    return normalizeExtractedFields(parsed);
-  } catch (err) {
-    console.warn('Failed to extract RTI application details from message', err);
-    return null;
-  }
-}
-
-async function setApplicationField(applicationId, fieldKey, value) {
-  await pool.query(
-    `UPDATE rti_applications SET ${fieldKey} = ?, updated_at = NOW() WHERE id = ?`,
-    [value, applicationId]
-  );
-}
-
-async function setApplicationState(applicationId, updates) {
-  const fields = [];
-  const values = [];
-  Object.entries(updates).forEach(([key, value]) => {
-    fields.push(`${key} = ?`);
-    values.push(value);
-  });
-  if (fields.length === 0) return;
-  values.push(applicationId);
-  await pool.query(
-    `UPDATE rti_applications SET ${fields.join(', ')}, updated_at = NOW() WHERE id = ?`,
-    values
-  );
-}
-
-async function generateRtiDraft(application) {
-  const fieldValues = APPLICATION_FIELDS.reduce((acc, field) => {
-    acc[field.key] = (application[field.key] || '').toString().trim();
-    return acc;
-  }, {});
-
+// Simplified RTI draft generation - AI handles everything through conversation
+async function generateRtiDraftFromMessage(userId, sessionId, message, conversationHistory = []) {
   if (!client) {
     return null;
   }
 
-  // Using the global systemPrompt defined at the top of the file
-  // Construct the user prompt from application field values
-  const prompt = `Please create a formal RTI application letter with the following details:
-  
-Department/Authority: ${fieldValues.department}
-Reference Details: ${fieldValues.reference_details}
-Information Request: ${fieldValues.information_request}
-
-Use placeholders for personal details (name, address, phone, email) as [Applicant Name], [Address Line 1], [City], [State], [PIN], [Phone Number], [Email Address]. Please format this as a professional RTI application letter.`;
+  // Build conversation context for AI
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    ...conversationHistory,
+    { role: 'user', content: message }
+  ];
 
   const completion = await client.chat.completions.create({
     model: OPENAI_MODEL,
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: prompt },
-    ],
-    temperature: 0.2,
-    max_tokens: 600,
+    messages,
+    temperature: 0.3,
+    max_tokens: 1200, // More tokens for complete RTI draft
+    user: String(userId),
   });
 
   const draft = completion.choices?.[0]?.message?.content?.trim();
   return draft || null;
 }
 
-async function finalizeApplication(userId, application, session) {
-  if (!client) {
-    return {
-      handled: true,
-      reply:
-        'I have all the information needed, but generating the RTI draft is unavailable because the OpenAI API key is not configured. Please try again after the administrator updates the server settings.',
-      draftAvailable: false,
-    };
-  }
-
-  const refreshed = await getApplicationById(application.id);
-  if (!refreshed) {
-    return {
-      handled: true,
-      reply: 'I could not retrieve your RTI application details. Please try again.',
-      draftAvailable: false,
-    };
-  }
-
-  // Sync the freshly fetched application data back into the active session.
-  updateSessionFromFields(userId, refreshed);
-  if (session) {
-    // Removed 'full_name' and 'contact_info' - now using placeholders
-    ['department', 'information_request'].forEach(key => {
-      const value = refreshed[key];
-      if (typeof value === 'string' && value.trim()) {
-        session[key] = value.trim();
-      }
-    });
-    session.lastUpdated = Date.now();
-  }
-  if (!refreshed.reference_details || !refreshed.reference_details.trim()) {
-    const defaultReference = 'No specific reference details provided.';
-    if (refreshed.reference_details !== defaultReference) {
-      await setApplicationState(refreshed.id, { reference_details: defaultReference });
-      refreshed.reference_details = defaultReference;
-    }
-  }
-
-  const draftText = await generateRtiDraft(refreshed);
-  if (!draftText) {
-    return {
-      handled: true,
-      reply: 'I was unable to generate the RTI draft right now. Let\'s try again in a moment.',
-      draftAvailable: false,
-    };
-  }
-
-  await setApplicationState(refreshed.id, {
-    status: 'completed',
-    current_field: null,
-    draft_text: draftText,
-  });
-
-  const reply = [
-    'Here is your ready-to-copy RTI application draft:',
-    '---',
-    draftText,
-    '---',
-    'You can download a text copy anytime using the “Download draft” button.',
-  ].join('\n');
-
-  return {
-    handled: true,
-    reply,
-    draftAvailable: true,
-    draftText,
-  };
-}
-
+// Simplified RTI application handling - AI handles everything through conversation
 async function handleRtiApplication({ userId, sessionId, message, existingApplication, session }) {
-  const trimmed = message.trim();
-  const activeSession = session || getSession(userId);
-  let application = existingApplication || (await getLatestApplication(userId, sessionId));
-  const triggered = shouldStartApplication(trimmed);
+  // Check if user is requesting an RTI draft
+  const triggered = shouldStartApplication(message);
 
-  if (!application) {
-    if (!triggered) return null;
-
-    let extractedFields = null;
-    if (client) {
-      extractedFields = await extractApplicationDetailsFromMessage(trimmed);
-    }
-
-    application = await createApplication(userId, sessionId);
-    const sessionPrefill = collectNonEmptyFields({
-      // Removed full_name and contact_info - now using placeholders
-      department: activeSession.department,
-      information_request: activeSession.information_request,
-    });
-    let recognizedFields = { ...sessionPrefill };
-    if (extractedFields) {
-      const extracted = collectNonEmptyFields(extractedFields);
-      recognizedFields = { ...sessionPrefill, ...extracted };
-    }
-    if (Object.keys(recognizedFields).length > 0) {
-      await setApplicationState(application.id, recognizedFields);
-      application = { ...application, ...recognizedFields };
-      updateSessionFromFields(userId, recognizedFields);
-    }
-
-    const allFieldsPresent = hasAllRequiredFields({
-      ...sessionPrefill,
-      ...(extractedFields || {}),
-    });
-    if (allFieldsPresent) {
-      const referenceValue =
-        application.reference_details && application.reference_details.trim()
-          ? application.reference_details
-          : 'No specific reference details provided.';
-
-      await setApplicationState(application.id, {
-        reference_details: referenceValue,
-        current_field: null,
-      });
-      application.reference_details = referenceValue;
-      application.current_field = null;
-
-      return finalizeApplication(userId, application, activeSession);
-    }
-
-    const nextFieldKey = nextMissingField(application) || APPLICATION_FIELDS[0].key;
-    await setApplicationState(application.id, { current_field: nextFieldKey });
-    application.current_field = nextFieldKey;
-    const nextPrompt = APPLICATION_FIELD_MAP[nextFieldKey].prompt;
-    const introLines = [
-      Object.keys(recognizedFields).length > 0
-        ? 'Thanks! I still need a couple more details to complete your RTI draft.'
-        : 'Great! Let\'s draft your RTI application together. I\'ll collect a few quick details.',
-      '',
-      nextPrompt,
-    ].join('\n');
-
-    return { handled: true, reply: introLines, draftAvailable: false };
-  }
-
-  // Auto-fill any outstanding RTI draft fields using remembered session values.
-  const missingFieldsForSession = REQUIRED_FIELD_KEYS.filter(key => {
-    const currentValue = application[key];
-    return !currentValue || !String(currentValue).trim();
-  });
-  if (missingFieldsForSession.length > 0) {
-    const sessionAutoFill = missingFieldsForSession.reduce((acc, key) => {
-      const sessionValue = activeSession[key];
-      if (typeof sessionValue === 'string' && sessionValue.trim()) {
-        acc[key] = sessionValue.trim();
-      }
-      return acc;
-    }, {});
-    if (Object.keys(sessionAutoFill).length > 0) {
-      await setApplicationState(application.id, sessionAutoFill);
-      application = { ...application, ...sessionAutoFill };
-      updateSessionFromFields(userId, sessionAutoFill);
-      if (application.current_field && sessionAutoFill[application.current_field]) {
-        const nextFieldAfterAuto = nextMissingField(application);
-        await setApplicationState(application.id, { current_field: nextFieldAfterAuto });
-        application.current_field = nextFieldAfterAuto;
-      }
-    }
-  }
-
-  if (application.status === 'completed') {
-    if (triggered) {
-      application = await createApplication(userId, sessionId);
-      const firstField = APPLICATION_FIELD_MAP[APPLICATION_FIELDS[0].key];
-      const intro = [
-        'Starting a fresh RTI draft for you.',
-        '',
-        firstField.prompt,
-      ].join('\n');
-      return { handled: true, reply: intro, draftAvailable: false };
-    }
+  if (!triggered) {
+    // Not an RTI draft request - let AI handle it normally
     return null;
   }
 
-  if (triggered) {
-    const currentField = application.current_field || nextMissingField(application);
-    const fieldInfo = currentField ? APPLICATION_FIELD_MAP[currentField] : null;
-    const reply = fieldInfo
-      ? `We\'re already gathering details. ${fieldInfo.prompt}`
-      : 'We\'re already gathering information for this RTI draft. Please respond to the pending question.';
-    return { handled: true, reply, draftAvailable: false };
-  }
+  // User wants an RTI draft - let AI generate it directly
+  // Get recent conversation history for context
+  const [historyRows] = await pool.query(
+    'SELECT message, response FROM chats WHERE user_id = ? AND session_id = ? ORDER BY timestamp DESC LIMIT 10',
+    [userId, sessionId]
+  );
 
-  let currentField = application.current_field || nextMissingField(application);
-  if (!currentField) {
-    return finalizeApplication(userId, application, activeSession);
-  }
+  // Build conversation history (reverse to chronological order)
+  const conversationHistory = historyRows.reverse().flatMap(row => [
+    { role: 'user', content: row.message },
+    { role: 'assistant', content: row.response }
+  ]);
 
-  const fieldInfo = APPLICATION_FIELD_MAP[currentField];
-  if (!trimmed) {
+  // Generate RTI draft using AI
+  const draftText = await generateRtiDraftFromMessage(userId, sessionId, message, conversationHistory);
+
+  if (!draftText) {
     return {
       handled: true,
-      reply: `Please provide ${fieldInfo.label}. ${fieldInfo.prompt}`,
+      reply: 'I was unable to generate the RTI draft right now. Please try again in a moment.',
       draftAvailable: false,
     };
   }
 
-  let value = trimmed;
-  if (currentField === 'reference_details' && trimmed.toLowerCase() === 'none') {
-    value = 'No specific reference details provided.';
+  // Save draft to database
+  let application = existingApplication;
+  if (!application) {
+    const [result] = await pool.query(
+      'INSERT INTO rti_applications (user_id, session_id, status, draft_text) VALUES (?, ?, "completed", ?)',
+      [userId, sessionId, draftText]
+    );
+    application = await getApplicationById(result.insertId);
+  } else {
+    await pool.query(
+      'UPDATE rti_applications SET status = "completed", draft_text = ?, updated_at = NOW() WHERE id = ?',
+      [draftText, application.id]
+    );
   }
 
-  await setApplicationField(application.id, currentField, value);
-  application[currentField] = value;
-  updateSessionFromFields(userId, { [currentField]: value });
-
-  const nextFieldKey = nextMissingField(application);
-  if (nextFieldKey) {
-    await setApplicationState(application.id, { current_field: nextFieldKey });
-    application.current_field = nextFieldKey;
-    const nextPrompt = APPLICATION_FIELD_MAP[nextFieldKey].prompt;
-    return {
-      handled: true,
-      reply: `Thanks! ${nextPrompt}`,
-      draftAvailable: false,
-    };
-  }
-
-  return finalizeApplication(userId, application, activeSession);
+  // Return AI response (which includes the draft)
+  return {
+    handled: true,
+    reply: draftText, // AI response contains the formatted RTI draft
+    draftAvailable: true,
+    draftText,
+  };
 }
 
 // GET chat history
@@ -1044,13 +632,10 @@ router.post('/', async (req, res) => {
     storeUserInfo(userId, message);
 
     const existingApplication = await getLatestApplication(userId, sessionId);
-    const hasCollectingApplication =
-      existingApplication && existingApplication.status === 'collecting';
-
     const generalRtiQuestion = isGeneralRtiQuestion(message);
 
     if (isGreeting(message) && !isRTIRelated(message) && !generalRtiQuestion) {
-      // Removed name-based greeting - keeping it simple
+      // Simple greeting - let AI handle RTI-related conversations
       const reply = 'Hello! How can I assist you with India\'s RTI Act today?';
       const saved = await recordChat(userId, sessionId, message, reply);
       return res.json({
@@ -1062,18 +647,7 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // Offer helpful guidance for general non-RTI queries without forcing an RTI workflow.
-    const generalSupport = getGeneralSupportResponse(message);
-    if (generalSupport && !hasCollectingApplication) {
-      const saved = await recordChat(userId, sessionId, message, generalSupport);
-      return res.json({
-        reply: generalSupport,
-        id: saved.id,
-        message,
-        timestamp: saved.timestamp,
-        sessionId: saved.sessionId,
-      });
-    }
+    // Removed general support patterns - AI handles all responses according to system prompt
 
     // Commented out: No longer asking for or storing user names
     // if (isNameRecallRequest(message)) {
@@ -1114,16 +688,7 @@ router.post('/', async (req, res) => {
       });
     }
 
-    if (!generalRtiQuestion && hasCollectingApplication && needsClarification(message)) {
-      const saved = await recordChat(userId, sessionId, message, CLARIFY);
-      return res.json({
-        reply: CLARIFY,
-        id: saved.id,
-        message,
-        timestamp: saved.timestamp,
-        sessionId: saved.sessionId,
-      });
-    }
+    // Removed structured clarification flow - AI handles all conversations
 
     if (!client) {
       const saved = await recordChat(userId, sessionId, message, FALLBACK);
@@ -1139,15 +704,28 @@ router.post('/', async (req, res) => {
 
 
 
-    // Call OpenAI
+    // Get conversation history for context
+    const [historyRows] = await pool.query(
+      'SELECT message, response FROM chats WHERE user_id = ? AND session_id = ? ORDER BY timestamp DESC LIMIT 10',
+      [userId, sessionId]
+    );
+
+    // Build conversation history (reverse to chronological order)
+    const conversationHistory = historyRows.reverse().flatMap(row => [
+      { role: 'user', content: row.message },
+      { role: 'assistant', content: row.response }
+    ]);
+
+    // Call OpenAI with conversation history
     const completion = await client.chat.completions.create({
       model: OPENAI_MODEL,
       messages: [
         { role: 'system', content: systemPrompt },
+        ...conversationHistory,
         { role: 'user', content: message },
       ],
       temperature: 0.3,
-      max_tokens: 400, // slightly more room for practical answers
+      max_tokens: 1200, // Allow for complete RTI drafts
       user: String(userId),
     });
 
