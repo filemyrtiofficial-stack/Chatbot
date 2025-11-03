@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHumanTalk } from '../App';
-import { api, resolveApiUrl } from '../api';
+import { api } from '../api';
 
 const HumanTalkWidget: React.FC = () => {
   const { isOpen, setIsOpen } = useHumanTalk();
@@ -36,7 +36,7 @@ const HumanTalkWidget: React.FC = () => {
 
     try {
       // Call the API to submit the form and send WhatsApp notification
-      await api(resolveApiUrl('/api/contact'), {
+      await api('/api/contact', {
         method: 'POST',
         body: JSON.stringify({
           phoneNumber: submittedPhoneValue,
