@@ -362,7 +362,7 @@ export const HumanTalkNavButton: React.FC = () => {
   return (
     <button
       onClick={() => setIsOpen(true)}
-      className="md:hidden relative flex items-center gap-1.5 rounded-lg bg-[#1660a6] px-2 py-1.5 text-[11px] sm:text-xs font-semibold text-white transition-colors hover:bg-[#145891] focus:outline-none focus:ring-2 focus:ring-[#1660a6] focus:ring-offset-1 whitespace-nowrap shadow-sm"
+      className="md:hidden relative flex items-center gap-1 rounded-lg bg-[#1660a6] px-1.5 py-1.5 text-[10px] sm:text-[11px] font-semibold text-white transition-colors hover:bg-[#145891] focus:outline-none focus:ring-2 focus:ring-[#1660a6] focus:ring-offset-1 whitespace-nowrap shadow-sm flex-shrink-0"
       aria-label="Talk with Human"
     >
       <svg

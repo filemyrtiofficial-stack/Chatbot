@@ -907,7 +907,6 @@ export default function Chat() {
             </button>
             <div className={`h-6 w-px lg:hidden transition-colors duration-200 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'
               }`} />
-            <div className="flex-1 min-w-0" />
 
             {/* Show sidebar toggle in navbar when sidebar is closed */}
             {!sidebarOpen && (
@@ -935,9 +934,9 @@ export default function Chat() {
               </button>
             )}
 
-            <div className="flex flex-1 gap-x-2 self-stretch lg:gap-x-6 min-w-0">
-              <div className="relative flex flex-1 min-w-0">
-                <div className="flex items-center gap-2 -ml-2">
+            <div className="flex flex-1 gap-x-1 self-stretch lg:gap-x-6 min-w-0">
+              <div className="relative hidden sm:flex flex-1 min-w-0 overflow-hidden">
+                <div className="flex items-center gap-1 -ml-1 lg:gap-2 lg:-ml-2">
                   <div className="relative" data-dropdown>
                     <button
                       type="button"
@@ -948,13 +947,14 @@ export default function Chat() {
                           setSearchQuery('');
                         }
                       }}
-                      className={`inline-flex items-center gap-2 pl-6 pr-3 py-2 text-lg font-normal transition-colors duration-200 focus:outline-none ${isDarkMode
+                      className={`inline-flex items-center gap-1 lg:gap-2 pl-2 pr-1.5 lg:pl-6 lg:pr-3 py-1.5 lg:py-2 text-xs lg:text-lg font-normal transition-colors duration-200 focus:outline-none ${isDarkMode
                         ? 'text-gray-300 hover:text-gray-100'
                         : 'text-gray-700 hover:text-gray-900'
                         }`}
                     >
-                      <span>{selectedModel}</span>
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                      <span className="hidden sm:inline truncate max-w-[80px] lg:max-w-none">{selectedModel}</span>
+                      <span className="sm:hidden truncate max-w-[50px]">{selectedModel.split('-')[0]}</span>
+                      <svg className="h-3 w-3 lg:h-4 lg:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                       </svg>
                     </button>
@@ -1013,7 +1013,7 @@ export default function Chat() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-x-2 lg:gap-x-6">
+              <div className="flex items-center gap-x-1 lg:gap-x-6 flex-shrink-0">
                 <HumanTalkNavButton />
               </div>
             </div>
