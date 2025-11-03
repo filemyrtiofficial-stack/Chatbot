@@ -218,14 +218,21 @@ async function initWhatsAppSession() {
       // Find Chrome/Chromium executable (cross-platform)
       const executablePath = findChromeExecutable(config);
 
-      // Determine headless mode - use non-headless for better QR code extraction
-      // In production, you might want headless, but for QR scanning, non-headless is better
-      const isHeadless = false; // Always show browser for QR code scanning
+      // Determine headless mode - check if we have a display
+      // Headless mode still renders everything, we just can't see it
+      // For server environments, we'll use headless mode
+      const hasDisplay = process.env.DISPLAY || (process.platform === 'win32' && process.env.SESSIONNAME);
+      const isHeadless = config.NODE_ENV === 'production' || !hasDisplay;
+
+      if (isHeadless) {
+        console.log('🚀 Launching browser in headless mode (no display available)...');
+      } else {
+        console.log('🚀 Launching browser (fresh session, no persistent storage)...');
+      }
 
       // Launch browser WITHOUT userDataDir (fresh session each time)
-      console.log('🚀 Launching browser (fresh session, no persistent storage)...');
       browserInstance = await puppeteer.launch({
-        headless: isHeadless,
+        headless: isHeadless ? 'new' : false,
         executablePath,
         args: [
           '--no-sandbox',
@@ -233,6 +240,8 @@ async function initWhatsAppSession() {
           '--disable-dev-shm-usage',
           '--disable-blink-features=AutomationControlled',
           '--disable-web-security',
+          '--disable-gpu',
+          ...(isHeadless ? ['--disable-dev-shm-usage'] : []),
         ],
         ignoreDefaultArgs: ['--enable-automation'],
         // NO userDataDir - fresh session each time
