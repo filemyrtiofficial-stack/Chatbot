@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useHumanTalk } from '../App';
 
 const HumanTalkWidget: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen, setIsOpen } = useHumanTalk();
   const [isHovered, setIsHovered] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [query, setQuery] = useState('');
@@ -45,9 +46,9 @@ const HumanTalkWidget: React.FC = () => {
 
   return (
     <>
-      {/* Floating Button */}
+      {/* Floating Button - Desktop only */}
       <motion.div
-        className="fixed bottom-6 right-6 z-50"
+        className="hidden md:block fixed bottom-6 right-6 z-50"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', stiffness: 260, damping: 20 }}
@@ -139,7 +140,7 @@ const HumanTalkWidget: React.FC = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="fixed bottom-24 right-6 z-50 flex h-auto max-h-[600px] w-[400px] flex-col rounded-2xl bg-white shadow-2xl"
+              className="fixed z-50 flex flex-col bg-white shadow-2xl md:bottom-24 md:right-6 md:h-auto md:max-h-[600px] md:w-[400px] md:rounded-2xl bottom-0 right-0 left-0 w-full max-h-[calc(100vh-3rem)] rounded-t-2xl"
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b border-slate-200 bg-[#1660a6] px-5 py-4 text-white">
@@ -354,4 +355,35 @@ const HumanTalkWidget: React.FC = () => {
 };
 
 export default HumanTalkWidget;
+
+// Compact button component for navbar/mobile use
+export const HumanTalkNavButton: React.FC = () => {
+  const { setIsOpen } = useHumanTalk();
+  return (
+    <button
+      onClick={() => setIsOpen(true)}
+      className="md:hidden relative flex items-center gap-1.5 rounded-lg bg-[#1660a6] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#145891] focus:outline-none focus:ring-2 focus:ring-[#1660a6] focus:ring-offset-1"
+      aria-label="Talk with Human"
+    >
+      <svg
+        className="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
+        />
+      </svg>
+      <span className="hidden sm:inline">Talk</span>
+      <div className="absolute -top-1 -right-1 rounded-full bg-red-500 px-1 py-0.5 text-[8px] font-bold uppercase text-white">
+        Beta
+      </div>
+    </button>
+  );
+};
 

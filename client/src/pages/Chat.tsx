@@ -1,6 +1,7 @@
 ﻿import { useEffect, useMemo, useRef, useState, type FormEvent, type SVGProps } from 'react';
 import { ApiError, api, resolveApiUrl } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { HumanTalkNavButton } from '../components/HumanTalkWidget';
 
 type HistoryRecord = {
   id: number;
@@ -1012,6 +1013,7 @@ export default function Chat() {
                 </div>
               </div>
               <div className="flex items-center gap-x-4 lg:gap-x-6">
+                <HumanTalkNavButton />
               </div>
             </div>
           </div>

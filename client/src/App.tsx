@@ -1,11 +1,19 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import React from 'react';
+import React, { useState, createContext, useContext } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Chat from './pages/Chat';
 import HumanTalkWidget from './components/HumanTalkWidget';
 import './style.css';
+
+// Context for sharing widget state across components
+export const HumanTalkContext = createContext<{
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+}>({ isOpen: false, setIsOpen: () => { } });
+
+export const useHumanTalk = () => useContext(HumanTalkContext);
 
 function PrivateRoute({ children }: { children: React.ReactElement }) {
   const { user, initializing } = useAuth();
@@ -23,17 +31,21 @@ function PrivateRoute({ children }: { children: React.ReactElement }) {
 }
 
 export default function App() {
+  const [isHumanTalkOpen, setIsHumanTalkOpen] = useState(false);
+
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<PrivateRoute><Chat /></PrivateRoute>} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-        <HumanTalkWidget />
-      </BrowserRouter>
+      <HumanTalkContext.Provider value={{ isOpen: isHumanTalkOpen, setIsOpen: setIsHumanTalkOpen }}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<PrivateRoute><Chat /></PrivateRoute>} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+          <HumanTalkWidget />
+        </BrowserRouter>
+      </HumanTalkContext.Provider>
     </AuthProvider>
   );
 }
