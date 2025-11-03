@@ -52,6 +52,7 @@ app.get('/api/health', (req, res) =>
   res.json({ ok: true, uptime: process.uptime(), timestamp: new Date().toISOString() })
 );
 
+
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', authMiddleware, chatRoutes);
 app.use('/api/contact', contactRoutes); // No auth required for contact form

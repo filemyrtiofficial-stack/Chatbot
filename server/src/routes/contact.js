@@ -18,13 +18,34 @@ const contactFormSchema = z.object({
 
 let browserInstance = null;
 let whatsappPage = null;
+let isInitializing = false;
+let isReady = false;
+let initPromise = null;
+
+// Initialize WhatsApp session in background when module loads (non-blocking)
+setTimeout(async () => {
+  if (!isReady && !isInitializing) {
+    console.log('🔄 Auto-initializing WhatsApp session in background...');
+    try {
+      await initWhatsAppSession();
+    } catch (error) {
+      console.error('Background WhatsApp initialization error:', error);
+    }
+  }
+}, 5000); // Wait 5 seconds after server starts
 
 /**
  * Initialize Puppeteer browser and WhatsApp Web session
  * This keeps the browser open to maintain WhatsApp Web session
+ * This is a long-running operation and should be called asynchronously
  */
 async function initWhatsAppSession() {
-  if (browserInstance && whatsappPage) {
+  // If already initializing, wait for that to complete
+  if (isInitializing && initPromise) {
+    return initPromise;
+  }
+
+  if (browserInstance && whatsappPage && isReady) {
     try {
       // Check if page is still connected
       if (!whatsappPage.isClosed()) {
@@ -32,111 +53,161 @@ async function initWhatsAppSession() {
       }
     } catch (error) {
       console.log('WhatsApp page disconnected, reinitializing...');
+      isReady = false;
     }
   }
 
-  try {
-    console.log('Initializing WhatsApp Web session with Puppeteer...');
+  // Start initialization
+  isInitializing = true;
+  initPromise = (async () => {
+    try {
+      console.log('Initializing WhatsApp Web session with Puppeteer...');
 
-    const config = getConfig();
-    const userDataDir = path.join(__dirname, '../../.whatsapp-session');
+      const config = getConfig();
+      const userDataDir = path.join(__dirname, '../../.whatsapp-session');
 
-    // Try to find Chrome/Chromium in common locations for production servers
-    let executablePath = undefined;
-    if (config.NODE_ENV === 'production') {
-      // Common paths for Chrome/Chromium on Linux servers
-      const possiblePaths = [
-        '/usr/bin/google-chrome',
-        '/usr/bin/google-chrome-stable',
-        '/usr/bin/chromium',
-        '/usr/bin/chromium-browser',
-        '/snap/bin/chromium',
-      ];
+      // Try to find Chrome/Chromium in common locations for production servers
+      let executablePath = undefined;
+      if (config.NODE_ENV === 'production') {
+        // Common paths for Chrome/Chromium on Linux servers
+        const possiblePaths = [
+          '/usr/bin/google-chrome',
+          '/usr/bin/google-chrome-stable',
+          '/usr/bin/chromium',
+          '/usr/bin/chromium-browser',
+          '/snap/bin/chromium',
+        ];
 
-      for (const chromePath of possiblePaths) {
-        try {
-          if (fs.existsSync(chromePath)) {
-            executablePath = chromePath;
-            console.log(`Found Chrome/Chromium at: ${chromePath}`);
-            break;
+        for (const chromePath of possiblePaths) {
+          try {
+            if (fs.existsSync(chromePath)) {
+              executablePath = chromePath;
+              console.log(`Found Chrome/Chromium at: ${chromePath}`);
+              break;
+            }
+          } catch (e) {
+            // Continue checking other paths
           }
-        } catch (e) {
-          // Continue checking other paths
+        }
+
+        if (!executablePath) {
+          console.warn('Chrome/Chromium not found in standard paths. Please install Chrome/Chromium or run: npx puppeteer browsers install chrome');
         }
       }
 
-      if (!executablePath) {
-        console.warn('Chrome/Chromium not found in standard paths. Please install Chrome/Chromium or run: npx puppeteer browsers install chrome');
-      }
-    }
+      // Force headless mode in production or if no DISPLAY variable (server environment)
+      const isHeadless = config.NODE_ENV === 'production' || !process.env.DISPLAY;
 
-    // Force headless mode in production or if no DISPLAY variable (server environment)
-    const isHeadless = config.NODE_ENV === 'production' || !process.env.DISPLAY;
-
-    browserInstance = await puppeteer.launch({
-      headless: isHeadless ? 'new' : false, // Use 'new' headless mode or false for visible browser
-      executablePath, // Use system Chrome if available
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--disable-gpu',
-        '--disable-software-rasterizer',
-        '--disable-extensions',
-        ...(isHeadless ? ['--disable-dev-shm-usage', '--disable-setuid-sandbox'] : []),
-      ],
-      userDataDir, // Persist session data
-    });
-
-    whatsappPage = await browserInstance.newPage();
-    await whatsappPage.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    );
-
-    // Navigate to WhatsApp Web
-    await whatsappPage.goto('https://web.whatsapp.com', {
-      waitUntil: 'networkidle2',
-      timeout: 60000,
-    });
-
-    // Wait for WhatsApp Web to load and check if logged in
-    try {
-      // Wait for either QR code or chat list (logged in)
-      await whatsappPage.waitForSelector('canvas[aria-label*="Scan"], div[data-testid="chat-list"]', {
-        timeout: 30000,
+      browserInstance = await puppeteer.launch({
+        headless: isHeadless ? 'new' : false, // Use 'new' headless mode or false for visible browser
+        executablePath, // Use system Chrome if available
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--disable-gpu',
+          '--disable-software-rasterizer',
+          '--disable-extensions',
+          ...(isHeadless ? ['--disable-dev-shm-usage', '--disable-setuid-sandbox'] : []),
+        ],
+        userDataDir, // Persist session data
       });
 
-      const isLoggedIn = await whatsappPage.$('div[data-testid="chat-list"]');
+      whatsappPage = await browserInstance.newPage();
+      await whatsappPage.setUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      );
 
-      if (!isLoggedIn) {
-        console.log('⚠️  WhatsApp Web is not logged in. Please scan the QR code:');
-        console.log('   1. Open WhatsApp on your phone');
-        console.log('   2. Go to Settings > Linked Devices');
-        console.log('   3. Scan the QR code shown in the browser');
-        console.log('   4. The browser will automatically detect when you\'re logged in');
+      // Navigate to WhatsApp Web
+      await whatsappPage.goto('https://web.whatsapp.com', {
+        waitUntil: 'networkidle2',
+        timeout: 60000,
+      });
 
-        // Wait for user to scan QR code (wait for chat list to appear)
-        await whatsappPage.waitForSelector('div[data-testid="chat-list"]', {
-          timeout: 300000, // 5 minutes to scan QR code
+      // Wait for WhatsApp Web to load and check if logged in
+      try {
+        // Wait for either QR code or chat list (logged in)
+        await whatsappPage.waitForSelector('canvas[aria-label*="Scan"], div[data-testid="chat-list"]', {
+          timeout: 30000,
         });
 
-        console.log('✅ WhatsApp Web logged in successfully!');
-      } else {
-        console.log('✅ WhatsApp Web session active');
-      }
-    } catch (error) {
-      console.error('Error waiting for WhatsApp Web to load:', error);
-      throw error;
-    }
+        const isLoggedIn = await whatsappPage.$('div[data-testid="chat-list"]');
 
-    return { browser: browserInstance, page: whatsappPage };
-  } catch (error) {
-    console.error('Error initializing WhatsApp session:', error);
-    browserInstance = null;
-    whatsappPage = null;
-    throw error;
-  }
+        if (!isLoggedIn) {
+          console.log('⚠️  WhatsApp Web is not logged in. Extracting QR code...');
+
+          // Wait for QR code to appear
+          await whatsappPage.waitForSelector('canvas[aria-label*="Scan"], canvas', {
+            timeout: 10000,
+          });
+
+          // Find and capture QR code canvas
+          const qrCanvas = await whatsappPage.$('canvas[aria-label*="Scan"], canvas');
+
+          if (qrCanvas) {
+            // Capture QR code as image
+            const qrCodePath = path.join(__dirname, '../../qr-code.png');
+            await qrCanvas.screenshot({ path: qrCodePath });
+
+            console.log('\n📱 QR CODE SAVED!');
+            console.log(`   Location: ${qrCodePath}`);
+            console.log('   Steps to scan:');
+            console.log('   1. Open WhatsApp on your phone');
+            console.log('   2. Go to Settings > Linked Devices');
+            console.log('   3. Click "Link a Device"');
+            console.log('   4. Open the QR code image file and scan it');
+            console.log('   5. The system will automatically detect when you\'re logged in\n');
+
+            // Also log the full path for easy access
+            console.log(`   Full path: ${path.resolve(qrCodePath)}\n`);
+          } else {
+            console.log('⚠️  Could not find QR code canvas. Please check WhatsApp Web manually.');
+          }
+
+          // Don't block here - QR code scanning should happen in background
+          // The user can scan it later and we'll check on next request
+          console.log('⏳ QR code saved. Please scan it using your phone.');
+          console.log('   The system will automatically detect login on the next message attempt.');
+
+          // Check periodically if logged in (non-blocking)
+          const checkLoginInterval = setInterval(async () => {
+            try {
+              const loggedIn = await whatsappPage.$('div[data-testid="chat-list"]');
+              if (loggedIn) {
+                clearInterval(checkLoginInterval);
+                isReady = true;
+                console.log('✅ WhatsApp Web logged in successfully!');
+              }
+            } catch (e) {
+              // Ignore errors during check
+            }
+          }, 5000); // Check every 5 seconds
+
+          // Timeout after 10 minutes
+          setTimeout(() => {
+            clearInterval(checkLoginInterval);
+          }, 600000);
+
+          // Return even if not logged in - will try again on next request
+          return { browser: browserInstance, page: whatsappPage };
+        } else {
+          console.log('✅ WhatsApp Web session active');
+          isReady = true;
+        }
+
+        return { browser: browserInstance, page: whatsappPage };
+      } catch (error) {
+        console.error('Error waiting for WhatsApp Web to load:', error);
+        isReady = false;
+        throw error;
+      }
+    } finally {
+      isInitializing = false;
+    }
+  })();
+
+  return initPromise;
 }
 
 /**
@@ -227,6 +298,17 @@ async function sendWhatsAppMessage(adminPhone, message) {
   }
 }
 
+// GET QR code endpoint - serves the QR code image for scanning
+router.get('/qr-code', (req, res) => {
+  const qrCodePath = path.join(__dirname, '../../qr-code.png');
+
+  if (fs.existsSync(qrCodePath)) {
+    res.sendFile(qrCodePath);
+  } else {
+    res.status(404).json({ error: 'QR code not found. Please submit a contact form first to generate it.' });
+  }
+});
+
 // POST contact form submission
 router.post('/', async (req, res) => {
   try {
@@ -254,7 +336,35 @@ router.post('/', async (req, res) => {
     // Create notification message
     const message = `🔔 *New Contact Form Submission*\n\n📞 *Phone:* ${phoneNumber}\n\n💬 *Query:*\n${query}\n\n⏰ *Time:* ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
 
-    // Send WhatsApp notification
+    // Initialize WhatsApp session in background (non-blocking)
+    // If not ready, try to initialize but don't wait for QR scan
+    if (!isReady) {
+      // Start initialization but don't wait - it will complete in background
+      initWhatsAppSession().catch(err => {
+        console.error('Background WhatsApp initialization error:', err);
+      });
+
+      // If QR code exists, return with info
+      const qrCodePath = path.join(__dirname, '../../qr-code.png');
+      if (fs.existsSync(qrCodePath)) {
+        return res.json({
+          success: true,
+          message: 'Your query has been submitted successfully. WhatsApp notification will be sent once QR code is scanned.',
+          notificationSent: false,
+          qrCodeAvailable: true,
+          qrCodeUrl: '/api/contact/qr-code',
+        });
+      }
+
+      // Return success immediately - WhatsApp will be initialized in background
+      return res.json({
+        success: true,
+        message: 'Your query has been submitted successfully. WhatsApp is being set up in the background.',
+        notificationSent: false,
+      });
+    }
+
+    // If WhatsApp is ready, send notification
     const notificationSent = await sendWhatsAppMessage(adminPhone, message);
 
     return res.json({
