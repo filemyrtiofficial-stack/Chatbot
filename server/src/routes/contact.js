@@ -6,8 +6,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import qrcode from 'qrcode-terminal';
-import sharp from 'sharp';
-import jsQR from 'jsqr';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -122,6 +120,26 @@ async function initWhatsAppSession() {
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       );
 
+      // Set up network request interception to capture QR code data
+      let qrCodeRef = null;
+      whatsappPage.on('response', async (response) => {
+        const url = response.url();
+        if (url.includes('login_code.json') || url.includes('ref=')) {
+          try {
+            const data = await response.json();
+            if (data && data.ref) {
+              qrCodeRef = data.ref;
+            }
+          } catch (e) {
+            // Try to extract ref from URL
+            const urlMatch = url.match(/[?&]ref=([^&]+)/);
+            if (urlMatch) {
+              qrCodeRef = urlMatch[1];
+            }
+          }
+        }
+      });
+
       // Navigate to WhatsApp Web
       await whatsappPage.goto('https://web.whatsapp.com', {
         waitUntil: 'networkidle2',
@@ -150,41 +168,69 @@ async function initWhatsAppSession() {
 
           if (qrCanvas) {
             try {
-              // Capture QR code canvas as base64 image
-              const qrCodeImage = await qrCanvas.screenshot({ encoding: 'base64' });
+              // Extract QR code data directly from WhatsApp Web page
+              // WhatsApp stores the QR code reference in various places on the page
+              const qrCodeData = await whatsappPage.evaluate(() => {
+                // Method 1: Try to find QR code ref in localStorage or sessionStorage
+                try {
+                  const stored = localStorage.getItem('WASecretBundle') || sessionStorage.getItem('WASecretBundle');
+                  if (stored) {
+                    const data = JSON.parse(stored);
+                    if (data && data.ref) {
+                      return `https://web.whatsapp.com/desktop/login_code.json?ref=${data.ref}`;
+                    }
+                  }
+                } catch (e) { }
 
-              // Save QR code image for reference
+                // Method 2: Try to find in window properties
+                try {
+                  if (window.WASecretBundle && window.WASecretBundle.ref) {
+                    return `https://web.whatsapp.com/desktop/login_code.json?ref=${window.WASecretBundle.ref}`;
+                  }
+                } catch (e) { }
+
+                // Method 3: Extract from page URL or query parameters
+                try {
+                  const urlParams = new URLSearchParams(window.location.search);
+                  const ref = urlParams.get('ref');
+                  if (ref) {
+                    return `https://web.whatsapp.com/desktop/login_code.json?ref=${ref}`;
+                  }
+                } catch (e) { }
+
+                // Method 4: Try to get QR code data from canvas context
+                try {
+                  const canvas = document.querySelector('canvas[aria-label*="Scan"], canvas');
+                  if (canvas) {
+                    // Get canvas as data URL (this will be used as fallback)
+                    return canvas.toDataURL();
+                  }
+                } catch (e) { }
+
+                return null;
+              });
+
+              // Capture QR code canvas as base64 image for fallback
+              const qrCodeImage = await qrCanvas.screenshot({ encoding: 'base64' });
               const qrCodePath = path.join(__dirname, '../../qr-code.png');
               fs.writeFileSync(qrCodePath, qrCodeImage, 'base64');
 
-              // Decode QR code from image using jsQR
-              const imageBuffer = Buffer.from(qrCodeImage, 'base64');
+              // Use captured ref from network requests if available
+              let finalQrUrl = null;
+              if (qrCodeRef) {
+                finalQrUrl = `https://web.whatsapp.com/desktop/login_code.json?ref=${qrCodeRef}`;
+              } else if (qrCodeData && qrCodeData.startsWith('https://')) {
+                finalQrUrl = qrCodeData;
+              }
 
-              // Convert image to raw RGBA data using sharp
-              const { data, info } = await sharp(imageBuffer)
-                .ensureAlpha()
-                .raw()
-                .toBuffer({ resolveWithObject: true });
-
-              // Convert to raw image data for jsQR
-              const qrImageData = {
-                data: new Uint8ClampedArray(data),
-                width: info.width,
-                height: info.height,
-              };
-
-              // Decode QR code
-              const qrCode = jsQR(qrImageData.data, qrImageData.width, qrImageData.height);
-
-              if (qrCode && qrCode.data) {
-                const qrData = qrCode.data;
-
+              // If we got a URL, use it directly
+              if (finalQrUrl) {
                 console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
                 console.log('📱 SCAN THIS QR CODE WITH YOUR PHONE');
                 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
                 // Display QR code in terminal
-                qrcode.generate(qrData, { small: true });
+                qrcode.generate(finalQrUrl, { small: true });
 
                 console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
                 console.log('📋 Steps to scan:');
@@ -195,13 +241,17 @@ async function initWhatsAppSession() {
                 console.log('   5. The system will automatically detect when logged in');
                 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
               } else {
-                console.log('\n⚠️  Could not decode QR code from canvas image.');
+                // Fallback: Show saved image location
+                console.log('\n⚠️  Could not extract QR code URL from WhatsApp Web.');
                 console.log('   QR code image saved to:', qrCodePath);
-                console.log('   Please try scanning the saved image file manually.\n');
+                console.log('   You can view it at: https://chat.filemyrti.com/api/contact/qr-code');
+                console.log('   Or download and scan the image file manually.\n');
               }
             } catch (error) {
               console.error('Error extracting QR code:', error);
-              console.log('   Falling back to saved image file...\n');
+              const qrCodePath = path.join(__dirname, '../../qr-code.png');
+              console.log('   QR code image saved to:', qrCodePath);
+              console.log('   Please try scanning the saved image file manually.\n');
             }
           } else {
             console.log('⚠️  Could not find QR code canvas. Please check WhatsApp Web manually.');
