@@ -6,6 +6,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import qrcode from 'qrcode-terminal';
+import jsQR from 'jsqr';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const Jimp = require('jimp');
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -307,141 +311,269 @@ async function initWhatsAppSession() {
 
           // Try to extract and display QR code
           try {
-            // Wait for QR code canvas to appear
-            let qrCanvasFound = false;
-            try {
-              await whatsappPage.waitForSelector('canvas[aria-label*="Scan"], canvas[aria-label*="QR"], canvas', {
-                timeout: 10000,
-              });
-              qrCanvasFound = true;
-              console.log('✅ QR code canvas found');
-            } catch (e) {
-              console.log('⚠️  QR code canvas not found, trying alternative methods...');
-            }
+            // Wait for QR code canvas to appear with multiple selector strategies
+            let qrCanvas = null;
+            let attempts = 0;
+            const maxAttempts = 5;
 
-            // Wait longer for network requests and QR code data to load
-            console.log('⏳ Waiting for QR code data to load (this may take a few seconds)...');
-            await wait(8000); // Wait longer for all network requests
-
-            // Try multiple methods to extract QR code reference
-            const extractionResults = await whatsappPage.evaluate(() => {
-              const results = { methods: [] };
-
-              // Method 1: Check localStorage
+            while (!qrCanvas && attempts < maxAttempts) {
               try {
-                const keys = Object.keys(localStorage);
-                for (const key of keys) {
-                  if (key.includes('WASecret') || key.includes('ref')) {
-                    const value = localStorage.getItem(key);
-                    try {
-                      const parsed = JSON.parse(value);
-                      if (parsed && parsed.ref) {
-                        results.methods.push({ method: 'localStorage', ref: parsed.ref });
-                        results.ref = parsed.ref;
-                      }
-                    } catch (e) {
-                      if (value && value.length > 10) {
-                        results.methods.push({ method: 'localStorage_raw', value: value.substring(0, 50) });
-                      }
+                // Try different selectors for the QR code canvas
+                const selectors = [
+                  'canvas[aria-label*="Scan"]',
+                  'canvas[aria-label*="QR"]',
+                  'canvas',
+                  'div[data-ref] canvas',
+                  '#app canvas',
+                ];
+
+                for (const selector of selectors) {
+                  try {
+                    await whatsappPage.waitForSelector(selector, { timeout: 3000 });
+                    qrCanvas = await whatsappPage.$(selector);
+                    if (qrCanvas) {
+                      console.log(`✅ QR code canvas found using selector: ${selector}`);
+                      break;
                     }
+                  } catch (e) {
+                    // Try next selector
+                  }
+                }
+
+                if (!qrCanvas) {
+                  attempts++;
+                  if (attempts < maxAttempts) {
+                    console.log(`⏳ Waiting for QR code canvas (attempt ${attempts + 1}/${maxAttempts})...`);
+                    await wait(2000);
                   }
                 }
               } catch (e) {
-                results.methods.push({ method: 'localStorage', error: e.message });
-              }
-
-              // Method 2: Check window properties
-              try {
-                if (window.wb) {
-                  const wbStr = JSON.stringify(window.wb).substring(0, 200);
-                  results.methods.push({ method: 'window.wb', data: wbStr });
+                attempts++;
+                if (attempts < maxAttempts) {
+                  await wait(2000);
                 }
-              } catch (e) { }
-
-              // Method 3: Check script tags for ref
-              try {
-                const scripts = Array.from(document.querySelectorAll('script'));
-                for (const script of scripts) {
-                  const content = script.innerHTML || script.textContent || '';
-                  const refMatch = content.match(/ref["\s:=]+([a-zA-Z0-9_-]+)/i);
-                  if (refMatch && refMatch[1] && refMatch[1].length > 10) {
-                    results.methods.push({ method: 'script_tag', ref: refMatch[1] });
-                    if (!results.ref) results.ref = refMatch[1];
-                  }
-                }
-              } catch (e) { }
-
-              // Method 4: Check URL
-              try {
-                const urlParams = new URLSearchParams(window.location.search);
-                const ref = urlParams.get('ref');
-                if (ref) {
-                  results.methods.push({ method: 'url_param', ref });
-                  if (!results.ref) results.ref = ref;
-                }
-              } catch (e) { }
-
-              // Method 5: Check page source for common patterns
-              try {
-                const bodyText = document.body.innerHTML;
-                const patterns = [
-                  /ref["\s:=]+([a-zA-Z0-9_-]{20,})/gi,
-                  /login_code\.json[?&]ref=([^"'\s&]+)/gi,
-                ];
-                for (const pattern of patterns) {
-                  const matches = bodyText.matchAll(pattern);
-                  for (const match of matches) {
-                    if (match[1] && match[1].length > 10) {
-                      results.methods.push({ method: 'body_html', ref: match[1] });
-                      if (!results.ref) results.ref = match[1];
-                      break;
-                    }
-                  }
-                }
-              } catch (e) { }
-
-              return results;
-            });
-
-            console.log('🔍 QR extraction attempts:', JSON.stringify(extractionResults, null, 2));
-            console.log('📡 Network captured QR ref:', qrCodeRef ? qrCodeRef.substring(0, 50) + '...' : 'none');
-            console.log('📡 Network captured QR URL:', qrCodeUrl || 'none');
-
-            // Use captured URL from network (most reliable), or build from ref, or page extraction
-            let finalQrUrl = null;
-
-            if (qrCodeUrl) {
-              finalQrUrl = qrCodeUrl;
-              console.log('✅ Using QR URL from network interception');
-            } else {
-              const refToUse = qrCodeRef || extractionResults.ref;
-              if (refToUse) {
-                finalQrUrl = `https://web.whatsapp.com/desktop/login_code.json?ref=${refToUse}`;
-                console.log('✅ Using QR ref to build URL:', refToUse.substring(0, 50) + '...');
               }
             }
 
-            if (finalQrUrl) {
-              console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-              console.log('📱 SCAN THIS QR CODE WITH YOUR PHONE');
-              console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+            if (!qrCanvas) {
+              console.log('⚠️  QR code canvas not found. Waiting for page to fully load...');
+              await wait(5000);
 
-              // Display QR code in terminal
-              qrcode.generate(finalQrUrl, { small: true });
+              // Try one more time to find canvas
+              try {
+                qrCanvas = await whatsappPage.$('canvas');
+              } catch (e) {
+                console.log('⚠️  Still could not find canvas element.');
+              }
+            }
 
-              console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-              console.log('📋 Steps to scan:');
-              console.log('   1. Open WhatsApp on your phone');
-              console.log('   2. Go to Settings > Linked Devices');
-              console.log('   3. Tap "Link a Device"');
-              console.log('   4. Point your camera at the QR code above');
-              console.log('   5. The system will automatically detect when logged in');
-              console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-            } else {
-              console.log('⚠️  Could not extract QR code reference.');
-              console.log('   Debug info:', JSON.stringify(extractionResults.methods.slice(0, 3), null, 2));
-              console.log('   The browser window is open - please scan the QR code there.');
-              console.log('   WhatsApp will automatically connect once logged in.');
+            // Wait a bit more for QR code to fully render
+            if (qrCanvas) {
+              console.log('⏳ Waiting for QR code to fully render...');
+              await wait(3000);
+            }
+
+            // Extract QR code data directly from canvas
+            let qrCodeData = null;
+
+            if (qrCanvas) {
+              try {
+                // Method 1: Try to extract canvas data directly (fastest)
+                const canvasData = await whatsappPage.evaluate(() => {
+                  const canvases = Array.from(document.querySelectorAll('canvas'));
+
+                  for (const canvas of canvases) {
+                    try {
+                      const width = canvas.width || canvas.offsetWidth || canvas.clientWidth;
+                      const height = canvas.height || canvas.offsetHeight || canvas.clientHeight;
+
+                      if (width < 100 || height < 100) continue;
+
+                      // Try to get 2d context
+                      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                      if (!ctx) continue;
+
+                      // Get image data
+                      const imageData = ctx.getImageData(0, 0, width, height);
+
+                      return {
+                        width,
+                        height,
+                        data: Array.from(imageData.data),
+                        success: true
+                      };
+                    } catch (e) {
+                      // Canvas might be tainted or use WebGL, try next canvas
+                      continue;
+                    }
+                  }
+                  return { success: false };
+                });
+
+                if (canvasData && canvasData.success) {
+                  // Convert array back to Uint8ClampedArray for jsQR
+                  const uint8Array = new Uint8ClampedArray(canvasData.data);
+
+                  // Decode QR code using jsQR
+                  const code = jsQR(uint8Array, canvasData.width, canvasData.height);
+
+                  if (code && code.data) {
+                    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                    console.log('📱 SCAN THIS QR CODE WITH YOUR PHONE');
+                    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+                    // Display QR code in terminal
+                    qrcode.generate(code.data, { small: true });
+
+                    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                    console.log('📋 Steps to scan:');
+                    console.log('   1. Open WhatsApp on your phone');
+                    console.log('   2. Go to Settings > Linked Devices');
+                    console.log('   3. Tap "Link a Device"');
+                    console.log('   4. Point your camera at the QR code above');
+                    console.log('   5. The system will automatically detect when logged in');
+                    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+                    qrCodeData = code.data; // Mark as successful
+                  }
+                }
+
+                // Method 2: If direct extraction failed, try screenshot method
+                if (!qrCodeData) {
+                  try {
+                    console.log('📸 Taking screenshot of canvas to extract QR code...');
+                    const screenshotBuffer = await qrCanvas.screenshot();
+
+                    // Use Jimp to read the image and extract pixel data
+                    const image = await Jimp.read(screenshotBuffer);
+                    const width = image.bitmap.width;
+                    const height = image.bitmap.height;
+
+                    // Convert Jimp image data to format jsQR expects
+                    // jsQR expects Uint8ClampedArray in RGBA format
+                    const imageData = new Uint8ClampedArray(width * height * 4);
+
+                    for (let y = 0; y < height; y++) {
+                      for (let x = 0; x < width; x++) {
+                        const pixel = Jimp.intToRGBA(image.getPixelColor(x, y));
+                        const idx = (y * width + x) * 4;
+                        imageData[idx] = pixel.r;     // Red
+                        imageData[idx + 1] = pixel.g; // Green
+                        imageData[idx + 2] = pixel.b; // Blue
+                        imageData[idx + 3] = pixel.a; // Alpha
+                      }
+                    }
+
+                    // Decode QR code using jsQR
+                    const code = jsQR(imageData, width, height);
+
+                    if (code && code.data) {
+                      console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                      console.log('📱 SCAN THIS QR CODE WITH YOUR PHONE');
+                      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+                      // Display QR code in terminal
+                      qrcode.generate(code.data, { small: true });
+
+                      console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                      console.log('📋 Steps to scan:');
+                      console.log('   1. Open WhatsApp on your phone');
+                      console.log('   2. Go to Settings > Linked Devices');
+                      console.log('   3. Tap "Link a Device"');
+                      console.log('   4. Point your camera at the QR code above');
+                      console.log('   5. The system will automatically detect when logged in');
+                      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+                      qrCodeData = code.data; // Mark as successful
+                    } else {
+                      console.log('⚠️  Could not decode QR code from screenshot. Trying alternative methods...');
+                    }
+                  } catch (screenshotError) {
+                    console.log('⚠️  Error with screenshot method:', screenshotError.message);
+                  }
+                }
+              } catch (error) {
+                console.log('⚠️  Error extracting QR code from canvas:', error.message);
+              }
+            }
+
+            // Fallback: Try to extract QR code reference/URL from network or page
+            if (!qrCodeData) {
+              console.log('🔍 Trying alternative QR code extraction methods...');
+
+              // Wait a bit more for network requests
+              await wait(3000);
+
+              // Try to get QR code reference from network interception
+              let finalQrUrl = qrCodeUrl;
+
+              if (!finalQrUrl && qrCodeRef) {
+                finalQrUrl = `https://web.whatsapp.com/desktop/login_code.json?ref=${qrCodeRef}`;
+              }
+
+              // If still no URL, try extracting from page
+              if (!finalQrUrl) {
+                const pageData = await whatsappPage.evaluate(() => {
+                  // Try to find ref in various places
+                  try {
+                    // Check localStorage
+                    for (let i = 0; i < localStorage.length; i++) {
+                      const key = localStorage.key(i);
+                      if (key && (key.includes('ref') || key.includes('WASecret'))) {
+                        try {
+                          const value = JSON.parse(localStorage.getItem(key));
+                          if (value && value.ref) {
+                            return value.ref;
+                          }
+                        } catch (e) {
+                          const value = localStorage.getItem(key);
+                          if (value && value.length > 20) {
+                            const match = value.match(/ref["\s:=]+([a-zA-Z0-9_-]{20,})/);
+                            if (match) return match[1];
+                          }
+                        }
+                      }
+                    }
+
+                    // Check script tags
+                    const scripts = Array.from(document.querySelectorAll('script'));
+                    for (const script of scripts) {
+                      const content = script.innerHTML || script.textContent || '';
+                      const match = content.match(/ref["\s:=]+([a-zA-Z0-9_-]{20,})/i);
+                      if (match && match[1]) return match[1];
+                    }
+                  } catch (e) {
+                    return null;
+                  }
+                  return null;
+                });
+
+                if (pageData) {
+                  finalQrUrl = `https://web.whatsapp.com/desktop/login_code.json?ref=${pageData}`;
+                }
+              }
+
+              if (finalQrUrl) {
+                console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.log('📱 SCAN THIS QR CODE WITH YOUR PHONE');
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+                // Display QR code in terminal
+                qrcode.generate(finalQrUrl, { small: true });
+
+                console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.log('📋 Steps to scan:');
+                console.log('   1. Open WhatsApp on your phone');
+                console.log('   2. Go to Settings > Linked Devices');
+                console.log('   3. Tap "Link a Device"');
+                console.log('   4. Point your camera at the QR code above');
+                console.log('   5. The system will automatically detect when logged in');
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+              } else {
+                console.log('⚠️  Could not extract QR code.');
+                console.log('   The browser window is open - please scan the QR code there.');
+                console.log('   WhatsApp will automatically connect once logged in.');
+              }
             }
           } catch (error) {
             console.log('⚠️  Error extracting QR code:', error.message);
