@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHumanTalk } from '../App';
-import { api } from '../api';
+import { api, resolveApiUrl } from '../api';
 
 const HumanTalkWidget: React.FC = () => {
   const { isOpen, setIsOpen } = useHumanTalk();
@@ -14,7 +14,7 @@ const HumanTalkWidget: React.FC = () => {
   const phoneInputRef = useRef<HTMLInputElement>(null);
 
   // Company phone number - update this with your actual number
-  const companyPhoneNumber = '+91 8106342858';
+  const companyPhoneNumber = '+91 99999 99999';
 
   // Focus phone input when modal opens
   useEffect(() => {
@@ -36,7 +36,7 @@ const HumanTalkWidget: React.FC = () => {
 
     try {
       // Call the API to submit the form and send WhatsApp notification
-      await api('/api/contact', {
+      await api(resolveApiUrl('/api/contact'), {
         method: 'POST',
         body: JSON.stringify({
           phoneNumber: submittedPhoneValue,

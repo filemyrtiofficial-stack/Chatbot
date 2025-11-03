@@ -17,8 +17,7 @@ const config = getConfig();
 const app = express();
 
 app.disable('x-powered-by');
-// Trust proxy only from specific sources (fixes rate limiting warning)
-app.set('trust proxy', 1); // Trust only the first proxy (1 = trust first hop only)
+app.set('trust proxy', true);
 
 const logger = pinoHttp({
   transport: isProduction()
@@ -51,7 +50,6 @@ app.use(cookieParser());
 app.get('/api/health', (req, res) =>
   res.json({ ok: true, uptime: process.uptime(), timestamp: new Date().toISOString() })
 );
-
 
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', authMiddleware, chatRoutes);
