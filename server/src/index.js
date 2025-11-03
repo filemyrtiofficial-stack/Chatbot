@@ -17,7 +17,7 @@ const config = getConfig();
 const app = express();
 
 app.disable('x-powered-by');
-app.set('trust proxy', true);
+app.set('trust proxy', 1); // Trust only the first proxy (for rate limiting security)
 
 const logger = pinoHttp({
   transport: isProduction()
