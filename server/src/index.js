@@ -17,7 +17,8 @@ const config = getConfig();
 const app = express();
 
 app.disable('x-powered-by');
-app.set('trust proxy', true);
+// Trust proxy only from specific sources (fixes rate limiting warning)
+app.set('trust proxy', 1); // Trust only the first proxy (1 = trust first hop only)
 
 const logger = pinoHttp({
   transport: isProduction()

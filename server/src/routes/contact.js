@@ -70,8 +70,11 @@ async function initWhatsAppSession() {
       }
     }
 
+    // Force headless mode in production or if no DISPLAY variable (server environment)
+    const isHeadless = config.NODE_ENV === 'production' || !process.env.DISPLAY;
+
     browserInstance = await puppeteer.launch({
-      headless: config.NODE_ENV === 'production', // Show browser in development
+      headless: isHeadless ? 'new' : false, // Use 'new' headless mode or false for visible browser
       executablePath, // Use system Chrome if available
       args: [
         '--no-sandbox',
@@ -81,6 +84,7 @@ async function initWhatsAppSession() {
         '--disable-gpu',
         '--disable-software-rasterizer',
         '--disable-extensions',
+        ...(isHeadless ? ['--disable-dev-shm-usage', '--disable-setuid-sandbox'] : []),
       ],
       userDataDir, // Persist session data
     });
