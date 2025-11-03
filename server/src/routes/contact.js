@@ -23,6 +23,9 @@ let isInitializing = false;
 let isReady = false;
 let initPromise = null;
 
+// Helper function to replace deprecated waitForTimeout
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 /**
  * Initialize Puppeteer browser and WhatsApp Web session
  * This keeps the browser open to maintain WhatsApp Web session
@@ -153,7 +156,7 @@ async function initWhatsAppSession() {
             await execAsync(`killall -9 chrome || killall -9 chromium || true`);
 
             // Wait a moment for processes to terminate
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await wait(2000);
 
             // Remove lock files again
             const lockFiles = [
@@ -238,7 +241,7 @@ async function initWhatsAppSession() {
       });
 
       // Wait a bit for page to stabilize and network requests to complete
-      await whatsappPage.waitForTimeout(5000);
+      await wait(5000);
 
       // Try multiple selector strategies with more flexibility
       let isLoggedIn = false;
@@ -280,7 +283,7 @@ async function initWhatsAppSession() {
             }
 
             // Wait a bit more for QR code data to load
-            await whatsappPage.waitForTimeout(3000);
+            await wait(3000);
 
             // Try multiple methods to extract QR code reference
             const extractionResults = await whatsappPage.evaluate(() => {
@@ -486,7 +489,7 @@ async function sendWhatsAppMessage(adminPhone, message) {
     }
 
     // Wait a moment for message to be typed
-    await page.waitForTimeout(500);
+    await wait(500);
 
     // Click send button
     const sendButton = await page.$('button[data-testid="send"]') ||
@@ -497,14 +500,14 @@ async function sendWhatsAppMessage(adminPhone, message) {
       await sendButton.click();
 
       // Wait for message to be sent (check for sent status)
-      await page.waitForTimeout(2000);
+      await wait(2000);
 
       console.log('✅ WhatsApp message sent successfully');
       return true;
     } else {
       // Alternative: Press Enter key
       await page.keyboard.press('Enter');
-      await page.waitForTimeout(2000);
+      await wait(2000);
       console.log('✅ WhatsApp message sent successfully (using Enter key)');
       return true;
     }
