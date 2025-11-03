@@ -7,7 +7,7 @@
     "dev": "nodemon src/index.js",
     "start": "node src/index.js"
   },
-  "keywords": [],
+  "keywords": [ ],
   "author": "",
   "license": "ISC",
   "type": "module",
@@ -27,6 +27,7 @@
     "passport-google-oauth20": "^2.0.0",
     "pino": "^10.0.0",
     "pino-http": "^11.0.0",
+    "puppeteer": "^24.27.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

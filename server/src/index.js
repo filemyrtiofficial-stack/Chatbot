@@ -9,6 +9,7 @@ import pinoHttp from 'pino-http';
 import { initDatabase } from './db.js';
 import authRoutes from './routes/auth.js';
 import chatRoutes from './routes/chat.js';
+import contactRoutes from './routes/contact.js';
 import { authMiddleware } from './middleware/auth.js';
 import { getConfig, isProduction } from './config.js';
 
@@ -22,9 +23,9 @@ const logger = pinoHttp({
   transport: isProduction()
     ? undefined
     : {
-        target: 'pino-pretty',
-        options: { colorize: true, translateTime: 'SYS:standard' },
-      },
+      target: 'pino-pretty',
+      options: { colorize: true, translateTime: 'SYS:standard' },
+    },
 });
 
 const limiter = rateLimit({
@@ -52,6 +53,7 @@ app.get('/api/health', (req, res) =>
 
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', authMiddleware, chatRoutes);
+app.use('/api/contact', contactRoutes); // No auth required for contact form
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });

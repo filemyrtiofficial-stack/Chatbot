@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useHumanTalk } from '../App';
+import { api, resolveApiUrl } from '../api';
 
 const HumanTalkWidget: React.FC = () => {
   const { isOpen, setIsOpen } = useHumanTalk();
@@ -22,7 +23,7 @@ const HumanTalkWidget: React.FC = () => {
     }
   }, [isOpen, isSubmitted]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (phoneNumber.trim() === '' || query.trim() === '') {
@@ -31,17 +32,30 @@ const HumanTalkWidget: React.FC = () => {
 
     setIsSubmitting(true);
     const submittedPhoneValue = phoneNumber.trim();
+    const submittedQuery = query.trim();
 
-    // Simulate API call (you can replace this with actual API call later)
-    setTimeout(() => {
-      console.log('Submitted:', { phoneNumber: submittedPhoneValue, query });
+    try {
+      // Call the API to submit the form and send WhatsApp notification
+      await api(resolveApiUrl('/api/contact'), {
+        method: 'POST',
+        body: JSON.stringify({
+          phoneNumber: submittedPhoneValue,
+          query: submittedQuery,
+        }),
+      });
+
       setIsSubmitting(false);
       setIsSubmitted(true);
       setSubmittedPhone(submittedPhoneValue);
       setPhoneNumber('');
       setQuery('');
       // Thank you message will stay until user closes the modal
-    }, 1000);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setIsSubmitting(false);
+      // You can add an error message here if needed
+      alert('Failed to submit your query. Please try again later.');
+    }
   };
 
   return (
