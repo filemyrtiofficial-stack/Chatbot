@@ -36,7 +36,7 @@ const HumanTalkWidget: React.FC = () => {
 
     try {
       // Call the API to submit the form and send WhatsApp notification
-      await api(resolveApiUrl('/api/contact'), {
+      await api('/api/contact', {
         method: 'POST',
         body: JSON.stringify({
           phoneNumber: submittedPhoneValue,
@@ -150,11 +150,11 @@ const HumanTalkWidget: React.FC = () => {
 
             {/* Modal */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              initial={{ opacity: 0, x: '100%' }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="fixed z-50 flex flex-col bg-white shadow-2xl md:bottom-24 md:right-6 md:h-auto md:max-h-[600px] md:w-[400px] md:rounded-2xl bottom-0 right-0 left-0 w-full max-h-[calc(100vh-3rem)] rounded-t-2xl"
+              className="fixed z-50 flex flex-col bg-white shadow-2xl md:top-6 md:right-6 md:bottom-6 md:left-auto md:h-auto md:max-h-[calc(100vh-3rem)] md:w-[420px] md:rounded-2xl bottom-0 right-0 left-0 w-full max-h-[calc(100vh-3rem)] rounded-t-2xl"
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b border-slate-200 bg-[#1660a6] px-5 py-4 text-white">
