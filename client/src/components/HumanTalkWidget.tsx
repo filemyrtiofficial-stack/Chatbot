@@ -362,7 +362,7 @@ export const HumanTalkNavButton: React.FC = () => {
   return (
     <button
       onClick={() => setIsOpen(true)}
-      className="md:hidden relative flex items-center gap-1.5 rounded-lg bg-[#1660a6] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[#145891] focus:outline-none focus:ring-2 focus:ring-[#1660a6] focus:ring-offset-1 whitespace-nowrap"
+      className="md:hidden relative flex items-center gap-1.5 rounded-lg bg-[#1660a6] px-2 py-1.5 text-[11px] sm:text-xs font-semibold text-white transition-colors hover:bg-[#145891] focus:outline-none focus:ring-2 focus:ring-[#1660a6] focus:ring-offset-1 whitespace-nowrap shadow-sm"
       aria-label="Talk with Human"
     >
       <svg
@@ -379,8 +379,8 @@ export const HumanTalkNavButton: React.FC = () => {
           d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
         />
       </svg>
-      <span className="inline">Talk With Human</span>
-      <div className="absolute -top-1 -right-1 rounded-full bg-red-500 px-1 py-0.5 text-[8px] font-bold uppercase text-white">
+      <span className="inline whitespace-nowrap">Talk With Human</span>
+      <div className="absolute -top-1 -right-1 rounded-full bg-red-500 px-1 py-0.5 text-[8px] font-bold uppercase text-white shadow-sm">
         Beta
       </div>
     </button>

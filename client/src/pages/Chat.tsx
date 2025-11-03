@@ -892,11 +892,11 @@ export default function Chat() {
         {/* Main content area */}
         <div className={`flex flex-1 flex-col min-h-0 ${sidebarOpen ? 'lg:pl-64' : ''}`}>
           {/* Header */}
-          <div className={`sticky top-0 z-40 flex h-12 shrink-0 items-center gap-x-4 px-3 sm:px-4 sm:gap-x-6 lg:px-8 transition-colors duration-200 ${isDarkMode ? 'bg-gray-900' : 'bg-white'
+          <div className={`sticky top-0 z-40 flex h-12 shrink-0 items-center gap-x-2 px-2 sm:px-3 sm:gap-x-4 lg:px-8 lg:gap-x-6 transition-colors duration-200 ${isDarkMode ? 'bg-gray-900' : 'bg-white'
             }`}>
             <button
               type="button"
-              className={`-m-2.5 p-2.5 lg:hidden transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
+              className={`-m-1.5 p-1.5 lg:hidden transition-colors duration-200 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
                 }`}
               onClick={() => setSidebarOpen(true)}
             >
@@ -907,6 +907,7 @@ export default function Chat() {
             </button>
             <div className={`h-6 w-px lg:hidden transition-colors duration-200 ${isDarkMode ? 'bg-gray-600' : 'bg-gray-200'
               }`} />
+            <div className="flex-1 min-w-0" />
 
             {/* Show sidebar toggle in navbar when sidebar is closed */}
             {!sidebarOpen && (
@@ -934,8 +935,8 @@ export default function Chat() {
               </button>
             )}
 
-            <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-              <div className="relative flex flex-1">
+            <div className="flex flex-1 gap-x-2 self-stretch lg:gap-x-6 min-w-0">
+              <div className="relative flex flex-1 min-w-0">
                 <div className="flex items-center gap-2 -ml-2">
                   <div className="relative" data-dropdown>
                     <button
@@ -1012,7 +1013,7 @@ export default function Chat() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-x-4 lg:gap-x-6">
+              <div className="flex items-center gap-x-2 lg:gap-x-6">
                 <HumanTalkNavButton />
               </div>
             </div>
