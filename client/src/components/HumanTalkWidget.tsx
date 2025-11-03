@@ -107,7 +107,7 @@ const HumanTalkWidget: React.FC = () => {
           onClick={() => setIsOpen(true)}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          className="relative flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 px-5 py-3 shadow-lg transition-shadow hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+          className="relative flex items-center gap-2 rounded-xl bg-[#1660a6] px-5 py-3 shadow-lg transition-shadow hover:bg-[#145891] hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#1660a6] focus:ring-offset-2"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           aria-label="Talk with a Human Expert"
@@ -162,17 +162,17 @@ const HumanTalkWidget: React.FC = () => {
               className="fixed bottom-24 right-6 z-50 flex h-[600px] w-[400px] flex-col rounded-2xl bg-white shadow-2xl"
             >
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-r from-sky-500 to-sky-600 px-5 py-4 text-white">
+              <div className="flex items-center justify-between border-b border-slate-200 bg-[#1660a6] px-5 py-4 text-white">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">👥</span>
                   <div>
                     <h2 className="text-lg font-semibold">Talk with a Human</h2>
-                    <p className="text-xs text-sky-100">Real expert ready to help</p>
+                    <p className="text-xs text-blue-100">Real expert ready to help</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="rounded-full p-1 transition-colors hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-sky-500"
+                  className="rounded-full p-1 transition-colors hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#1660a6]"
                   aria-label="Close chat"
                 >
                   <svg
@@ -206,7 +206,7 @@ const HumanTalkWidget: React.FC = () => {
                     >
                       <div
                         className={`max-w-[80%] rounded-2xl px-4 py-2 ${message.sender === 'user'
-                          ? 'bg-gradient-to-r from-sky-500 to-sky-600 text-white'
+                          ? 'bg-[#1660a6] text-white'
                           : 'bg-slate-100 text-slate-800'
                           }`}
                       >
@@ -237,14 +237,14 @@ const HumanTalkWidget: React.FC = () => {
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Type your message to connect with a human..."
-                    className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200 focus:ring-offset-1"
+                    className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-[#1660a6] focus:outline-none focus:ring-2 focus:ring-[#1660a6]/20 focus:ring-offset-1"
                   />
                   <motion.button
                     onClick={handleSend}
                     disabled={inputValue.trim() === ''}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="rounded-lg bg-gradient-to-r from-sky-500 to-sky-600 px-5 py-2 text-sm font-semibold text-white transition-opacity disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-1"
+                    className="rounded-lg bg-[#1660a6] px-5 py-2 text-sm font-semibold text-white transition-opacity hover:bg-[#145891] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[#1660a6] focus:ring-offset-1"
                   >
                     Send
                   </motion.button>

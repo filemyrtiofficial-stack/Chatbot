@@ -9,6 +9,7 @@ const config = {
       colors: {
         'surface-light': '#f1f5f9',
         'surface-dark': '#0f172a',
+        'brand-blue': '#1660a6',
       },
     },
   },
