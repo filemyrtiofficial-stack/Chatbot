@@ -5,6 +5,9 @@ import puppeteer from 'puppeteer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import qrcode from 'qrcode-terminal';
+import sharp from 'sharp';
+import jsQR from 'jsqr';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -146,29 +149,63 @@ async function initWhatsAppSession() {
           const qrCanvas = await whatsappPage.$('canvas[aria-label*="Scan"], canvas');
 
           if (qrCanvas) {
-            // Capture QR code as image
-            const qrCodePath = path.join(__dirname, '../../qr-code.png');
-            await qrCanvas.screenshot({ path: qrCodePath });
+            try {
+              // Capture QR code canvas as base64 image
+              const qrCodeImage = await qrCanvas.screenshot({ encoding: 'base64' });
 
-            console.log('\n📱 QR CODE SAVED!');
-            console.log(`   Location: ${qrCodePath}`);
-            console.log('   Steps to scan:');
-            console.log('   1. Open WhatsApp on your phone');
-            console.log('   2. Go to Settings > Linked Devices');
-            console.log('   3. Click "Link a Device"');
-            console.log('   4. Open the QR code image file and scan it');
-            console.log('   5. The system will automatically detect when you\'re logged in\n');
+              // Save QR code image for reference
+              const qrCodePath = path.join(__dirname, '../../qr-code.png');
+              fs.writeFileSync(qrCodePath, qrCodeImage, 'base64');
 
-            // Also log the full path for easy access
-            console.log(`   Full path: ${path.resolve(qrCodePath)}\n`);
+              // Decode QR code from image using jsQR
+              const imageBuffer = Buffer.from(qrCodeImage, 'base64');
+
+              // Convert image to raw RGBA data using sharp
+              const { data, info } = await sharp(imageBuffer)
+                .ensureAlpha()
+                .raw()
+                .toBuffer({ resolveWithObject: true });
+
+              // Convert to raw image data for jsQR
+              const qrImageData = {
+                data: new Uint8ClampedArray(data),
+                width: info.width,
+                height: info.height,
+              };
+
+              // Decode QR code
+              const qrCode = jsQR(qrImageData.data, qrImageData.width, qrImageData.height);
+
+              if (qrCode && qrCode.data) {
+                const qrData = qrCode.data;
+
+                console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.log('📱 SCAN THIS QR CODE WITH YOUR PHONE');
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+                // Display QR code in terminal
+                qrcode.generate(qrData, { small: true });
+
+                console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                console.log('📋 Steps to scan:');
+                console.log('   1. Open WhatsApp on your phone');
+                console.log('   2. Go to Settings > Linked Devices');
+                console.log('   3. Tap "Link a Device"');
+                console.log('   4. Point your camera at the QR code above');
+                console.log('   5. The system will automatically detect when logged in');
+                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+              } else {
+                console.log('\n⚠️  Could not decode QR code from canvas image.');
+                console.log('   QR code image saved to:', qrCodePath);
+                console.log('   Please try scanning the saved image file manually.\n');
+              }
+            } catch (error) {
+              console.error('Error extracting QR code:', error);
+              console.log('   Falling back to saved image file...\n');
+            }
           } else {
             console.log('⚠️  Could not find QR code canvas. Please check WhatsApp Web manually.');
           }
-
-          // Don't block here - QR code scanning should happen in background
-          // The user can scan it later and we'll check on next request
-          console.log('⏳ QR code saved. Please scan it using your phone.');
-          console.log('   The system will automatically detect login on the next message attempt.');
 
           // Check periodically if logged in (non-blocking)
           const checkLoginInterval = setInterval(async () => {
