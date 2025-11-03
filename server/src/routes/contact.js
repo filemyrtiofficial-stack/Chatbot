@@ -56,6 +56,43 @@ async function initWhatsAppSession() {
       const config = getConfig();
       const userDataDir = path.join(__dirname, '../../.whatsapp-session');
 
+      // Clean up existing browser instance if any
+      if (browserInstance) {
+        try {
+          console.log('Closing existing browser instance...');
+          const pages = await browserInstance.pages();
+          for (const page of pages) {
+            try {
+              await page.close();
+            } catch (e) {
+              // Ignore errors closing pages
+            }
+          }
+          await browserInstance.close();
+        } catch (error) {
+          console.log('Error closing existing browser:', error.message);
+        }
+        browserInstance = null;
+        whatsappPage = null;
+      }
+
+      // Clean up browser lock files if they exist
+      try {
+        const lockFiles = [
+          path.join(userDataDir, 'SingletonLock'),
+          path.join(userDataDir, 'Default', 'SingletonLock'),
+        ];
+        for (const lockFile of lockFiles) {
+          if (fs.existsSync(lockFile)) {
+            console.log(`Removing lock file: ${lockFile}`);
+            fs.unlinkSync(lockFile);
+          }
+        }
+      } catch (error) {
+        // Lock file cleanup is best effort, continue even if it fails
+        console.log('Note: Could not clean up all lock files:', error.message);
+      }
+
       // Try to find Chrome/Chromium in common locations for production servers
       let executablePath = undefined;
       if (config.NODE_ENV === 'production') {
@@ -83,21 +120,81 @@ async function initWhatsAppSession() {
       // Force headless mode in production or if no DISPLAY variable
       const isHeadless = config.NODE_ENV === 'production' || !process.env.DISPLAY;
 
-      browserInstance = await puppeteer.launch({
-        headless: isHeadless ? 'new' : false,
-        executablePath,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--disable-gpu',
-          '--disable-software-rasterizer',
-          '--disable-extensions',
-          ...(isHeadless ? ['--disable-dev-shm-usage', '--disable-setuid-sandbox'] : []),
-        ],
-        userDataDir,
-      });
+      // Try to launch browser, handle lock file errors
+      try {
+        browserInstance = await puppeteer.launch({
+          headless: isHeadless ? 'new' : false,
+          executablePath,
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--disable-gpu',
+            '--disable-software-rasterizer',
+            '--disable-extensions',
+            ...(isHeadless ? ['--disable-dev-shm-usage', '--disable-setuid-sandbox'] : []),
+          ],
+          userDataDir,
+        });
+      } catch (launchError) {
+        // If browser is already running, try to connect to it or force cleanup
+        if (launchError.message && launchError.message.includes('already running')) {
+          console.log('⚠️  Browser instance already running. Attempting cleanup...');
+
+          // Try to kill any existing Chrome/Chromium processes for this userDataDir
+          try {
+            const { exec } = await import('child_process');
+            const { promisify } = await import('util');
+            const execAsync = promisify(exec);
+
+            // Find and kill Chrome processes using this userDataDir
+            await execAsync(`pkill -f "chrome.*${userDataDir}" || pkill -f "chromium.*${userDataDir}" || true`);
+            await execAsync(`killall -9 chrome || killall -9 chromium || true`);
+
+            // Wait a moment for processes to terminate
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Remove lock files again
+            const lockFiles = [
+              path.join(userDataDir, 'SingletonLock'),
+              path.join(userDataDir, 'Default', 'SingletonLock'),
+            ];
+            for (const lockFile of lockFiles) {
+              try {
+                if (fs.existsSync(lockFile)) {
+                  fs.unlinkSync(lockFile);
+                }
+              } catch (e) {
+                // Ignore errors
+              }
+            }
+
+            // Try launching again
+            console.log('Retrying browser launch after cleanup...');
+            browserInstance = await puppeteer.launch({
+              headless: isHeadless ? 'new' : false,
+              executablePath,
+              args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--disable-gpu',
+                '--disable-software-rasterizer',
+                '--disable-extensions',
+                ...(isHeadless ? ['--disable-dev-shm-usage', '--disable-setuid-sandbox'] : []),
+              ],
+              userDataDir,
+            });
+          } catch (retryError) {
+            console.error('Failed to cleanup and retry:', retryError.message);
+            throw launchError; // Throw original error
+          }
+        } else {
+          throw launchError; // Throw other errors as-is
+        }
+      }
 
       whatsappPage = await browserInstance.newPage();
       await whatsappPage.setUserAgent(
@@ -423,6 +520,39 @@ async function sendWhatsAppMessage(adminPhone, message) {
     return false;
   }
 }
+
+// GET endpoint to initialize WhatsApp and show QR code (for manual setup)
+router.get('/init-whatsapp', async (req, res) => {
+  try {
+    console.log('🔄 Manual WhatsApp initialization triggered...');
+
+    // Reset state to force reinitialization
+    isReady = false;
+    isInitializing = false;
+    initPromise = null;
+
+    // Initialize WhatsApp session (this will show QR code in terminal if needed)
+    const session = await initWhatsAppSession();
+
+    if (session && session.page) {
+      return res.json({
+        success: true,
+        message: 'WhatsApp initialization started. Check the terminal for QR code if login is needed.',
+        isReady,
+      });
+    } else {
+      return res.json({
+        success: false,
+        message: 'WhatsApp initialization failed. Check server logs.',
+      });
+    }
+  } catch (error) {
+    console.error('Error in manual WhatsApp initialization:', error);
+    return res.status(500).json({
+      error: 'Failed to initialize WhatsApp. Check server logs.',
+    });
+  }
+});
 
 // POST contact form submission
 router.post('/', async (req, res) => {
