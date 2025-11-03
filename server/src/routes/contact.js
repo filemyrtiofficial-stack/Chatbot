@@ -204,25 +204,62 @@ async function initWhatsAppSession() {
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       );
 
-      // Set up network request interception to capture QR code reference
+      // Set up network request AND response interception to capture QR code reference
       let qrCodeRef = null;
+      let qrCodeUrl = null;
+
+      // Intercept requests (happens before navigation)
+      await whatsappPage.setRequestInterception(true);
+      whatsappPage.on('request', (request) => {
+        const url = request.url();
+        // Log and allow all requests, but capture QR-related URLs
+        if (url.includes('login_code') || url.includes('ref=') || url.includes('qrcode')) {
+          console.log('📡 Intercepted QR-related request:', url);
+          const urlMatch = url.match(/[?&]ref=([^&]+)/);
+          if (urlMatch) {
+            const ref = decodeURIComponent(urlMatch[1]);
+            qrCodeRef = ref;
+            qrCodeUrl = `https://web.whatsapp.com/desktop/login_code.json?ref=${ref}`;
+            console.log('📡 Captured QR ref from request URL:', ref.substring(0, 30) + '...');
+          }
+        }
+        request.continue();
+      });
+
+      // Also intercept responses
       const responseHandler = async (response) => {
         const url = response.url();
-        if (url.includes('login_code.json')) {
+
+        // Capture QR code references from various endpoints
+        if (url.includes('login_code') || url.includes('ref=') || url.includes('qrcode')) {
           try {
+            console.log('📡 Intercepted QR-related response:', url);
             // Extract ref from URL first
             const urlMatch = url.match(/[?&]ref=([^&]+)/);
             if (urlMatch) {
-              qrCodeRef = decodeURIComponent(urlMatch[1]);
-              console.log('📡 Captured QR ref from network request:', qrCodeRef);
+              const ref = decodeURIComponent(urlMatch[1]);
+              qrCodeRef = ref;
+              qrCodeUrl = `https://web.whatsapp.com/desktop/login_code.json?ref=${ref}`;
+              console.log('📡 Captured QR ref from response URL:', ref.substring(0, 30) + '...');
             }
 
             // Also try to get from response body
             try {
               const data = await response.json();
-              if (data && data.ref) {
-                qrCodeRef = data.ref;
-                console.log('📡 Captured QR ref from response body:', qrCodeRef);
+              if (data) {
+                if (data.ref) {
+                  qrCodeRef = data.ref;
+                  qrCodeUrl = `https://web.whatsapp.com/desktop/login_code.json?ref=${data.ref}`;
+                  console.log('📡 Captured QR ref from response body:', data.ref.substring(0, 30) + '...');
+                }
+                // Also check for QR code URL directly
+                if (data.code && typeof data.code === 'string' && data.code.length > 50) {
+                  console.log('📡 Found QR code data in response');
+                }
+                if (data.qr && typeof data.qr === 'string') {
+                  qrCodeUrl = data.qr;
+                  console.log('📡 Found QR code URL in response');
+                }
               }
             } catch (e) {
               // Response might not be JSON, that's okay
@@ -282,8 +319,9 @@ async function initWhatsAppSession() {
               console.log('⚠️  QR code canvas not found, trying alternative methods...');
             }
 
-            // Wait a bit more for QR code data to load
-            await wait(3000);
+            // Wait longer for network requests and QR code data to load
+            console.log('⏳ Waiting for QR code data to load (this may take a few seconds)...');
+            await wait(8000); // Wait longer for all network requests
 
             // Try multiple methods to extract QR code reference
             const extractionResults = await whatsappPage.evaluate(() => {
@@ -366,14 +404,21 @@ async function initWhatsAppSession() {
             });
 
             console.log('🔍 QR extraction attempts:', JSON.stringify(extractionResults, null, 2));
+            console.log('📡 Network captured QR ref:', qrCodeRef ? qrCodeRef.substring(0, 50) + '...' : 'none');
+            console.log('📡 Network captured QR URL:', qrCodeUrl || 'none');
 
-            // Use captured ref from network requests (most reliable) or page extraction
+            // Use captured URL from network (most reliable), or build from ref, or page extraction
             let finalQrUrl = null;
-            const refToUse = qrCodeRef || extractionResults.ref;
 
-            if (refToUse) {
-              finalQrUrl = `https://web.whatsapp.com/desktop/login_code.json?ref=${refToUse}`;
-              console.log('✅ Using QR ref:', refToUse.substring(0, 50) + '...');
+            if (qrCodeUrl) {
+              finalQrUrl = qrCodeUrl;
+              console.log('✅ Using QR URL from network interception');
+            } else {
+              const refToUse = qrCodeRef || extractionResults.ref;
+              if (refToUse) {
+                finalQrUrl = `https://web.whatsapp.com/desktop/login_code.json?ref=${refToUse}`;
+                console.log('✅ Using QR ref to build URL:', refToUse.substring(0, 50) + '...');
+              }
             }
 
             if (finalQrUrl) {
