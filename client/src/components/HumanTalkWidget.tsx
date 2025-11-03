@@ -107,14 +107,14 @@ const HumanTalkWidget: React.FC = () => {
           onClick={() => setIsOpen(true)}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-sky-600 shadow-lg transition-shadow hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
-          whileHover={{ scale: 1.1 }}
+          className="relative flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 px-5 py-3 shadow-lg transition-shadow hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           aria-label="Talk with a Human Expert"
         >
-          {/* Human/Chat Icon - combining chat and person */}
+          {/* Human/Chat Icon */}
           <svg
-            className="h-8 w-8 text-white"
+            className="h-5 w-5 text-white"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -128,8 +128,11 @@ const HumanTalkWidget: React.FC = () => {
             />
           </svg>
 
+          {/* Text */}
+          <span className="text-sm font-semibold text-white">Talk with Human</span>
+
           {/* Beta Badge */}
-          <div className="absolute -top-1 -right-1 rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-bold uppercase text-white shadow-md">
+          <div className="absolute -top-1.5 -right-1.5 rounded-full bg-red-500 px-1.5 py-0.5 text-[9px] font-bold uppercase text-white shadow-md">
             Beta
           </div>
         </motion.button>
