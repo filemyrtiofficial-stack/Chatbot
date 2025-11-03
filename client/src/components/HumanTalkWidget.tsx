@@ -14,7 +14,7 @@ const HumanTalkWidget: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'Hello! I'm HumanTalk Assistant.How can I help you today?',
+      text: "Hello! I'm HumanTalk Assistant. How can I help you today?",
       sender: 'assistant',
       timestamp: new Date(),
     },
@@ -197,8 +197,8 @@ const HumanTalkWidget: React.FC = () => {
                     >
                       <div
                         className={`max-w-[80%] rounded-2xl px-4 py-2 ${message.sender === 'user'
-                            ? 'bg-gradient-to-r from-green-500 to-teal-600 text-white'
-                            : 'bg-gray-100 text-gray-800'
+                          ? 'bg-gradient-to-r from-green-500 to-teal-600 text-white'
+                          : 'bg-gray-100 text-gray-800'
                           }`}
                       >
                         <p className="text-sm leading-relaxed">{message.text}</p>
