@@ -26,9 +26,93 @@ let whatsappPage = null;
 let isInitializing = false;
 let isReady = false;
 let initPromise = null;
+let qrCodeDisplayed = false; // Track if QR code has been displayed to avoid duplicates
 
 // Helper function to replace deprecated waitForTimeout
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * Clean up browser lock files (cross-platform)
+ */
+function cleanupLockFiles(userDataDir) {
+  const lockFiles = [
+    path.join(userDataDir, 'SingletonLock'),
+    path.join(userDataDir, 'Default', 'SingletonLock'),
+  ];
+
+  for (const lockFile of lockFiles) {
+    try {
+      if (fs.existsSync(lockFile)) {
+        fs.unlinkSync(lockFile);
+        console.log(`✅ Removed lock file: ${lockFile}`);
+      }
+    } catch (error) {
+      // Lock file might be in use, that's okay
+      console.log(`⚠️  Could not remove lock file ${lockFile}: ${error.message}`);
+    }
+  }
+}
+
+/**
+ * Find Chrome/Chromium executable path (cross-platform)
+ */
+function findChromeExecutable(config) {
+  const platform = process.platform;
+  let possiblePaths = [];
+
+  if (platform === 'win32') {
+    // Windows paths
+    const programFiles = [
+      process.env.PROGRAMFILES || 'C:\\Program Files',
+      process.env['PROGRAMFILES(X86)'] || 'C:\\Program Files (x86)',
+      process.env.LOCALAPPDATA || path.join(process.env.USERPROFILE || '', 'AppData', 'Local'),
+    ];
+
+    for (const basePath of programFiles) {
+      possiblePaths.push(
+        path.join(basePath, 'Google', 'Chrome', 'Application', 'chrome.exe'),
+        path.join(basePath, 'Google', 'Chrome', 'Application', 'chrome'),
+        path.join(basePath, 'Chromium', 'Application', 'chrome.exe'),
+        path.join(basePath, 'Chromium', 'Application', 'chromium.exe'),
+      );
+    }
+
+    // Also check default user installation location
+    possiblePaths.push(
+      path.join(process.env.LOCALAPPDATA || '', 'Google', 'Chrome', 'Application', 'chrome.exe'),
+    );
+  } else if (platform === 'darwin') {
+    // macOS paths
+    possiblePaths = [
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      '/Applications/Chromium.app/Contents/MacOS/Chromium',
+    ];
+  } else {
+    // Linux paths
+    possiblePaths = [
+      '/usr/bin/google-chrome',
+      '/usr/bin/google-chrome-stable',
+      '/usr/bin/chromium',
+      '/usr/bin/chromium-browser',
+      '/snap/bin/chromium',
+    ];
+  }
+
+  if (config.NODE_ENV === 'production' || config.FORCE_CHROME_PATH) {
+    for (const chromePath of possiblePaths) {
+      try {
+        if (fs.existsSync(chromePath)) {
+          console.log(`✅ Found Chrome/Chromium at: ${chromePath}`);
+          return chromePath;
+        }
+      } catch (e) {
+        // Continue checking other paths
+      }
+    }
+  }
+
+  return undefined; // Let Puppeteer use bundled Chromium
+}
 
 /**
  * Initialize Puppeteer browser and WhatsApp Web session
@@ -83,49 +167,24 @@ async function initWhatsAppSession() {
         whatsappPage = null;
       }
 
+      // Ensure userDataDir exists
+      if (!fs.existsSync(userDataDir)) {
+        fs.mkdirSync(userDataDir, { recursive: true });
+        console.log(`✅ Created WhatsApp session directory: ${userDataDir}`);
+      }
+
       // Clean up browser lock files if they exist
-      try {
-        const lockFiles = [
-          path.join(userDataDir, 'SingletonLock'),
-          path.join(userDataDir, 'Default', 'SingletonLock'),
-        ];
-        for (const lockFile of lockFiles) {
-          if (fs.existsSync(lockFile)) {
-            console.log(`Removing lock file: ${lockFile}`);
-            fs.unlinkSync(lockFile);
-          }
-        }
-      } catch (error) {
-        // Lock file cleanup is best effort, continue even if it fails
-        console.log('Note: Could not clean up all lock files:', error.message);
-      }
+      cleanupLockFiles(userDataDir);
 
-      // Try to find Chrome/Chromium in common locations for production servers
-      let executablePath = undefined;
-      if (config.NODE_ENV === 'production') {
-        const possiblePaths = [
-          '/usr/bin/google-chrome',
-          '/usr/bin/google-chrome-stable',
-          '/usr/bin/chromium',
-          '/usr/bin/chromium-browser',
-          '/snap/bin/chromium',
-        ];
+      // Find Chrome/Chromium executable (cross-platform)
+      const executablePath = findChromeExecutable(config);
 
-        for (const chromePath of possiblePaths) {
-          try {
-            if (fs.existsSync(chromePath)) {
-              executablePath = chromePath;
-              console.log(`Found Chrome/Chromium at: ${chromePath}`);
-              break;
-            }
-          } catch (e) {
-            // Continue checking other paths
-          }
-        }
-      }
-
-      // Force headless mode in production or if no DISPLAY variable
-      const isHeadless = config.NODE_ENV === 'production' || !process.env.DISPLAY;
+      // Determine headless mode
+      // In production, always use headless unless explicitly disabled
+      // On Windows, headless might cause issues, so be more lenient
+      const isHeadless = config.NODE_ENV === 'production'
+        ? (config.HEADLESS !== false) // Default to headless in production unless disabled
+        : (!process.env.DISPLAY && process.platform !== 'win32'); // On non-Windows, check DISPLAY
 
       // Try to launch browser, handle lock file errors
       try {
@@ -140,45 +199,65 @@ async function initWhatsAppSession() {
             '--disable-gpu',
             '--disable-software-rasterizer',
             '--disable-extensions',
+            '--disable-blink-features=AutomationControlled',
+            '--disable-web-security',
             ...(isHeadless ? ['--disable-dev-shm-usage', '--disable-setuid-sandbox'] : []),
           ],
+          ignoreDefaultArgs: ['--enable-automation'],
           userDataDir,
         });
       } catch (launchError) {
         // If browser is already running, try to connect to it or force cleanup
-        if (launchError.message && launchError.message.includes('already running')) {
-          console.log('⚠️  Browser instance already running. Attempting cleanup...');
+        if (launchError.message && (
+          launchError.message.includes('already running') ||
+          launchError.message.includes('user data directory') ||
+          launchError.message.includes('SingletonLock')
+        )) {
+          console.log('⚠️  Browser lock detected. Attempting cleanup...');
 
-          // Try to kill any existing Chrome/Chromium processes for this userDataDir
-          try {
-            const { exec } = await import('child_process');
-            const { promisify } = await import('util');
-            const execAsync = promisify(exec);
+          // Clean up lock files
+          cleanupLockFiles(userDataDir);
 
-            // Find and kill Chrome processes using this userDataDir
-            await execAsync(`pkill -f "chrome.*${userDataDir}" || pkill -f "chromium.*${userDataDir}" || true`);
-            await execAsync(`killall -9 chrome || killall -9 chromium || true`);
+          // On Windows, try to kill Chrome processes
+          if (process.platform === 'win32') {
+            try {
+              const { exec } = await import('child_process');
+              const { promisify } = await import('util');
+              const execAsync = promisify(exec);
 
-            // Wait a moment for processes to terminate
-            await wait(2000);
+              // Kill Chrome processes on Windows (force kill)
+              await execAsync('taskkill /F /IM chrome.exe /T 2>nul || taskkill /F /IM chromium.exe /T 2>nul || exit 0');
 
-            // Remove lock files again
-            const lockFiles = [
-              path.join(userDataDir, 'SingletonLock'),
-              path.join(userDataDir, 'Default', 'SingletonLock'),
-            ];
-            for (const lockFile of lockFiles) {
-              try {
-                if (fs.existsSync(lockFile)) {
-                  fs.unlinkSync(lockFile);
-                }
-              } catch (e) {
-                // Ignore errors
-              }
+              // Wait for processes to terminate
+              await wait(3000);
+            } catch (e) {
+              console.log('Note: Could not kill Chrome processes:', e.message);
             }
+          } else {
+            // Unix-like systems
+            try {
+              const { exec } = await import('child_process');
+              const { promisify } = await import('util');
+              const execAsync = promisify(exec);
 
-            // Try launching again
-            console.log('Retrying browser launch after cleanup...');
+              await execAsync(`pkill -f "chrome.*${userDataDir}" || pkill -f "chromium.*${userDataDir}" || true`);
+              await execAsync(`killall -9 chrome || killall -9 chromium || true 2>/dev/null`);
+
+              await wait(2000);
+            } catch (e) {
+              console.log('Note: Could not kill Chrome processes:', e.message);
+            }
+          }
+
+          // Clean lock files again after killing processes
+          cleanupLockFiles(userDataDir);
+
+          // Wait a bit more
+          await wait(1000);
+
+          // Try launching again
+          console.log('🔄 Retrying browser launch after cleanup...');
+          try {
             browserInstance = await puppeteer.launch({
               headless: isHeadless ? 'new' : false,
               executablePath,
@@ -190,23 +269,38 @@ async function initWhatsAppSession() {
                 '--disable-gpu',
                 '--disable-software-rasterizer',
                 '--disable-extensions',
+                '--disable-blink-features=AutomationControlled',
                 ...(isHeadless ? ['--disable-dev-shm-usage', '--disable-setuid-sandbox'] : []),
               ],
               userDataDir,
+              ignoreDefaultArgs: ['--enable-automation'],
             });
           } catch (retryError) {
-            console.error('Failed to cleanup and retry:', retryError.message);
+            console.error('❌ Failed to launch browser after cleanup:', retryError.message);
             throw launchError; // Throw original error
           }
         } else {
-          throw launchError; // Throw other errors as-is
+          console.error('❌ Browser launch error:', launchError.message);
+          throw launchError;
         }
       }
 
       whatsappPage = await browserInstance.newPage();
+
+      // Set realistic user agent
       await whatsappPage.setUserAgent(
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
       );
+
+      // Remove webdriver property
+      await whatsappPage.evaluateOnNewDocument(() => {
+        Object.defineProperty(navigator, 'webdriver', {
+          get: () => false,
+        });
+      });
+
+      // Set viewport
+      await whatsappPage.setViewport({ width: 1920, height: 1080 });
 
       // Set up network request AND response interception to capture QR code reference
       let qrCodeRef = null;
@@ -307,7 +401,9 @@ async function initWhatsAppSession() {
         }
 
         if (!isLoggedIn) {
-          console.log('⚠️  WhatsApp Web is not logged in. Extracting QR code...');
+          if (!qrCodeDisplayed) {
+            console.log('⚠️  WhatsApp Web is not logged in. Extracting QR code...');
+          }
 
           // Try to extract and display QR code
           try {
@@ -418,21 +514,25 @@ async function initWhatsAppSession() {
                   const code = jsQR(uint8Array, canvasData.width, canvasData.height);
 
                   if (code && code.data) {
-                    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-                    console.log('📱 SCAN THIS QR CODE WITH YOUR PHONE');
-                    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+                    if (!qrCodeDisplayed) {
+                      console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                      console.log('📱 SCAN THIS QR CODE WITH YOUR PHONE');
+                      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
-                    // Display QR code in terminal
-                    qrcode.generate(code.data, { small: true });
+                      // Display QR code in terminal
+                      qrcode.generate(code.data, { small: true });
 
-                    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-                    console.log('📋 Steps to scan:');
-                    console.log('   1. Open WhatsApp on your phone');
-                    console.log('   2. Go to Settings > Linked Devices');
-                    console.log('   3. Tap "Link a Device"');
-                    console.log('   4. Point your camera at the QR code above');
-                    console.log('   5. The system will automatically detect when logged in');
-                    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+                      console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                      console.log('📋 Steps to scan:');
+                      console.log('   1. Open WhatsApp on your phone');
+                      console.log('   2. Go to Settings > Linked Devices');
+                      console.log('   3. Tap "Link a Device"');
+                      console.log('   4. Point your camera at the QR code above');
+                      console.log('   5. The system will automatically detect when logged in');
+                      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+                      qrCodeDisplayed = true;
+                    }
 
                     qrCodeData = code.data; // Mark as successful
                   }
@@ -468,21 +568,25 @@ async function initWhatsAppSession() {
                     const code = jsQR(imageData, width, height);
 
                     if (code && code.data) {
-                      console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-                      console.log('📱 SCAN THIS QR CODE WITH YOUR PHONE');
-                      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+                      if (!qrCodeDisplayed) {
+                        console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                        console.log('📱 SCAN THIS QR CODE WITH YOUR PHONE');
+                        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
-                      // Display QR code in terminal
-                      qrcode.generate(code.data, { small: true });
+                        // Display QR code in terminal
+                        qrcode.generate(code.data, { small: true });
 
-                      console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-                      console.log('📋 Steps to scan:');
-                      console.log('   1. Open WhatsApp on your phone');
-                      console.log('   2. Go to Settings > Linked Devices');
-                      console.log('   3. Tap "Link a Device"');
-                      console.log('   4. Point your camera at the QR code above');
-                      console.log('   5. The system will automatically detect when logged in');
-                      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+                        console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                        console.log('📋 Steps to scan:');
+                        console.log('   1. Open WhatsApp on your phone');
+                        console.log('   2. Go to Settings > Linked Devices');
+                        console.log('   3. Tap "Link a Device"');
+                        console.log('   4. Point your camera at the QR code above');
+                        console.log('   5. The system will automatically detect when logged in');
+                        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+                        qrCodeDisplayed = true;
+                      }
 
                       qrCodeData = code.data; // Mark as successful
                     } else {
@@ -554,21 +658,25 @@ async function initWhatsAppSession() {
               }
 
               if (finalQrUrl) {
-                console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-                console.log('📱 SCAN THIS QR CODE WITH YOUR PHONE');
-                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+                if (!qrCodeDisplayed) {
+                  console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                  console.log('📱 SCAN THIS QR CODE WITH YOUR PHONE');
+                  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
-                // Display QR code in terminal
-                qrcode.generate(finalQrUrl, { small: true });
+                  // Display QR code in terminal
+                  qrcode.generate(finalQrUrl, { small: true });
 
-                console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-                console.log('📋 Steps to scan:');
-                console.log('   1. Open WhatsApp on your phone');
-                console.log('   2. Go to Settings > Linked Devices');
-                console.log('   3. Tap "Link a Device"');
-                console.log('   4. Point your camera at the QR code above');
-                console.log('   5. The system will automatically detect when logged in');
-                console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+                  console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+                  console.log('📋 Steps to scan:');
+                  console.log('   1. Open WhatsApp on your phone');
+                  console.log('   2. Go to Settings > Linked Devices');
+                  console.log('   3. Tap "Link a Device"');
+                  console.log('   4. Point your camera at the QR code above');
+                  console.log('   5. The system will automatically detect when logged in');
+                  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+                  qrCodeDisplayed = true;
+                }
               } else {
                 console.log('⚠️  Could not extract QR code.');
                 console.log('   The browser window is open - please scan the QR code there.');
@@ -586,6 +694,7 @@ async function initWhatsAppSession() {
         } else {
           console.log('✅ WhatsApp Web session active');
           isReady = true;
+          qrCodeDisplayed = false; // Reset for next time if needed
         }
       } catch (error) {
         console.warn('Could not determine login status:', error.message);
@@ -710,6 +819,7 @@ router.get('/init-whatsapp', async (req, res) => {
     isReady = false;
     isInitializing = false;
     initPromise = null;
+    qrCodeDisplayed = false; // Reset QR code display flag
 
     // Initialize WhatsApp session (this will show QR code in terminal if needed)
     const session = await initWhatsAppSession();
@@ -792,21 +902,53 @@ router.post('/', async (req, res) => {
   }
 });
 
+/**
+ * Cleanup browser instance gracefully
+ */
+async function cleanupBrowser() {
+  if (browserInstance) {
+    try {
+      console.log('🔄 Closing WhatsApp browser session...');
+      const pages = await browserInstance.pages();
+      for (const page of pages) {
+        try {
+          await page.close();
+        } catch (e) {
+          // Ignore errors
+        }
+      }
+      await browserInstance.close();
+      browserInstance = null;
+      whatsappPage = null;
+      isReady = false;
+      console.log('✅ Browser session closed');
+    } catch (error) {
+      console.error('⚠️  Error closing browser:', error.message);
+    }
+  }
+}
+
 // Graceful shutdown - close browser on process termination
 process.on('SIGINT', async () => {
-  if (browserInstance) {
-    console.log('Closing WhatsApp browser session...');
-    await browserInstance.close();
-  }
+  await cleanupBrowser();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
-  if (browserInstance) {
-    console.log('Closing WhatsApp browser session...');
-    await browserInstance.close();
-  }
+  await cleanupBrowser();
   process.exit(0);
+});
+
+// Handle uncaught errors
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('⚠️  Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+  cleanupBrowser().finally(() => {
+    process.exit(1);
+  });
 });
 
 export default router;
