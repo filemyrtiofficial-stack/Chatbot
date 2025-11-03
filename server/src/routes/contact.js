@@ -4,6 +4,7 @@ import { getConfig } from '../config.js';
 import puppeteer from 'puppeteer';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,14 +41,46 @@ async function initWhatsAppSession() {
     const config = getConfig();
     const userDataDir = path.join(__dirname, '../../.whatsapp-session');
 
+    // Try to find Chrome/Chromium in common locations for production servers
+    let executablePath = undefined;
+    if (config.NODE_ENV === 'production') {
+      // Common paths for Chrome/Chromium on Linux servers
+      const possiblePaths = [
+        '/usr/bin/google-chrome',
+        '/usr/bin/google-chrome-stable',
+        '/usr/bin/chromium',
+        '/usr/bin/chromium-browser',
+        '/snap/bin/chromium',
+      ];
+
+      for (const chromePath of possiblePaths) {
+        try {
+          if (fs.existsSync(chromePath)) {
+            executablePath = chromePath;
+            console.log(`Found Chrome/Chromium at: ${chromePath}`);
+            break;
+          }
+        } catch (e) {
+          // Continue checking other paths
+        }
+      }
+
+      if (!executablePath) {
+        console.warn('Chrome/Chromium not found in standard paths. Please install Chrome/Chromium or run: npx puppeteer browsers install chrome');
+      }
+    }
+
     browserInstance = await puppeteer.launch({
       headless: config.NODE_ENV === 'production', // Show browser in development
+      executablePath, // Use system Chrome if available
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-accelerated-2d-canvas',
         '--disable-gpu',
+        '--disable-software-rasterizer',
+        '--disable-extensions',
       ],
       userDataDir, // Persist session data
     });

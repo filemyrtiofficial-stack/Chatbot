@@ -60,8 +60,23 @@ WhatsApp Notifications
 - Uses Puppeteer to automate WhatsApp Web (no API keys required, completely free)
 - Setup:
   1. Add `ADMIN_WHATSAPP_NUMBER` to your `.env` file
-  2. On first run, the browser will open and show WhatsApp Web QR code
-  3. Scan the QR code with your phone's WhatsApp
-  4. The session will be saved and reused for future messages
-  5. In production, run with `headless: true` (set `NODE_ENV=production`)
-- Note: Requires Chrome/Chromium to be installed on the server
+  2. Install Chrome/Chromium on your server (see commands below)
+  3. On first run, the browser will open and show WhatsApp Web QR code
+  4. Scan the QR code with your phone's WhatsApp
+  5. The session will be saved and reused for future messages
+  6. In production, run with `headless: true` (set `NODE_ENV=production`)
+  
+Installing Chrome/Chromium on Linux Server:
+```bash
+# Option 1: Install Google Chrome
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+sudo apt install ./google-chrome-stable_current_amd64.deb
+
+# Option 2: Install Chromium (lighter alternative)
+sudo apt update
+sudo apt install -y chromium-browser
+
+# Option 3: Install via Puppeteer (downloads Chrome to node_modules)
+cd /var/www/chatapp/Chatbot/server
+npx puppeteer browsers install chrome
+```
