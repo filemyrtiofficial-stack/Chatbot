@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Chat from './pages/Chat';
+import HumanTalkWidget from './components/HumanTalkWidget';
 import './style.css';
 
 function PrivateRoute({ children }: { children: React.ReactElement }) {
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <HumanTalkWidget />
       </BrowserRouter>
     </AuthProvider>
   );
