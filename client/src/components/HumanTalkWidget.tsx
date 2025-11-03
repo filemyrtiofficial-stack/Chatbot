@@ -14,7 +14,7 @@ const HumanTalkWidget: React.FC = () => {
   const phoneInputRef = useRef<HTMLInputElement>(null);
 
   // Company phone number - update this with your actual number
-  const companyPhoneNumber = '+91 99999 99999';
+  const companyPhoneNumber = '+91 8106342858';
 
   // Focus phone input when modal opens
   useEffect(() => {

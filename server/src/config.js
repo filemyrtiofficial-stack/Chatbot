@@ -22,7 +22,7 @@ const envSchema = z.object({
     .min(1, 'GOOGLE_CLIENT_SECRET is required')
     .optional(),
   GOOGLE_CALLBACK_URL: z.string().url().optional(),
-  ADMIN_WHATSAPP_NUMBER: z.string().optional(), // Admin's WhatsApp number to receive notifications
+  ADMIN_WHATSAPP_NUMBER: z.string().default('918106342858'), // Admin's WhatsApp number to receive notifications
 });
 
 let cachedConfig;
