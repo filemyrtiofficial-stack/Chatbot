@@ -1013,7 +1013,7 @@ export default function Chat() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-x-1 lg:gap-x-6 flex-shrink-0">
+              <div className="flex items-center justify-end ml-auto gap-x-1 lg:gap-x-6 flex-shrink-0">
                 <HumanTalkNavButton />
               </div>
             </div>
