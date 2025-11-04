@@ -19,7 +19,7 @@ const HumanTalkWidget: React.FC = () => {
   const queryInputRef = useRef<HTMLTextAreaElement>(null);
 
   // Company phone number - update this with your actual number
-  const companyPhoneNumber = '+91 99999 99999';
+  const companyPhoneNumber = '+91 9911100589';
   const MAX_QUERY_LENGTH = 1000;
 
   // Format phone number as user types (Indian format)
