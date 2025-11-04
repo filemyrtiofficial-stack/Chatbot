@@ -394,34 +394,18 @@ const HumanTalkWidget: React.FC = () => {
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 }}
+                      transition={{ delay: 0.4 }}
                       className="space-y-1.5 md:space-y-2 text-xs md:text-sm leading-relaxed text-slate-600 max-w-sm"
                     >
                       <p>
-                        Your query has been successfully submitted. We've received your message and our team will get back to you soon.
-                      </p>
-                      <p className="pt-2 border-t border-slate-200">
                         We'll contact you at{' '}
                         <span className="font-semibold text-[#026CB6]">{submittedPhone}</span> regarding your inquiry.
-                      </p>
-                      <p className="mt-3 text-xs md:text-sm text-slate-500 bg-slate-50 rounded-lg p-2.5 md:p-3">
-                        <span className="font-semibold text-slate-700">⏱️ Response Time:</span> Typically within 24 hours. For urgent matters, please{' '}
-                        <a
-                          href={`tel:${companyPhoneNumber.replace(/\s/g, '')}`}
-                          className="inline-flex items-center gap-1 font-semibold text-[#026CB6] hover:text-[#0259a3] hover:underline"
-                        >
-                          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                          </svg>
-                          call us at {companyPhoneDisplay}
-                        </a>
-                        {' '}or reach out via WhatsApp.
                       </p>
                     </motion.div>
                     <motion.button
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.6 }}
+                      transition={{ delay: 0.5 }}
                       onClick={() => setIsOpen(false)}
                       className="mt-4 md:mt-5 rounded-lg bg-[#026CB6] px-5 md:px-6 py-2 md:py-2.5 text-xs md:text-sm font-semibold text-white transition-all hover:bg-[#0259a3] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#026CB6] focus:ring-offset-2"
                     >
