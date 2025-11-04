@@ -173,7 +173,7 @@ const HumanTalkWidget: React.FC = () => {
               className="absolute bottom-full right-0 mb-3 w-64 rounded-lg bg-slate-900 px-4 py-3 text-white shadow-xl"
             >
               <div className="text-sm font-semibold">
-                HumanTalk <span className="text-red-400">(Beta)</span>
+                Need Help? Talk to a Real Person <span className="text-red-400">(Beta)</span>
               </div>
               <div className="mt-1 text-xs text-gray-300">
                 👥 Talk with a Real Human Expert! Click to connect with our team and get personalized assistance right away.
@@ -463,8 +463,8 @@ const HumanTalkWidget: React.FC = () => {
                           aria-invalid={!!errors.phone}
                           aria-describedby={errors.phone ? 'phone-error' : undefined}
                           className={`w-full rounded-lg border px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${errors.phone
-                              ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500/20'
-                              : 'border-slate-300 bg-white focus:border-[#026CB6] focus:ring-[#026CB6]/20'
+                            ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500/20'
+                            : 'border-slate-300 bg-white focus:border-[#026CB6] focus:ring-[#026CB6]/20'
                             }`}
                         />
                         <AnimatePresence>
@@ -497,8 +497,8 @@ const HumanTalkWidget: React.FC = () => {
                           </label>
                           <span
                             className={`text-xs font-medium ${query.length > MAX_QUERY_LENGTH * 0.9
-                                ? 'text-orange-600'
-                                : 'text-slate-400'
+                              ? 'text-orange-600'
+                              : 'text-slate-400'
                               }`}
                           >
                             {query.length}/{MAX_QUERY_LENGTH}
@@ -520,8 +520,8 @@ const HumanTalkWidget: React.FC = () => {
                           aria-invalid={!!errors.query}
                           aria-describedby={errors.query ? 'query-error' : undefined}
                           className={`w-full resize-none rounded-lg border px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${errors.query
-                              ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500/20'
-                              : 'border-slate-300 bg-white focus:border-[#026CB6] focus:ring-[#026CB6]/20'
+                            ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500/20'
+                            : 'border-slate-300 bg-white focus:border-[#026CB6] focus:ring-[#026CB6]/20'
                             }`}
                         />
                         <AnimatePresence>
