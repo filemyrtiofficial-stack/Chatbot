@@ -55,6 +55,12 @@ router.post('/', async (req, res) => {
     const config = getConfig();
     const adminPhone = config.ADMIN_WHATSAPP_NUMBER;
 
+    // Log received data for debugging
+    console.log('📝 Contact form submission received:');
+    console.log(`   Name: ${name}`);
+    console.log(`   Phone: ${phoneNumber}`);
+    console.log(`   Query: ${query.substring(0, 50)}...`);
+
     if (!adminPhone) {
       console.warn('ADMIN_WHATSAPP_NUMBER not configured. Skipping WhatsApp notification.');
       return res.json({
@@ -64,8 +70,23 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // Create notification message
-    const message = `🔔 *New Contact Form Submission*\n\n👤 *Name:* ${name}\n\n📞 *Phone:* ${phoneNumber}\n\n💬 *Query:*\n${query}\n\n⏰ *Time:* ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+    // Create notification message with better formatting
+    const timestamp = new Date().toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    });
+
+    const message = `🔔 *New Contact Form Submission*
+
+👤 *Name:* ${name}
+
+📞 *Phone:* ${phoneNumber}
+
+💬 *Query:*
+${query}
+
+⏰ *Time:* ${timestamp}`;
 
     // Initialize WhatsApp if not connected (non-blocking)
     if (!whatsappService.getConnectionStatus()) {
