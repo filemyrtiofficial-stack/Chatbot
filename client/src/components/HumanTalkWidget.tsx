@@ -432,7 +432,17 @@ const HumanTalkWidget: React.FC = () => {
                         <span className="font-semibold text-[#026CB6]">{submittedPhone}</span> regarding your inquiry.
                       </p>
                       <p className="mt-3 text-xs md:text-sm text-slate-500 bg-slate-50 rounded-lg p-2.5 md:p-3">
-                        <span className="font-semibold text-slate-700">⏱️ Response Time:</span> Typically within 24 hours. For urgent matters, please call us or reach out via WhatsApp.
+                        <span className="font-semibold text-slate-700">⏱️ Response Time:</span> Typically within 24 hours. For urgent matters, please{' '}
+                        <a
+                          href={`tel:${companyPhoneNumber.replace(/\s/g, '')}`}
+                          className="inline-flex items-center gap-1 font-semibold text-[#026CB6] hover:text-[#0259a3] hover:underline"
+                        >
+                          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                          </svg>
+                          call us at {companyPhoneNumber}
+                        </a>
+                        {' '}or reach out via WhatsApp.
                       </p>
                     </motion.div>
                     <motion.button
