@@ -255,7 +255,7 @@ const HumanTalkWidget: React.FC = () => {
               <div className="mt-1 text-xs text-gray-700 flex items-start gap-1.5">
                 <img
                   src="/logo/image.png"
-                  alt="Human Talk"
+                  alt="File My RTI"
                   className="h-4 w-4 mt-0.5 flex-shrink-0 object-contain"
                 />
                 <span>Talk with a Real Human Expert! Click to connect with our team and get personalized assistance right away.</span>
@@ -343,8 +343,8 @@ const HumanTalkWidget: React.FC = () => {
                 <div className="flex items-center gap-2 md:gap-2.5">
                   <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm flex-shrink-0">
                     <img
-                      src="/logo/FILEMYRTIFEVICON.ico"
-                      alt="Human Talk"
+                      src="/logo/image.png"
+                      alt="File My RTI"
                       className="h-5 w-5 md:h-6 md:w-6 object-contain"
                     />
                   </div>
