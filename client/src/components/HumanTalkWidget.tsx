@@ -7,7 +7,6 @@ import { api, resolveApiUrl } from '../api';
 const HumanTalkWidget: React.FC = () => {
   const location = useLocation();
   const { isOpen, setIsOpen } = useHumanTalk();
-  const [isHovered, setIsHovered] = useState(false);
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [query, setQuery] = useState('');
@@ -239,40 +238,9 @@ const HumanTalkWidget: React.FC = () => {
         animate={{ scale: 1 }}
         transition={{ type: 'spring', stiffness: 260, damping: 20 }}
       >
-        {/* Tooltip */}
-        <AnimatePresence>
-          {isHovered && !isOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.9 }}
-              transition={{ duration: 0.2 }}
-              className="absolute bottom-full right-0 mb-3 w-64 rounded-lg bg-white px-4 py-3 text-black shadow-xl border border-gray-200"
-            >
-              <div className="text-sm font-semibold text-black">
-                Need Help?<br />Talk to a Real Person <span className="text-red-600">(Beta)</span>
-              </div>
-              <div className="mt-1 text-xs text-gray-700 flex items-start gap-1.5">
-                <img
-                  src="/logo/image.png"
-                  alt="File My RTI"
-                  className="h-4 w-4 mt-0.5 flex-shrink-0 object-contain"
-                />
-                <span>Talk with a Real Human Expert! Click to connect with our team and get personalized assistance right away.</span>
-              </div>
-              {/* Arrow pointing down */}
-              <div className="absolute bottom-0 right-6 translate-y-full">
-                <div className="h-0 w-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white"></div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Button */}
         <motion.button
           onClick={() => setIsOpen(true)}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
           className="relative flex items-center gap-2.5 rounded-xl bg-[#026CB6] px-5 py-3.5 shadow-lg transition-all hover:shadow-xl hover:shadow-[#026CB6]/25 focus:outline-none focus:ring-2 focus:ring-[#026CB6] focus:ring-offset-2"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -341,7 +309,7 @@ const HumanTalkWidget: React.FC = () => {
               {/* Header */}
               <div className="flex items-center justify-between border-b border-blue-700/20 bg-[#026CB6] px-2.5 sm:px-3 md:px-4 py-2 md:py-2.5 text-white shadow-sm flex-shrink-0">
                 <div className="flex items-center gap-1.5 sm:gap-2 md:gap-2.5 min-w-0 flex-1">
-                  <div className="flex h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 items-center justify-center rounded-full bg-white flex-shrink-0 p-1">
+                  <div className="flex h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 items-center justify-center rounded-full bg-white flex-shrink-0 p-1">
                     <img
                       src="/logo/image.png"
                       alt="File My RTI"
