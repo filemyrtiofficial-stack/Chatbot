@@ -29,22 +29,61 @@ const HumanTalkWidget: React.FC = () => {
     // Remove all non-digits
     const digits = value.replace(/\D/g, '');
 
-    // Format for Indian numbers
+    // If empty, return empty
     if (digits.length === 0) return '';
-    if (digits.length <= 2) return `+91 ${digits}`;
-    if (digits.length <= 7) return `+91 ${digits.slice(2, 7)}`;
-    return `+91 ${digits.slice(2, 7)} ${digits.slice(7, 11)}`;
+
+    // Handle different cases
+    let phoneDigits = digits;
+
+    // If starts with 91, use it (country code included)
+    if (digits.startsWith('91') && digits.length > 2) {
+      phoneDigits = digits.slice(2); // Remove 91 prefix
+    }
+
+    // If starts with 0, remove leading 0
+    if (phoneDigits.startsWith('0')) {
+      phoneDigits = phoneDigits.slice(1);
+    }
+
+    // Limit to 10 digits (Indian mobile number length)
+    phoneDigits = phoneDigits.slice(0, 10);
+
+    // Format based on length
+    if (phoneDigits.length === 0) return '';
+    if (phoneDigits.length <= 5) {
+      return `+91 ${phoneDigits}`;
+    }
+    return `+91 ${phoneDigits.slice(0, 5)} ${phoneDigits.slice(5)}`;
   };
 
   // Validate phone number
   const validatePhone = (phone: string): string | undefined => {
     const digits = phone.replace(/\D/g, '');
-    if (digits.length < 10) {
-      return 'Phone number must be at least 10 digits';
+
+    // Extract only the 10-digit Indian mobile number (remove country code if present)
+    let phoneDigits = digits;
+    if (digits.startsWith('91') && digits.length > 2) {
+      phoneDigits = digits.slice(2);
     }
-    if (digits.length > 13) {
-      return 'Phone number is too long';
+
+    // Remove leading 0 if present
+    if (phoneDigits.startsWith('0')) {
+      phoneDigits = phoneDigits.slice(1);
     }
+
+    // Indian mobile numbers must be exactly 10 digits
+    if (phoneDigits.length < 10) {
+      return 'Phone number must be 10 digits';
+    }
+    if (phoneDigits.length > 10) {
+      return 'Phone number must be exactly 10 digits';
+    }
+
+    // Check if it starts with valid Indian mobile prefix (6-9)
+    if (!/^[6-9]/.test(phoneDigits)) {
+      return 'Phone number must start with 6, 7, 8, or 9';
+    }
+
     return undefined;
   };
 
@@ -302,9 +341,9 @@ const HumanTalkWidget: React.FC = () => {
                   </div>
                   <div className="min-w-0">
                     <h2 id="human-talk-title" className="text-sm md:text-base font-semibold leading-tight">
-                      Talk with a Human
+                    Talk to a Real Person
                     </h2>
-                    <p className="text-[10px] md:text-xs text-blue-100/90 mt-0.5">Get personalized assistance</p>
+                    <p className="text-[10px] md:text-xs text-blue-100/90 mt-0.5">Get instant help — real people, real answers</p>
                   </div>
                 </div>
                 <button
