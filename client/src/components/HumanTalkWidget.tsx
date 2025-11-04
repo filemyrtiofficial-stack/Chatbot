@@ -280,7 +280,7 @@ const HumanTalkWidget: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="fixed z-50 flex flex-col bg-white shadow-2xl md:top-1/2 md:right-4 md:left-auto md:bottom-auto md:h-auto md:w-[90vw] md:max-w-[420px] md:-translate-y-1/2 md:rounded-xl bottom-0 right-0 left-0 w-full h-[calc(100vh-1rem)] max-h-[calc(100vh-1rem)] rounded-t-xl my-2"
+              className="fixed z-50 flex flex-col bg-white shadow-2xl md:top-1/2 md:right-4 md:left-auto md:bottom-auto md:h-auto md:w-[90vw] md:max-w-[420px] md:-translate-y-1/2 md:rounded-xl bottom-0 right-0 left-0 w-full h-[calc(100vh-1rem)] max-h-[calc(100vh-1rem)] rounded-t-xl my-2 -mt-[190px]"
               role="dialog"
               aria-modal="true"
               aria-labelledby="human-talk-title"
