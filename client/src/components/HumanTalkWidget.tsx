@@ -252,8 +252,13 @@ const HumanTalkWidget: React.FC = () => {
               <div className="text-sm font-semibold text-black">
                 Need Help?<br />Talk to a Real Person <span className="text-red-600">(Beta)</span>
               </div>
-              <div className="mt-1 text-xs text-gray-700">
-                👥 Talk with a Real Human Expert! Click to connect with our team and get personalized assistance right away.
+              <div className="mt-1 text-xs text-gray-700 flex items-start gap-1.5">
+                <img
+                  src="/logo/FILEMYRTIFEVICON.ico"
+                  alt="Human Talk"
+                  className="h-4 w-4 mt-0.5 flex-shrink-0 object-contain"
+                />
+                <span>Talk with a Real Human Expert! Click to connect with our team and get personalized assistance right away.</span>
               </div>
               {/* Arrow pointing down */}
               <div className="absolute bottom-0 right-6 translate-y-full">
@@ -337,11 +342,15 @@ const HumanTalkWidget: React.FC = () => {
               <div className="flex items-center justify-between border-b border-blue-700/20 bg-[#026CB6] px-3 md:px-4 py-2 md:py-2.5 text-white shadow-sm flex-shrink-0">
                 <div className="flex items-center gap-2 md:gap-2.5">
                   <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm flex-shrink-0">
-                    <span className="text-base md:text-lg">👥</span>
+                    <img
+                      src="/logo/FILEMYRTIFEVICON.ico"
+                      alt="Human Talk"
+                      className="h-5 w-5 md:h-6 md:w-6 object-contain"
+                    />
                   </div>
                   <div className="min-w-0">
                     <h2 id="human-talk-title" className="text-sm md:text-base font-semibold leading-tight">
-                    Talk to a Real Person
+                      Talk to a Real Person
                     </h2>
                     <p className="text-[10px] md:text-xs text-blue-100/90 mt-0.5">Get instant help — real people, real answers</p>
                   </div>
