@@ -100,6 +100,10 @@ const HumanTalkWidget: React.FC = () => {
 
   // Validate query
   const validateQuery = (text: string): string | undefined => {
+    // Query is optional, only validate if provided
+    if (text.trim().length === 0) {
+      return undefined; // Empty query is allowed
+    }
     if (text.trim().length < 10) {
       return 'Please provide more details (at least 10 characters)';
     }
@@ -604,7 +608,7 @@ const HumanTalkWidget: React.FC = () => {
                             htmlFor="query"
                             className="block text-xs md:text-sm font-semibold text-slate-700"
                           >
-                            Your Query <span className="text-red-500">*</span>
+                            Your Query
                           </label>
                           <span
                             className={`text-[10px] md:text-xs font-medium ${query.length > MAX_QUERY_LENGTH * 0.9
@@ -625,8 +629,7 @@ const HumanTalkWidget: React.FC = () => {
                             const error = validateQuery(query);
                             setErrors((prev: { name?: string; phone?: string; query?: string }) => ({ ...prev, query: error }));
                           }}
-                          placeholder="Describe your question or issue..."
-                          required
+                          placeholder="Describe your question or issue... (Optional)"
                           rows={3}
                           aria-invalid={!!errors.query}
                           aria-describedby={errors.query ? 'query-error' : undefined}
@@ -660,7 +663,6 @@ const HumanTalkWidget: React.FC = () => {
                         disabled={
                           name.trim() === '' ||
                           phoneNumber.trim() === '' ||
-                          query.trim() === '' ||
                           isSubmitting ||
                           !!errors.name ||
                           !!errors.phone ||
@@ -668,13 +670,13 @@ const HumanTalkWidget: React.FC = () => {
                         }
                         whileHover={{
                           scale:
-                            name.trim() && phoneNumber.trim() && query.trim() && !errors.name && !errors.phone && !errors.query && !isSubmitting
+                            name.trim() && phoneNumber.trim() && !errors.name && !errors.phone && !errors.query && !isSubmitting
                               ? 1.02
                               : 1,
                         }}
                         whileTap={{
                           scale:
-                            name.trim() && phoneNumber.trim() && query.trim() && !errors.name && !errors.phone && !errors.query && !isSubmitting
+                            name.trim() && phoneNumber.trim() && !errors.name && !errors.phone && !errors.query && !isSubmitting
                               ? 0.98
                               : 1,
                         }}

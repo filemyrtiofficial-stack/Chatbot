@@ -8,7 +8,7 @@ const router = express.Router();
 const contactFormSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   phoneNumber: z.string().min(1, 'Phone number is required'),
-  query: z.string().min(1, 'Query is required'),
+  query: z.string().optional().default(''),
 });
 
 // GET endpoint to initialize WhatsApp and show QR code (for manual setup)
@@ -59,7 +59,7 @@ router.post('/', async (req, res) => {
     console.log('📝 Contact form submission received:');
     console.log(`   Name: ${name}`);
     console.log(`   Phone: ${phoneNumber}`);
-    console.log(`   Query: ${query.substring(0, 50)}...`);
+    console.log(`   Query: ${query ? query.substring(0, 50) + '...' : '(empty)'}`);
 
     if (!adminPhone) {
       console.warn('ADMIN_WHATSAPP_NUMBER not configured. Skipping WhatsApp notification.');
@@ -77,6 +77,8 @@ router.post('/', async (req, res) => {
       timeStyle: 'short'
     });
 
+    const queryText = query && query.trim() ? query.trim() : 'No query provided';
+
     const message = `🔔 *New Contact Form Submission*
 
 👤 *Name:* ${name}
@@ -84,7 +86,7 @@ router.post('/', async (req, res) => {
 📞 *Phone:* ${phoneNumber}
 
 💬 *Query:*
-${query}
+${queryText}
 
 ⏰ *Time:* ${timestamp}`;
 
