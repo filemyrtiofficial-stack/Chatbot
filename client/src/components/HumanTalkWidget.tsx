@@ -213,7 +213,7 @@ const HumanTalkWidget: React.FC = () => {
           </svg>
 
           {/* Text */}
-          <span className="text-sm font-semibold text-white">Talk with Human</span>
+          <span className="text-sm font-semibold text-white">Need Help? Talk to a Real Person</span>
 
           {/* Beta Badge */}
           <motion.div
