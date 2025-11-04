@@ -280,31 +280,31 @@ const HumanTalkWidget: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="fixed z-50 flex flex-col bg-white shadow-2xl md:top-6 md:right-6 md:bottom-6 md:left-auto md:h-auto md:max-h-[calc(100vh-3rem)] md:w-[440px] md:rounded-2xl bottom-0 right-0 left-0 w-full max-h-[calc(100vh-3rem)] rounded-t-2xl"
+              className="fixed z-50 flex flex-col bg-white shadow-2xl md:top-1/2 md:right-4 md:left-auto md:bottom-auto md:h-auto md:max-h-[85vh] md:w-[380px] md:-translate-y-1/2 md:rounded-xl bottom-0 right-0 left-0 w-full max-h-[90vh] rounded-t-xl"
               role="dialog"
               aria-modal="true"
               aria-labelledby="human-talk-title"
             >
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-blue-700/30 bg-[#026CB6] px-6 py-5 text-white shadow-md">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
-                    <span className="text-xl">👥</span>
+              <div className="flex items-center justify-between border-b border-blue-700/20 bg-[#026CB6] px-4 py-3 text-white shadow-sm">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                    <span className="text-lg">👥</span>
                   </div>
                   <div>
-                    <h2 id="human-talk-title" className="text-lg font-semibold leading-tight">
+                    <h2 id="human-talk-title" className="text-base font-semibold leading-tight">
                       Talk with a Human
                     </h2>
-                    <p className="text-xs text-blue-100/90 mt-0.5">Get personalized assistance</p>
+                    <p className="text-[10px] text-blue-100/90 mt-0.5">Get personalized assistance</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="rounded-full p-1.5 transition-all hover:bg-white/20 active:scale-95 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent"
+                  className="rounded-full p-1 transition-all hover:bg-white/20 active:scale-95 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent"
                   aria-label="Close form"
                 >
                   <svg
-                    className="h-5 w-5"
+                    className="h-4 w-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -321,22 +321,22 @@ const HumanTalkWidget: React.FC = () => {
               </div>
 
               {/* Content Area */}
-              <div className="flex-1 overflow-hidden px-6 py-6">
+              <div className="flex-1 overflow-y-auto px-4 py-4">
                 {isSubmitted ? (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                    className="flex min-h-[400px] flex-col items-center justify-center text-center"
+                    className="flex min-h-[300px] flex-col items-center justify-center text-center px-2"
                   >
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                      className="mb-6 rounded-full bg-gradient-to-br from-green-100 to-emerald-100 p-5 shadow-lg"
+                      className="mb-4 rounded-full bg-gradient-to-br from-green-100 to-emerald-100 p-4 shadow-lg"
                     >
                       <svg
-                        className="h-14 w-14 text-green-600"
+                        className="h-10 w-10 text-green-600"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -357,7 +357,7 @@ const HumanTalkWidget: React.FC = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.4 }}
-                      className="mb-4 text-2xl font-bold text-slate-900"
+                      className="mb-3 text-xl font-bold text-slate-900"
                     >
                       Thank You!
                     </motion.h3>
@@ -365,7 +365,7 @@ const HumanTalkWidget: React.FC = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.5 }}
-                      className="space-y-3 text-sm leading-relaxed text-slate-600 max-w-sm"
+                      className="space-y-2 text-xs leading-relaxed text-slate-600 max-w-sm"
                     >
                       <p>
                         Your query has been successfully submitted. We've received your message and our team will get back to you soon.
@@ -374,7 +374,7 @@ const HumanTalkWidget: React.FC = () => {
                         We'll contact you at{' '}
                         <span className="font-semibold text-[#026CB6]">{submittedPhone}</span> regarding your inquiry.
                       </p>
-                      <p className="mt-4 text-xs text-slate-500 bg-slate-50 rounded-lg p-3">
+                      <p className="mt-3 text-[10px] text-slate-500 bg-slate-50 rounded-lg p-2.5">
                         <span className="font-semibold text-slate-700">⏱️ Response Time:</span> Typically within 24 hours. For urgent matters, please call us or reach out via WhatsApp.
                       </p>
                     </motion.div>
@@ -383,7 +383,7 @@ const HumanTalkWidget: React.FC = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.6 }}
                       onClick={() => setIsOpen(false)}
-                      className="mt-6 rounded-lg bg-[#026CB6] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#0259a3] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#026CB6] focus:ring-offset-2"
+                      className="mt-5 rounded-lg bg-[#026CB6] px-5 py-2 text-xs font-semibold text-white transition-all hover:bg-[#0259a3] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#026CB6] focus:ring-offset-2"
                     >
                       Close
                     </motion.button>
@@ -398,7 +398,7 @@ const HumanTalkWidget: React.FC = () => {
                           animate={{ opacity: 1, y: 0, height: 'auto' }}
                           exit={{ opacity: 0, y: -10, height: 0 }}
                           data-error-message
-                          className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3"
+                          className="mb-4 rounded-lg border border-red-200 bg-red-50 p-2.5"
                         >
                           <div className="flex items-start gap-2">
                             <svg
@@ -414,25 +414,25 @@ const HumanTalkWidget: React.FC = () => {
                                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                               />
                             </svg>
-                            <p className="text-sm text-red-800">{submitError}</p>
+                            <p className="text-xs text-red-800">{submitError}</p>
                           </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
 
                     {/* Company Phone Number */}
-                    <div className="mb-6 rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-blue-50/30 p-5 shadow-sm">
-                      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 text-center">
+                    <div className="mb-4 rounded-lg border border-slate-200 bg-gradient-to-br from-slate-50 to-blue-50/30 p-3 shadow-sm">
+                      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500 text-center">
                         📞 Direct Contact
                       </p>
-                      <div className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-2">
                         {/* Phone Number */}
                         <a
                           href={`tel:${companyPhoneNumber.replace(/\s/g, '')}`}
-                          className="group flex items-center justify-center gap-2.5 rounded-lg bg-white px-4 py-3 text-lg font-bold text-[#026CB6] transition-all hover:bg-[#026CB6] hover:text-white hover:shadow-md"
+                          className="group flex items-center justify-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-[#026CB6] transition-all hover:bg-[#026CB6] hover:text-white hover:shadow-md"
                         >
                           <svg
-                            className="h-5 w-5 transition-transform group-hover:scale-110"
+                            className="h-4 w-4 transition-transform group-hover:scale-110"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -445,7 +445,7 @@ const HumanTalkWidget: React.FC = () => {
                               d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                             />
                           </svg>
-                          <span>{companyPhoneNumber}</span>
+                          <span className="text-xs">{companyPhoneNumber}</span>
                         </a>
 
                         {/* WhatsApp Button */}
@@ -453,10 +453,10 @@ const HumanTalkWidget: React.FC = () => {
                           href={`https://wa.me/${companyPhoneNumber.replace(/[^\d]/g, '')}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="group flex items-center justify-center gap-2.5 rounded-lg bg-[#25D366] px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-[#20BA5A] hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                          className="group flex items-center justify-center gap-2 rounded-lg bg-[#25D366] px-3 py-2 text-xs font-semibold text-white transition-all hover:bg-[#20BA5A] hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
                         >
                           <svg
-                            className="h-5 w-5 transition-transform group-hover:scale-110"
+                            className="h-4 w-4 transition-transform group-hover:scale-110"
                             fill="currentColor"
                             viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg"
@@ -469,12 +469,12 @@ const HumanTalkWidget: React.FC = () => {
                     </div>
 
                     {/* Form */}
-                    <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+                    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                       {/* Name Input */}
                       <div>
                         <label
                           htmlFor="name"
-                          className="mb-2 block text-sm font-semibold text-slate-700"
+                          className="mb-1.5 block text-xs font-semibold text-slate-700"
                         >
                           Your Name <span className="text-red-500">*</span>
                         </label>
@@ -493,7 +493,7 @@ const HumanTalkWidget: React.FC = () => {
                           required
                           aria-invalid={!!errors.name}
                           aria-describedby={errors.name ? 'name-error' : undefined}
-                          className={`w-full rounded-lg border px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${errors.name
+                          className={`w-full rounded-lg border px-3 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${errors.name
                             ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500/20'
                             : 'border-slate-300 bg-white focus:border-[#026CB6] focus:ring-[#026CB6]/20'
                             }`}
@@ -505,10 +505,10 @@ const HumanTalkWidget: React.FC = () => {
                               animate={{ opacity: 1, y: 0, height: 'auto' }}
                               exit={{ opacity: 0, y: -5, height: 0 }}
                               id="name-error"
-                              className="mt-1.5 text-xs text-red-600 flex items-center gap-1"
+                              className="mt-1 text-xs text-red-600 flex items-center gap-1"
                               role="alert"
                             >
-                              <svg className="h-3.5 w-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <svg className="h-3 w-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                               </svg>
                               {errors.name}
@@ -521,7 +521,7 @@ const HumanTalkWidget: React.FC = () => {
                       <div>
                         <label
                           htmlFor="phone"
-                          className="mb-2 block text-sm font-semibold text-slate-700"
+                          className="mb-1.5 block text-xs font-semibold text-slate-700"
                         >
                           Your Phone Number <span className="text-red-500">*</span>
                         </label>
@@ -540,7 +540,7 @@ const HumanTalkWidget: React.FC = () => {
                           required
                           aria-invalid={!!errors.phone}
                           aria-describedby={errors.phone ? 'phone-error' : undefined}
-                          className={`w-full rounded-lg border px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${errors.phone
+                          className={`w-full rounded-lg border px-3 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${errors.phone
                             ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500/20'
                             : 'border-slate-300 bg-white focus:border-[#026CB6] focus:ring-[#026CB6]/20'
                             }`}
@@ -552,10 +552,10 @@ const HumanTalkWidget: React.FC = () => {
                               animate={{ opacity: 1, y: 0, height: 'auto' }}
                               exit={{ opacity: 0, y: -5, height: 0 }}
                               id="phone-error"
-                              className="mt-1.5 text-xs text-red-600 flex items-center gap-1"
+                              className="mt-1 text-xs text-red-600 flex items-center gap-1"
                               role="alert"
                             >
-                              <svg className="h-3.5 w-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <svg className="h-3 w-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                               </svg>
                               {errors.phone}
@@ -566,15 +566,15 @@ const HumanTalkWidget: React.FC = () => {
 
                       {/* Query Input */}
                       <div>
-                        <div className="mb-2 flex items-center justify-between">
+                        <div className="mb-1.5 flex items-center justify-between">
                           <label
                             htmlFor="query"
-                            className="block text-sm font-semibold text-slate-700"
+                            className="block text-xs font-semibold text-slate-700"
                           >
                             Your Query <span className="text-red-500">*</span>
                           </label>
                           <span
-                            className={`text-xs font-medium ${query.length > MAX_QUERY_LENGTH * 0.9
+                            className={`text-[10px] font-medium ${query.length > MAX_QUERY_LENGTH * 0.9
                               ? 'text-orange-600'
                               : 'text-slate-400'
                               }`}
@@ -594,10 +594,10 @@ const HumanTalkWidget: React.FC = () => {
                           }}
                           placeholder="Describe your question or issue in detail..."
                           required
-                          rows={5}
+                          rows={4}
                           aria-invalid={!!errors.query}
                           aria-describedby={errors.query ? 'query-error' : undefined}
-                          className={`w-full resize-none rounded-lg border px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${errors.query
+                          className={`w-full resize-none rounded-lg border px-3 py-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${errors.query
                             ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500/20'
                             : 'border-slate-300 bg-white focus:border-[#026CB6] focus:ring-[#026CB6]/20'
                             }`}
@@ -609,10 +609,10 @@ const HumanTalkWidget: React.FC = () => {
                               animate={{ opacity: 1, y: 0, height: 'auto' }}
                               exit={{ opacity: 0, y: -5, height: 0 }}
                               id="query-error"
-                              className="mt-1.5 text-xs text-red-600 flex items-center gap-1"
+                              className="mt-1 text-xs text-red-600 flex items-center gap-1"
                               role="alert"
                             >
-                              <svg className="h-3.5 w-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <svg className="h-3 w-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                               </svg>
                               {errors.query}
@@ -645,7 +645,7 @@ const HumanTalkWidget: React.FC = () => {
                               ? 0.98
                               : 1,
                         }}
-                        className="w-full rounded-lg bg-[#026CB6] px-5 py-3.5 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-[#026CB6] focus:ring-offset-2"
+                        className="w-full rounded-lg bg-[#026CB6] px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-[#026CB6] focus:ring-offset-2"
                       >
                         {isSubmitting ? (
                           <span className="flex items-center justify-center gap-2">
