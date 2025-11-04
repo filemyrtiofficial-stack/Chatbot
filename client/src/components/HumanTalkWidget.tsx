@@ -254,7 +254,7 @@ const HumanTalkWidget: React.FC = () => {
               </div>
               <div className="mt-1 text-xs text-gray-700 flex items-start gap-1.5">
                 <img
-                  src="/logo/FILEMYRTIFEVICON.ico"
+                  src="/logo/image.png"
                   alt="Human Talk"
                   className="h-4 w-4 mt-0.5 flex-shrink-0 object-contain"
                 />
