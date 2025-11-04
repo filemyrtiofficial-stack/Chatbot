@@ -21,6 +21,7 @@ const HumanTalkWidget: React.FC = () => {
 
   // Company phone number - update this with your actual number
   const companyPhoneNumber = '+91 9911100589';
+  const companyPhoneDisplay = '9911100589'; // Display without country code
   const MAX_QUERY_LENGTH = 1000;
 
   // Format phone number as user types (Indian format)
@@ -50,9 +51,9 @@ const HumanTalkWidget: React.FC = () => {
     // Format based on length
     if (phoneDigits.length === 0) return '';
     if (phoneDigits.length <= 5) {
-      return `+91 ${phoneDigits}`;
+      return phoneDigits;
     }
-    return `+91 ${phoneDigits.slice(0, 5)} ${phoneDigits.slice(5)}`;
+    return `${phoneDigits.slice(0, 5)} ${phoneDigits.slice(5)}`;
   };
 
   // Validate phone number
@@ -408,7 +409,7 @@ const HumanTalkWidget: React.FC = () => {
                           <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                           </svg>
-                          call us at {companyPhoneNumber}
+                          call us at {companyPhoneDisplay}
                         </a>
                         {' '}or reach out via WhatsApp.
                       </p>
@@ -477,7 +478,7 @@ const HumanTalkWidget: React.FC = () => {
                               d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                             />
                           </svg>
-                          <span className="text-[9px] sm:text-[10px] md:text-xs font-semibold break-all text-center">{companyPhoneNumber}</span>
+                          <span className="text-[9px] sm:text-[10px] md:text-xs font-semibold break-all text-center">{companyPhoneDisplay}</span>
                         </a>
 
                         {/* WhatsApp Button */}
@@ -568,7 +569,7 @@ const HumanTalkWidget: React.FC = () => {
                             const error = validatePhone(phoneNumber);
                             setErrors((prev: { name?: string; phone?: string; query?: string }) => ({ ...prev, phone: error }));
                           }}
-                          placeholder="+91 12345 67890"
+                          placeholder="12345 67890"
                           required
                           aria-invalid={!!errors.phone}
                           aria-describedby={errors.phone ? 'phone-error' : undefined}
