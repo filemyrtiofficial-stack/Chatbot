@@ -313,7 +313,7 @@ const HumanTalkWidget: React.FC = () => {
                     <img
                       src="/logo/image.png"
                       alt="File My RTI"
-                      className="h-full w-full object-contain"
+                      className="h-[90%] w-auto object-contain"
                     />
                   </div>
                   <div className="min-w-0 flex-1">
