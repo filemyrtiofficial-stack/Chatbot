@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 import { useHumanTalk } from '../App';
 import { api, resolveApiUrl } from '../api';
 
 const HumanTalkWidget: React.FC = () => {
+  const location = useLocation();
   const { isOpen, setIsOpen } = useHumanTalk();
   const [isHovered, setIsHovered] = useState(false);
   const [name, setName] = useState('');
@@ -183,6 +185,11 @@ const HumanTalkWidget: React.FC = () => {
       }, 100);
     }
   };
+
+  // Hide widget on login and signup pages
+  if (location.pathname === '/login' || location.pathname === '/signup') {
+    return null;
+  }
 
   return (
     <>
@@ -705,7 +712,14 @@ export default HumanTalkWidget;
 
 // Compact button component for navbar/mobile use
 export const HumanTalkNavButton: React.FC = () => {
+  const location = useLocation();
   const { setIsOpen } = useHumanTalk();
+
+  // Hide widget on login and signup pages
+  if (location.pathname === '/login' || location.pathname === '/signup') {
+    return null;
+  }
+
   return (
     <button
       onClick={() => setIsOpen(true)}
