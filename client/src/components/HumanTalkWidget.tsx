@@ -24,7 +24,7 @@ const HumanTalkWidget: React.FC = () => {
   const formatPhoneNumber = (value: string): string => {
     // Remove all non-digits
     const digits = value.replace(/\D/g, '');
-    
+
     // Format for Indian numbers
     if (digits.length === 0) return '';
     if (digits.length <= 2) return `+91 ${digits}`;
@@ -112,7 +112,7 @@ const HumanTalkWidget: React.FC = () => {
         phone: phoneError,
         query: queryError,
       });
-      
+
       // Focus on first error field
       if (phoneError && phoneInputRef.current) {
         phoneInputRef.current.focus();
@@ -144,7 +144,7 @@ const HumanTalkWidget: React.FC = () => {
       console.error('Error submitting form:', error);
       setIsSubmitting(false);
       setSubmitError('Failed to submit your query. Please check your connection and try again.');
-      
+
       // Scroll to error message
       setTimeout(() => {
         const errorElement = document.querySelector('[data-error-message]');
@@ -191,7 +191,7 @@ const HumanTalkWidget: React.FC = () => {
           onClick={() => setIsOpen(true)}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          className="relative flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-[#1660a6] to-[#145891] px-5 py-3.5 shadow-lg transition-all hover:shadow-xl hover:shadow-[#1660a6]/25 focus:outline-none focus:ring-2 focus:ring-[#1660a6] focus:ring-offset-2"
+          className="relative flex items-center gap-2.5 rounded-xl bg-[#026CB6] px-5 py-3.5 shadow-lg transition-all hover:shadow-xl hover:shadow-[#026CB6]/25 focus:outline-none focus:ring-2 focus:ring-[#026CB6] focus:ring-offset-2"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           aria-label="Talk with a Human Expert"
@@ -255,7 +255,7 @@ const HumanTalkWidget: React.FC = () => {
               aria-labelledby="human-talk-title"
             >
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-blue-700/30 bg-gradient-to-r from-[#1660a6] to-[#145891] px-6 py-5 text-white shadow-md">
+              <div className="flex items-center justify-between border-b border-blue-700/30 bg-[#026CB6] px-6 py-5 text-white shadow-md">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
                     <span className="text-xl">👥</span>
@@ -341,7 +341,7 @@ const HumanTalkWidget: React.FC = () => {
                       </p>
                       <p className="pt-2 border-t border-slate-200">
                         We'll contact you at{' '}
-                        <span className="font-semibold text-[#1660a6]">{submittedPhone}</span> regarding your inquiry.
+                        <span className="font-semibold text-[#026CB6]">{submittedPhone}</span> regarding your inquiry.
                       </p>
                       <p className="mt-4 text-xs text-slate-500 bg-slate-50 rounded-lg p-3">
                         <span className="font-semibold text-slate-700">⏱️ Response Time:</span> Typically within 24 hours. For urgent matters, please call us or reach out via WhatsApp.
@@ -352,7 +352,7 @@ const HumanTalkWidget: React.FC = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.6 }}
                       onClick={() => setIsOpen(false)}
-                      className="mt-6 rounded-lg bg-[#1660a6] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#145891] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#1660a6] focus:ring-offset-2"
+                      className="mt-6 rounded-lg bg-[#026CB6] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#0259a3] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#026CB6] focus:ring-offset-2"
                     >
                       Close
                     </motion.button>
@@ -398,7 +398,7 @@ const HumanTalkWidget: React.FC = () => {
                         {/* Phone Number */}
                         <a
                           href={`tel:${companyPhoneNumber.replace(/\s/g, '')}`}
-                          className="group flex items-center justify-center gap-2.5 rounded-lg bg-white px-4 py-3 text-lg font-bold text-[#1660a6] transition-all hover:bg-[#1660a6] hover:text-white hover:shadow-md"
+                          className="group flex items-center justify-center gap-2.5 rounded-lg bg-white px-4 py-3 text-lg font-bold text-[#026CB6] transition-all hover:bg-[#026CB6] hover:text-white hover:shadow-md"
                         >
                           <svg
                             className="h-5 w-5 transition-transform group-hover:scale-110"
@@ -462,11 +462,10 @@ const HumanTalkWidget: React.FC = () => {
                           required
                           aria-invalid={!!errors.phone}
                           aria-describedby={errors.phone ? 'phone-error' : undefined}
-                          className={`w-full rounded-lg border px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                            errors.phone
+                          className={`w-full rounded-lg border px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${errors.phone
                               ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500/20'
-                              : 'border-slate-300 bg-white focus:border-[#1660a6] focus:ring-[#1660a6]/20'
-                          }`}
+                              : 'border-slate-300 bg-white focus:border-[#026CB6] focus:ring-[#026CB6]/20'
+                            }`}
                         />
                         <AnimatePresence>
                           {errors.phone && (
@@ -497,11 +496,10 @@ const HumanTalkWidget: React.FC = () => {
                             Your Query <span className="text-red-500">*</span>
                           </label>
                           <span
-                            className={`text-xs font-medium ${
-                              query.length > MAX_QUERY_LENGTH * 0.9
+                            className={`text-xs font-medium ${query.length > MAX_QUERY_LENGTH * 0.9
                                 ? 'text-orange-600'
                                 : 'text-slate-400'
-                            }`}
+                              }`}
                           >
                             {query.length}/{MAX_QUERY_LENGTH}
                           </span>
@@ -521,11 +519,10 @@ const HumanTalkWidget: React.FC = () => {
                           rows={5}
                           aria-invalid={!!errors.query}
                           aria-describedby={errors.query ? 'query-error' : undefined}
-                          className={`w-full resize-none rounded-lg border px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${
-                            errors.query
+                          className={`w-full resize-none rounded-lg border px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${errors.query
                               ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500/20'
-                              : 'border-slate-300 bg-white focus:border-[#1660a6] focus:ring-[#1660a6]/20'
-                          }`}
+                              : 'border-slate-300 bg-white focus:border-[#026CB6] focus:ring-[#026CB6]/20'
+                            }`}
                         />
                         <AnimatePresence>
                           {errors.query && (
@@ -568,7 +565,7 @@ const HumanTalkWidget: React.FC = () => {
                               ? 0.98
                               : 1,
                         }}
-                        className="w-full rounded-lg bg-gradient-to-r from-[#1660a6] to-[#145891] px-5 py-3.5 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-[#1660a6] focus:ring-offset-2"
+                        className="w-full rounded-lg bg-[#026CB6] px-5 py-3.5 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-[#026CB6] focus:ring-offset-2"
                       >
                         {isSubmitting ? (
                           <span className="flex items-center justify-center gap-2">
@@ -633,7 +630,7 @@ export const HumanTalkNavButton: React.FC = () => {
   return (
     <button
       onClick={() => setIsOpen(true)}
-      className="md:hidden relative flex items-center gap-1 rounded-lg bg-[#1660a6] px-1.5 py-1.5 text-[10px] sm:text-[11px] font-semibold text-white transition-colors hover:bg-[#145891] focus:outline-none focus:ring-2 focus:ring-[#1660a6] focus:ring-offset-1 whitespace-nowrap shadow-sm flex-shrink-0"
+      className="md:hidden relative flex items-center gap-1 rounded-lg bg-[#026CB6] px-1.5 py-1.5 text-[10px] sm:text-[11px] font-semibold text-white transition-colors hover:bg-[#0259a3] focus:outline-none focus:ring-2 focus:ring-[#026CB6] focus:ring-offset-1 whitespace-nowrap shadow-sm flex-shrink-0"
       aria-label="Talk with Human"
     >
       <svg
