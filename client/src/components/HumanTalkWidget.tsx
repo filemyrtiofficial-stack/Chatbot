@@ -341,11 +341,11 @@ const HumanTalkWidget: React.FC = () => {
               {/* Header */}
               <div className="flex items-center justify-between border-b border-blue-700/20 bg-[#026CB6] px-2.5 sm:px-3 md:px-4 py-2 md:py-2.5 text-white shadow-sm flex-shrink-0">
                 <div className="flex items-center gap-1.5 sm:gap-2 md:gap-2.5 min-w-0 flex-1">
-                  <div className="flex h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm flex-shrink-0">
+                  <div className="flex h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 items-center justify-center rounded-full bg-white flex-shrink-0 p-1">
                     <img
                       src="/logo/image.png"
                       alt="File My RTI"
-                      className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 object-contain"
+                      className="h-full w-full object-contain"
                     />
                   </div>
                   <div className="min-w-0 flex-1">
