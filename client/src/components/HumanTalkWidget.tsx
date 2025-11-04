@@ -11,22 +11,114 @@ const HumanTalkWidget: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedPhone, setSubmittedPhone] = useState('');
+  const [errors, setErrors] = useState<{ phone?: string; query?: string }>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const phoneInputRef = useRef<HTMLInputElement>(null);
+  const queryInputRef = useRef<HTMLTextAreaElement>(null);
 
   // Company phone number - update this with your actual number
   const companyPhoneNumber = '+91 99999 99999';
+  const MAX_QUERY_LENGTH = 1000;
+
+  // Format phone number as user types (Indian format)
+  const formatPhoneNumber = (value: string): string => {
+    // Remove all non-digits
+    const digits = value.replace(/\D/g, '');
+    
+    // Format for Indian numbers
+    if (digits.length === 0) return '';
+    if (digits.length <= 2) return `+91 ${digits}`;
+    if (digits.length <= 7) return `+91 ${digits.slice(2, 7)}`;
+    return `+91 ${digits.slice(2, 7)} ${digits.slice(7, 11)}`;
+  };
+
+  // Validate phone number
+  const validatePhone = (phone: string): string | undefined => {
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length < 10) {
+      return 'Phone number must be at least 10 digits';
+    }
+    if (digits.length > 13) {
+      return 'Phone number is too long';
+    }
+    return undefined;
+  };
+
+  // Validate query
+  const validateQuery = (text: string): string | undefined => {
+    if (text.trim().length < 10) {
+      return 'Please provide more details (at least 10 characters)';
+    }
+    if (text.length > MAX_QUERY_LENGTH) {
+      return `Query cannot exceed ${MAX_QUERY_LENGTH} characters`;
+    }
+    return undefined;
+  };
+
+  // Handle phone number change
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    setPhoneNumber(formatted);
+    if (errors.phone) {
+      const error = validatePhone(formatted);
+      setErrors((prev: { phone?: string; query?: string }) => ({ ...prev, phone: error }));
+    }
+    setSubmitError(null);
+  };
+
+  // Handle query change
+  const handleQueryChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    if (value.length <= MAX_QUERY_LENGTH) {
+      setQuery(value);
+      if (errors.query) {
+        const error = validateQuery(value);
+        setErrors((prev: { phone?: string; query?: string }) => ({ ...prev, query: error }));
+      }
+      setSubmitError(null);
+    }
+  };
 
   // Focus phone input when modal opens
   useEffect(() => {
     if (isOpen && phoneInputRef.current && !isSubmitted) {
-      setTimeout(() => phoneInputRef.current?.focus(), 100);
+      setTimeout(() => phoneInputRef.current?.focus(), 150);
     }
   }, [isOpen, isSubmitted]);
 
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setTimeout(() => {
+        setPhoneNumber('');
+        setQuery('');
+        setErrors({});
+        setSubmitError(null);
+        setIsSubmitted(false);
+      }, 300);
+    }
+  }, [isOpen]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
 
-    if (phoneNumber.trim() === '' || query.trim() === '') {
+    // Validate both fields
+    const phoneError = validatePhone(phoneNumber);
+    const queryError = validateQuery(query);
+
+    if (phoneError || queryError) {
+      setErrors({
+        phone: phoneError,
+        query: queryError,
+      });
+      
+      // Focus on first error field
+      if (phoneError && phoneInputRef.current) {
+        phoneInputRef.current.focus();
+      } else if (queryError && queryInputRef.current) {
+        queryInputRef.current.focus();
+      }
       return;
     }
 
@@ -47,14 +139,17 @@ const HumanTalkWidget: React.FC = () => {
       setIsSubmitting(false);
       setIsSubmitted(true);
       setSubmittedPhone(submittedPhoneValue);
-      setPhoneNumber('');
-      setQuery('');
-      // Thank you message will stay until user closes the modal
+      setErrors({});
     } catch (error) {
       console.error('Error submitting form:', error);
       setIsSubmitting(false);
-      // You can add an error message here if needed
-      alert('Failed to submit your query. Please try again later.');
+      setSubmitError('Failed to submit your query. Please check your connection and try again.');
+      
+      // Scroll to error message
+      setTimeout(() => {
+        const errorElement = document.querySelector('[data-error-message]');
+        errorElement?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
     }
   };
 
@@ -96,7 +191,7 @@ const HumanTalkWidget: React.FC = () => {
           onClick={() => setIsOpen(true)}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          className="relative flex items-center gap-2 rounded-xl bg-[#1660a6] px-5 py-3 shadow-lg transition-shadow hover:bg-[#145891] hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#1660a6] focus:ring-offset-2"
+          className="relative flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-[#1660a6] to-[#145891] px-5 py-3.5 shadow-lg transition-all hover:shadow-xl hover:shadow-[#1660a6]/25 focus:outline-none focus:ring-2 focus:ring-[#1660a6] focus:ring-offset-2"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           aria-label="Talk with a Human Expert"
@@ -112,7 +207,7 @@ const HumanTalkWidget: React.FC = () => {
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
+              strokeWidth={2.5}
               d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
             />
           </svg>
@@ -121,9 +216,14 @@ const HumanTalkWidget: React.FC = () => {
           <span className="text-sm font-semibold text-white">Talk with Human</span>
 
           {/* Beta Badge */}
-          <div className="absolute -top-1.5 -right-1.5 rounded-full bg-red-500 px-1.5 py-0.5 text-[9px] font-bold uppercase text-white shadow-md">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
+            className="absolute -top-1.5 -right-1.5 flex items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-red-600 px-2 py-0.5 text-[9px] font-bold uppercase text-white shadow-lg ring-2 ring-white"
+          >
             Beta
-          </div>
+          </motion.div>
         </motion.button>
 
       </motion.div>
@@ -138,14 +238,9 @@ const HumanTalkWidget: React.FC = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
-              onClick={() => {
-                setIsOpen(false);
-                setIsSubmitted(false);
-                setPhoneNumber('');
-                setQuery('');
-                setSubmittedPhone('');
-              }}
+              className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
+              onClick={() => setIsOpen(false)}
+              aria-hidden="true"
             />
 
             {/* Modal */}
@@ -154,26 +249,27 @@ const HumanTalkWidget: React.FC = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="fixed z-50 flex flex-col bg-white shadow-2xl md:top-6 md:right-6 md:bottom-6 md:left-auto md:h-auto md:max-h-[calc(100vh-3rem)] md:w-[420px] md:rounded-2xl bottom-0 right-0 left-0 w-full max-h-[calc(100vh-3rem)] rounded-t-2xl"
+              className="fixed z-50 flex flex-col bg-white shadow-2xl md:top-6 md:right-6 md:bottom-6 md:left-auto md:h-auto md:max-h-[calc(100vh-3rem)] md:w-[440px] md:rounded-2xl bottom-0 right-0 left-0 w-full max-h-[calc(100vh-3rem)] rounded-t-2xl"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="human-talk-title"
             >
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-slate-200 bg-[#1660a6] px-5 py-4 text-white">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">👥</span>
+              <div className="flex items-center justify-between border-b border-blue-700/30 bg-gradient-to-r from-[#1660a6] to-[#145891] px-6 py-5 text-white shadow-md">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                    <span className="text-xl">👥</span>
+                  </div>
                   <div>
-                    <h2 className="text-lg font-semibold">Talk with a Human</h2>
-                    <p className="text-xs text-blue-100">Contact us for assistance</p>
+                    <h2 id="human-talk-title" className="text-lg font-semibold leading-tight">
+                      Talk with a Human
+                    </h2>
+                    <p className="text-xs text-blue-100/90 mt-0.5">Get personalized assistance</p>
                   </div>
                 </div>
                 <button
-                  onClick={() => {
-                    setIsOpen(false);
-                    setIsSubmitted(false);
-                    setPhoneNumber('');
-                    setQuery('');
-                    setSubmittedPhone('');
-                  }}
-                  className="rounded-full p-1 transition-colors hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#1660a6]"
+                  onClick={() => setIsOpen(false)}
+                  className="rounded-full p-1.5 transition-all hover:bg-white/20 active:scale-95 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent"
                   aria-label="Close form"
                 >
                   <svg
@@ -186,7 +282,7 @@ const HumanTalkWidget: React.FC = () => {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={2}
+                      strokeWidth={2.5}
                       d="M6 18L18 6M6 6l12 12"
                     />
                   </svg>
@@ -194,56 +290,118 @@ const HumanTalkWidget: React.FC = () => {
               </div>
 
               {/* Content Area */}
-              <div className="flex-1 overflow-y-auto px-5 py-6">
+              <div className="flex-1 overflow-y-auto px-6 py-6">
                 {isSubmitted ? (
                   <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="flex h-full flex-col items-center justify-center text-center"
+                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                    className="flex min-h-[400px] flex-col items-center justify-center text-center"
                   >
-                    <div className="mb-4 rounded-full bg-green-100 p-4">
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                      className="mb-6 rounded-full bg-gradient-to-br from-green-100 to-emerald-100 p-5 shadow-lg"
+                    >
                       <svg
-                        className="h-12 w-12 text-green-600"
+                        className="h-14 w-14 text-green-600"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg"
                       >
-                        <path
+                        <motion.path
+                          initial={{ pathLength: 0 }}
+                          animate={{ pathLength: 1 }}
+                          transition={{ delay: 0.3, duration: 0.5 }}
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          strokeWidth={2}
+                          strokeWidth={3}
                           d="M5 13l4 4L19 7"
                         />
                       </svg>
-                    </div>
-                    <h3 className="mb-3 text-xl font-semibold text-slate-900">Thank You!</h3>
-                    <div className="space-y-2 text-sm text-slate-600">
+                    </motion.div>
+                    <motion.h3
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 }}
+                      className="mb-4 text-2xl font-bold text-slate-900"
+                    >
+                      Thank You!
+                    </motion.h3>
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 }}
+                      className="space-y-3 text-sm leading-relaxed text-slate-600 max-w-sm"
+                    >
                       <p>
                         Your query has been successfully submitted. We've received your message and our team will get back to you soon.
                       </p>
-                      <p>
+                      <p className="pt-2 border-t border-slate-200">
                         We'll contact you at{' '}
                         <span className="font-semibold text-[#1660a6]">{submittedPhone}</span> regarding your inquiry.
                       </p>
-                      <p className="mt-3 text-xs text-slate-500">
-                        Our response time is typically within 24 hours. For urgent matters, please feel free to call us or reach out via WhatsApp using the contact information above.
+                      <p className="mt-4 text-xs text-slate-500 bg-slate-50 rounded-lg p-3">
+                        <span className="font-semibold text-slate-700">⏱️ Response Time:</span> Typically within 24 hours. For urgent matters, please call us or reach out via WhatsApp.
                       </p>
-                    </div>
+                    </motion.div>
+                    <motion.button
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 }}
+                      onClick={() => setIsOpen(false)}
+                      className="mt-6 rounded-lg bg-[#1660a6] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#145891] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#1660a6] focus:ring-offset-2"
+                    >
+                      Close
+                    </motion.button>
                   </motion.div>
                 ) : (
                   <>
+                    {/* Error Message */}
+                    <AnimatePresence>
+                      {submitError && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10, height: 0 }}
+                          animate={{ opacity: 1, y: 0, height: 'auto' }}
+                          exit={{ opacity: 0, y: -10, height: 0 }}
+                          data-error-message
+                          className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3"
+                        >
+                          <div className="flex items-start gap-2">
+                            <svg
+                              className="h-5 w-5 flex-shrink-0 text-red-600 mt-0.5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                            <p className="text-sm text-red-800">{submitError}</p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
                     {/* Company Phone Number */}
-                    <div className="mb-6 rounded-xl bg-slate-50 p-4">
-                      <p className="mb-3 text-xs font-medium text-slate-600 text-center">Our Contact Number</p>
+                    <div className="mb-6 rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-blue-50/30 p-5 shadow-sm">
+                      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 text-center">
+                        📞 Direct Contact
+                      </p>
                       <div className="flex flex-col gap-3">
                         {/* Phone Number */}
                         <a
                           href={`tel:${companyPhoneNumber.replace(/\s/g, '')}`}
-                          className="flex items-center justify-center gap-2 text-lg font-bold text-[#1660a6] transition-colors hover:text-[#145891]"
+                          className="group flex items-center justify-center gap-2.5 rounded-lg bg-white px-4 py-3 text-lg font-bold text-[#1660a6] transition-all hover:bg-[#1660a6] hover:text-white hover:shadow-md"
                         >
                           <svg
-                            className="h-5 w-5"
+                            className="h-5 w-5 transition-transform group-hover:scale-110"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -264,10 +422,10 @@ const HumanTalkWidget: React.FC = () => {
                           href={`https://wa.me/${companyPhoneNumber.replace(/[^\d]/g, '')}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#20BA5A] hover:shadow-md"
+                          className="group flex items-center justify-center gap-2.5 rounded-lg bg-[#25D366] px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-[#20BA5A] hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
                         >
                           <svg
-                            className="h-5 w-5"
+                            className="h-5 w-5 transition-transform group-hover:scale-110"
                             fill="currentColor"
                             viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg"
@@ -280,53 +438,137 @@ const HumanTalkWidget: React.FC = () => {
                     </div>
 
                     {/* Form */}
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                       {/* Phone Number Input */}
                       <div>
                         <label
                           htmlFor="phone"
-                          className="mb-2 block text-sm font-medium text-slate-700"
+                          className="mb-2 block text-sm font-semibold text-slate-700"
                         >
                           Your Phone Number <span className="text-red-500">*</span>
                         </label>
                         <input
                           ref={phoneInputRef}
                           id="phone"
+                          name="phone"
                           type="tel"
                           value={phoneNumber}
-                          onChange={(e) => setPhoneNumber(e.target.value)}
-                          placeholder="Enter your phone number"
+                          onChange={handlePhoneChange}
+                          onBlur={() => {
+                            const error = validatePhone(phoneNumber);
+                            setErrors((prev: { phone?: string; query?: string }) => ({ ...prev, phone: error }));
+                          }}
+                          placeholder="+91 12345 67890"
                           required
-                          className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-[#1660a6] focus:outline-none focus:ring-2 focus:ring-[#1660a6]/20 focus:ring-offset-1"
+                          aria-invalid={!!errors.phone}
+                          aria-describedby={errors.phone ? 'phone-error' : undefined}
+                          className={`w-full rounded-lg border px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+                            errors.phone
+                              ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500/20'
+                              : 'border-slate-300 bg-white focus:border-[#1660a6] focus:ring-[#1660a6]/20'
+                          }`}
                         />
+                        <AnimatePresence>
+                          {errors.phone && (
+                            <motion.p
+                              initial={{ opacity: 0, y: -5, height: 0 }}
+                              animate={{ opacity: 1, y: 0, height: 'auto' }}
+                              exit={{ opacity: 0, y: -5, height: 0 }}
+                              id="phone-error"
+                              className="mt-1.5 text-xs text-red-600 flex items-center gap-1"
+                              role="alert"
+                            >
+                              <svg className="h-3.5 w-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
+                              {errors.phone}
+                            </motion.p>
+                          )}
+                        </AnimatePresence>
                       </div>
 
                       {/* Query Input */}
                       <div>
-                        <label
-                          htmlFor="query"
-                          className="mb-2 block text-sm font-medium text-slate-700"
-                        >
-                          Your Query <span className="text-red-500">*</span>
-                        </label>
+                        <div className="mb-2 flex items-center justify-between">
+                          <label
+                            htmlFor="query"
+                            className="block text-sm font-semibold text-slate-700"
+                          >
+                            Your Query <span className="text-red-500">*</span>
+                          </label>
+                          <span
+                            className={`text-xs font-medium ${
+                              query.length > MAX_QUERY_LENGTH * 0.9
+                                ? 'text-orange-600'
+                                : 'text-slate-400'
+                            }`}
+                          >
+                            {query.length}/{MAX_QUERY_LENGTH}
+                          </span>
+                        </div>
                         <textarea
+                          ref={queryInputRef}
                           id="query"
+                          name="query"
                           value={query}
-                          onChange={(e) => setQuery(e.target.value)}
-                          placeholder="Describe your question or issue..."
+                          onChange={handleQueryChange}
+                          onBlur={() => {
+                            const error = validateQuery(query);
+                            setErrors((prev: { phone?: string; query?: string }) => ({ ...prev, query: error }));
+                          }}
+                          placeholder="Describe your question or issue in detail..."
                           required
-                          rows={4}
-                          className="w-full resize-none rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-[#1660a6] focus:outline-none focus:ring-2 focus:ring-[#1660a6]/20 focus:ring-offset-1"
+                          rows={5}
+                          aria-invalid={!!errors.query}
+                          aria-describedby={errors.query ? 'query-error' : undefined}
+                          className={`w-full resize-none rounded-lg border px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+                            errors.query
+                              ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500/20'
+                              : 'border-slate-300 bg-white focus:border-[#1660a6] focus:ring-[#1660a6]/20'
+                          }`}
                         />
+                        <AnimatePresence>
+                          {errors.query && (
+                            <motion.p
+                              initial={{ opacity: 0, y: -5, height: 0 }}
+                              animate={{ opacity: 1, y: 0, height: 'auto' }}
+                              exit={{ opacity: 0, y: -5, height: 0 }}
+                              id="query-error"
+                              className="mt-1.5 text-xs text-red-600 flex items-center gap-1"
+                              role="alert"
+                            >
+                              <svg className="h-3.5 w-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
+                              {errors.query}
+                            </motion.p>
+                          )}
+                        </AnimatePresence>
                       </div>
 
                       {/* Submit Button */}
                       <motion.button
                         type="submit"
-                        disabled={phoneNumber.trim() === '' || query.trim() === '' || isSubmitting}
-                        whileHover={{ scale: phoneNumber.trim() && query.trim() ? 1.02 : 1 }}
-                        whileTap={{ scale: phoneNumber.trim() && query.trim() ? 0.98 : 1 }}
-                        className="w-full rounded-lg bg-[#1660a6] px-5 py-3 text-sm font-semibold text-white transition-opacity hover:bg-[#145891] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[#1660a6] focus:ring-offset-1"
+                        disabled={
+                          phoneNumber.trim() === '' ||
+                          query.trim() === '' ||
+                          isSubmitting ||
+                          !!errors.phone ||
+                          !!errors.query
+                        }
+                        whileHover={{
+                          scale:
+                            phoneNumber.trim() && query.trim() && !errors.phone && !errors.query && !isSubmitting
+                              ? 1.02
+                              : 1,
+                        }}
+                        whileTap={{
+                          scale:
+                            phoneNumber.trim() && query.trim() && !errors.phone && !errors.query && !isSubmitting
+                              ? 0.98
+                              : 1,
+                        }}
+                        className="w-full rounded-lg bg-gradient-to-r from-[#1660a6] to-[#145891] px-5 py-3.5 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none focus:outline-none focus:ring-2 focus:ring-[#1660a6] focus:ring-offset-2"
                       >
                         {isSubmitting ? (
                           <span className="flex items-center justify-center gap-2">
@@ -353,7 +595,22 @@ const HumanTalkWidget: React.FC = () => {
                             Submitting...
                           </span>
                         ) : (
-                          'Submit Query'
+                          <span className="flex items-center justify-center gap-2">
+                            <svg
+                              className="h-4 w-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                              />
+                            </svg>
+                            Submit Query
+                          </span>
                         )}
                       </motion.button>
                     </form>
