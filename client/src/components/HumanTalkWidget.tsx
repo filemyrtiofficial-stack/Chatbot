@@ -170,17 +170,17 @@ const HumanTalkWidget: React.FC = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.9 }}
               transition={{ duration: 0.2 }}
-              className="absolute bottom-full right-0 mb-3 w-64 rounded-lg bg-slate-900 px-4 py-3 text-white shadow-xl"
+              className="absolute bottom-full right-0 mb-3 w-64 rounded-lg bg-white px-4 py-3 text-black shadow-xl border border-gray-200"
             >
-              <div className="text-sm font-semibold">
-                Need Help? Talk to a Real Person <span className="text-red-400">(Beta)</span>
+              <div className="text-sm font-semibold text-black">
+                Need Help? Talk to a Real Person <span className="text-red-600">(Beta)</span>
               </div>
-              <div className="mt-1 text-xs text-gray-300">
+              <div className="mt-1 text-xs text-gray-700">
                 👥 Talk with a Real Human Expert! Click to connect with our team and get personalized assistance right away.
               </div>
               {/* Arrow pointing down */}
               <div className="absolute bottom-0 right-6 translate-y-full">
-                <div className="h-0 w-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-slate-900"></div>
+                <div className="h-0 w-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white"></div>
               </div>
             </motion.div>
           )}
