@@ -6,6 +6,7 @@ import whatsappService from '../services/whatsapp.js';
 const router = express.Router();
 
 const contactFormSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
   phoneNumber: z.string().min(1, 'Phone number is required'),
   query: z.string().min(1, 'Query is required'),
 });
@@ -50,7 +51,7 @@ router.post('/', async (req, res) => {
       });
     }
 
-    const { phoneNumber, query } = parsed.data;
+    const { name, phoneNumber, query } = parsed.data;
     const config = getConfig();
     const adminPhone = config.ADMIN_WHATSAPP_NUMBER;
 
@@ -64,7 +65,7 @@ router.post('/', async (req, res) => {
     }
 
     // Create notification message
-    const message = `🔔 *New Contact Form Submission*\n\n📞 *Phone:* ${phoneNumber}\n\n💬 *Query:*\n${query}\n\n⏰ *Time:* ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
+    const message = `🔔 *New Contact Form Submission*\n\n👤 *Name:* ${name}\n\n📞 *Phone:* ${phoneNumber}\n\n💬 *Query:*\n${query}\n\n⏰ *Time:* ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`;
 
     // Initialize WhatsApp if not connected (non-blocking)
     if (!whatsappService.getConnectionStatus()) {

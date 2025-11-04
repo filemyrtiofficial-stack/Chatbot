@@ -6,13 +6,15 @@ import { api, resolveApiUrl } from '../api';
 const HumanTalkWidget: React.FC = () => {
   const { isOpen, setIsOpen } = useHumanTalk();
   const [isHovered, setIsHovered] = useState(false);
+  const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [query, setQuery] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedPhone, setSubmittedPhone] = useState('');
-  const [errors, setErrors] = useState<{ phone?: string; query?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string; phone?: string; query?: string }>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const phoneInputRef = useRef<HTMLInputElement>(null);
   const queryInputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -44,6 +46,17 @@ const HumanTalkWidget: React.FC = () => {
     return undefined;
   };
 
+  // Validate name
+  const validateName = (name: string): string | undefined => {
+    if (name.trim().length < 2) {
+      return 'Name must be at least 2 characters';
+    }
+    if (name.trim().length > 100) {
+      return 'Name is too long';
+    }
+    return undefined;
+  };
+
   // Validate query
   const validateQuery = (text: string): string | undefined => {
     if (text.trim().length < 10) {
@@ -55,13 +68,24 @@ const HumanTalkWidget: React.FC = () => {
     return undefined;
   };
 
+  // Handle name change
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setName(value);
+    if (errors.name) {
+      const error = validateName(value);
+      setErrors((prev: { name?: string; phone?: string; query?: string }) => ({ ...prev, name: error }));
+    }
+    setSubmitError(null);
+  };
+
   // Handle phone number change
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatPhoneNumber(e.target.value);
     setPhoneNumber(formatted);
     if (errors.phone) {
       const error = validatePhone(formatted);
-      setErrors((prev: { phone?: string; query?: string }) => ({ ...prev, phone: error }));
+      setErrors((prev: { name?: string; phone?: string; query?: string }) => ({ ...prev, phone: error }));
     }
     setSubmitError(null);
   };
@@ -73,16 +97,16 @@ const HumanTalkWidget: React.FC = () => {
       setQuery(value);
       if (errors.query) {
         const error = validateQuery(value);
-        setErrors((prev: { phone?: string; query?: string }) => ({ ...prev, query: error }));
+        setErrors((prev: { name?: string; phone?: string; query?: string }) => ({ ...prev, query: error }));
       }
       setSubmitError(null);
     }
   };
 
-  // Focus phone input when modal opens
+  // Focus name input when modal opens
   useEffect(() => {
-    if (isOpen && phoneInputRef.current && !isSubmitted) {
-      setTimeout(() => phoneInputRef.current?.focus(), 150);
+    if (isOpen && nameInputRef.current && !isSubmitted) {
+      setTimeout(() => nameInputRef.current?.focus(), 150);
     }
   }, [isOpen, isSubmitted]);
 
@@ -90,6 +114,7 @@ const HumanTalkWidget: React.FC = () => {
   useEffect(() => {
     if (!isOpen) {
       setTimeout(() => {
+        setName('');
         setPhoneNumber('');
         setQuery('');
         setErrors({});
@@ -103,18 +128,22 @@ const HumanTalkWidget: React.FC = () => {
     e.preventDefault();
     setSubmitError(null);
 
-    // Validate both fields
+    // Validate all fields
+    const nameError = validateName(name);
     const phoneError = validatePhone(phoneNumber);
     const queryError = validateQuery(query);
 
-    if (phoneError || queryError) {
+    if (nameError || phoneError || queryError) {
       setErrors({
+        name: nameError,
         phone: phoneError,
         query: queryError,
       });
 
       // Focus on first error field
-      if (phoneError && phoneInputRef.current) {
+      if (nameError && nameInputRef.current) {
+        nameInputRef.current.focus();
+      } else if (phoneError && phoneInputRef.current) {
         phoneInputRef.current.focus();
       } else if (queryError && queryInputRef.current) {
         queryInputRef.current.focus();
@@ -123,6 +152,7 @@ const HumanTalkWidget: React.FC = () => {
     }
 
     setIsSubmitting(true);
+    const submittedNameValue = name.trim();
     const submittedPhoneValue = phoneNumber.trim();
     const submittedQuery = query.trim();
 
@@ -131,6 +161,7 @@ const HumanTalkWidget: React.FC = () => {
       await api('/api/contact', {
         method: 'POST',
         body: JSON.stringify({
+          name: submittedNameValue,
           phoneNumber: submittedPhoneValue,
           query: submittedQuery,
         }),
@@ -290,7 +321,7 @@ const HumanTalkWidget: React.FC = () => {
               </div>
 
               {/* Content Area */}
-              <div className="flex-1 overflow-y-auto px-6 py-6">
+              <div className="flex-1 overflow-hidden px-6 py-6">
                 {isSubmitted ? (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -439,6 +470,53 @@ const HumanTalkWidget: React.FC = () => {
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+                      {/* Name Input */}
+                      <div>
+                        <label
+                          htmlFor="name"
+                          className="mb-2 block text-sm font-semibold text-slate-700"
+                        >
+                          Your Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          ref={nameInputRef}
+                          id="name"
+                          name="name"
+                          type="text"
+                          value={name}
+                          onChange={handleNameChange}
+                          onBlur={() => {
+                            const error = validateName(name);
+                            setErrors((prev: { name?: string; phone?: string; query?: string }) => ({ ...prev, name: error }));
+                          }}
+                          placeholder="Enter your full name"
+                          required
+                          aria-invalid={!!errors.name}
+                          aria-describedby={errors.name ? 'name-error' : undefined}
+                          className={`w-full rounded-lg border px-4 py-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 ${errors.name
+                            ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-500/20'
+                            : 'border-slate-300 bg-white focus:border-[#026CB6] focus:ring-[#026CB6]/20'
+                            }`}
+                        />
+                        <AnimatePresence>
+                          {errors.name && (
+                            <motion.p
+                              initial={{ opacity: 0, y: -5, height: 0 }}
+                              animate={{ opacity: 1, y: 0, height: 'auto' }}
+                              exit={{ opacity: 0, y: -5, height: 0 }}
+                              id="name-error"
+                              className="mt-1.5 text-xs text-red-600 flex items-center gap-1"
+                              role="alert"
+                            >
+                              <svg className="h-3.5 w-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
+                              {errors.name}
+                            </motion.p>
+                          )}
+                        </AnimatePresence>
+                      </div>
+
                       {/* Phone Number Input */}
                       <div>
                         <label
@@ -456,7 +534,7 @@ const HumanTalkWidget: React.FC = () => {
                           onChange={handlePhoneChange}
                           onBlur={() => {
                             const error = validatePhone(phoneNumber);
-                            setErrors((prev: { phone?: string; query?: string }) => ({ ...prev, phone: error }));
+                            setErrors((prev: { name?: string; phone?: string; query?: string }) => ({ ...prev, phone: error }));
                           }}
                           placeholder="+91 12345 67890"
                           required
@@ -512,7 +590,7 @@ const HumanTalkWidget: React.FC = () => {
                           onChange={handleQueryChange}
                           onBlur={() => {
                             const error = validateQuery(query);
-                            setErrors((prev: { phone?: string; query?: string }) => ({ ...prev, query: error }));
+                            setErrors((prev: { name?: string; phone?: string; query?: string }) => ({ ...prev, query: error }));
                           }}
                           placeholder="Describe your question or issue in detail..."
                           required
@@ -547,21 +625,23 @@ const HumanTalkWidget: React.FC = () => {
                       <motion.button
                         type="submit"
                         disabled={
+                          name.trim() === '' ||
                           phoneNumber.trim() === '' ||
                           query.trim() === '' ||
                           isSubmitting ||
+                          !!errors.name ||
                           !!errors.phone ||
                           !!errors.query
                         }
                         whileHover={{
                           scale:
-                            phoneNumber.trim() && query.trim() && !errors.phone && !errors.query && !isSubmitting
+                            name.trim() && phoneNumber.trim() && query.trim() && !errors.name && !errors.phone && !errors.query && !isSubmitting
                               ? 1.02
                               : 1,
                         }}
                         whileTap={{
                           scale:
-                            phoneNumber.trim() && query.trim() && !errors.phone && !errors.query && !isSubmitting
+                            name.trim() && phoneNumber.trim() && query.trim() && !errors.name && !errors.phone && !errors.query && !isSubmitting
                               ? 0.98
                               : 1,
                         }}
