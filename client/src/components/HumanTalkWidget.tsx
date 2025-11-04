@@ -21,7 +21,7 @@ const HumanTalkWidget: React.FC = () => {
 
   // Company phone number - update this with your actual number
   const companyPhoneNumber = '+91 9911100589';
-  const companyPhoneDisplay = '9911100589'; // Display without country code
+  const companyPhoneDisplay = '99111 00589'; // Display without country code
   const MAX_QUERY_LENGTH = 1000;
 
   // Format phone number as user types (Indian format)
