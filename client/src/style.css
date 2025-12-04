@@ -384,6 +384,128 @@
     color: #cbd5e1;
   }
 
+  .voice-settings-panel {
+    border: 1px solid #e2e8f0;
+    background: linear-gradient(120deg, #f8fafc, #f1f5f9);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .voice-assist-card--dark .voice-settings-panel {
+    border-color: #334155;
+    background: linear-gradient(120deg, #1e293b, #334155);
+  }
+
+  .voice-setting-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .voice-setting-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    min-width: 60px;
+    white-space: nowrap;
+  }
+
+  .voice-assist-card--dark .voice-setting-label {
+    color: #e2e8f0;
+  }
+
+  .voice-setting-slider {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: #e2e8f0;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .voice-setting-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #0ea5e9;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .voice-setting-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #0ea5e9;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .voice-setting-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: #0ea5e9;
+    min-width: 40px;
+    text-align: right;
+  }
+
+  .voice-setting-select {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 12px;
+    background: white;
+    color: #374151;
+    outline: none;
+  }
+
+  .voice-setting-select:focus {
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+  }
+
+  .voice-assist-card--dark .voice-setting-select {
+    background: #1f2937;
+    border-color: #374151;
+    color: #e2e8f0;
+  }
+
+  .voice-setting-hint {
+    font-size: 11px;
+    color: #64748b;
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  .voice-assist-card--dark .voice-setting-hint {
+    color: #94a3b8;
+  }
+
+  .voice-kbd {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #475569;
+  }
+
+  .voice-assist-card--dark .voice-kbd {
+    background: #334155;
+    border-color: #475569;
+    color: #cbd5e1;
+  }
+
   /* Mobile-friendly touch targets */
   @media (max-width: 640px) {
 

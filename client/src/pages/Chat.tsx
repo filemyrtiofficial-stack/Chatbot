@@ -111,6 +111,24 @@ function WaveAnimation() {
   );
 }
 
+function SettingsIcon(props: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      {...props}
+    >
+      <path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
 function SendIcon(props: IconProps) {
   return (
     <svg
@@ -197,6 +215,14 @@ export default function Chat() {
   const [speechSupported, setSpeechSupported] = useState(false);
   const [autoReadReplies, setAutoReadReplies] = useState(false);
   const [isReadingReply, setIsReadingReply] = useState(false);
+  const [voiceSettings, setVoiceSettings] = useState({
+    volume: 1,
+    rate: 1,
+    pitch: 1,
+    voice: null as SpeechSynthesisVoice | null,
+  });
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chatMessagesRef = useRef<HTMLDivElement>(null);
   const [hasStartedConversation, setHasStartedConversation] = useState(false);
@@ -275,6 +301,29 @@ export default function Chat() {
       // ignore storage access errors
     }
   }, [selectedSessionId, sessions]);
+
+  // Initialize voice settings and load available voices
+  useEffect(() => {
+    if (typeof window === 'undefined' || !speechSupported) return;
+
+    const loadVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      setAvailableVoices(voices);
+      // Set default voice (prefer English voices)
+      const englishVoice = voices.find(voice => voice.lang.startsWith('en') && voice.localService);
+      if (englishVoice) {
+        setVoiceSettings(prev => ({ ...prev, voice: englishVoice }));
+      }
+    };
+
+    loadVoices();
+    // Voices might load asynchronously
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+
+    return () => {
+      window.speechSynthesis.onvoiceschanged = null;
+    };
+  }, [speechSupported]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -420,6 +469,7 @@ export default function Chat() {
       document.removeEventListener('click', handleClickOutside);
     };
   }, [isModelDropdownOpen]);
+
 
   useEffect(() => {
     let active = true;
@@ -782,15 +832,48 @@ export default function Chat() {
 
   const speakReply = (text: string) => {
     if (!speechSupported || typeof window === 'undefined' || !text) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = SPEECH_LANG;
-    utterance.rate = 1;
-    utterance.pitch = 1;
-    setIsReadingReply(true);
-    utterance.onend = () => setIsReadingReply(false);
-    utterance.onerror = () => setIsReadingReply(false);
-    window.speechSynthesis.speak(utterance);
+
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = SPEECH_LANG;
+      utterance.volume = voiceSettings.volume;
+      utterance.rate = voiceSettings.rate;
+      utterance.pitch = voiceSettings.pitch;
+
+      if (voiceSettings.voice) {
+        utterance.voice = voiceSettings.voice;
+      }
+
+      setIsReadingReply(true);
+
+      utterance.onend = () => {
+        setIsReadingReply(false);
+      };
+
+      utterance.onerror = (event) => {
+        console.error('TTS Error:', event.error);
+        setIsReadingReply(false);
+        // Show user-friendly error message
+        if (event.error === 'not-allowed') {
+          setGlobalNotice('Speech synthesis was blocked. Please check your browser permissions.');
+        } else {
+          setGlobalNotice('Text-to-speech failed. The message will remain as text.');
+        }
+        setTimeout(() => setGlobalNotice(null), 4000);
+      };
+
+      utterance.onstart = () => {
+        setIsReadingReply(true);
+      };
+
+      window.speechSynthesis.speak(utterance);
+    } catch (error) {
+      console.error('Speech synthesis error:', error);
+      setIsReadingReply(false);
+      setGlobalNotice('Text-to-speech is not available. The message will remain as text.');
+      setTimeout(() => setGlobalNotice(null), 4000);
+    }
   };
 
   useEffect(() => {
@@ -840,12 +923,33 @@ export default function Chat() {
 
     recognition.onerror = (event: any) => {
       setVoiceAssistStatus('error');
-      const reason =
-        event.error === 'not-allowed'
-          ? 'Microphone permissions are blocked. Please allow mic access.'
-          : 'Voice capture failed. Please try again.';
+      let reason = 'Voice capture failed. Please try again.';
+
+      switch (event.error) {
+        case 'not-allowed':
+          reason = 'Microphone permissions are blocked. Please allow microphone access in your browser settings.';
+          break;
+        case 'no-speech':
+          reason = 'No speech detected. Please speak clearly and try again.';
+          break;
+        case 'audio-capture':
+          reason = 'Microphone not found or not accessible. Please check your microphone.';
+          break;
+        case 'network':
+          reason = 'Network error occurred. Please check your internet connection.';
+          break;
+        case 'service-not-allowed':
+          reason = 'Speech recognition service is not allowed. Please try again later.';
+          break;
+        default:
+          reason = `Voice recognition error: ${event.error}. Please try again.`;
+      }
+
       setVoiceAssistError(reason);
-      setTimeout(() => setVoiceAssistStatus('idle'), 1500);
+      setTimeout(() => {
+        setVoiceAssistStatus('idle');
+        setVoiceAssistError(null);
+      }, 3000);
     };
 
     recognition.onend = async () => {
@@ -860,6 +964,37 @@ export default function Chat() {
 
     recognition.start();
   };
+
+  // Keyboard shortcuts for voice features
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Only trigger if not typing in input fields
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      // Spacebar to toggle voice recording (when voice is supported and not sending)
+      if (event.code === 'Space' && voiceSupported && !sending && !isRecording) {
+        event.preventDefault();
+        handleVoiceAssistCapture();
+      }
+
+      // Escape to stop voice recording
+      if (event.code === 'Escape' && voiceAssistStatus === 'listening') {
+        event.preventDefault();
+        stopVoiceAssist();
+      }
+
+      // Ctrl/Cmd + R to toggle auto-read replies
+      if ((event.ctrlKey || event.metaKey) && event.key === 'r' && speechSupported) {
+        event.preventDefault();
+        setAutoReadReplies(prev => !prev);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [voiceSupported, sending, isRecording, voiceAssistStatus, speechSupported]);
 
   const userInitial = (user?.name?.trim()?.[0] ?? user?.email?.trim()?.[0] ?? 'R').toUpperCase();
 
@@ -1206,7 +1341,88 @@ export default function Chat() {
                           >
                             {autoReadReplies ? 'Auto-read replies: On' : 'Auto-read replies: Off'}
                           </button>
+                          {speechSupported && (
+                            <button
+                              type="button"
+                              onClick={() => setShowVoiceSettings(!showVoiceSettings)}
+                              className="voice-toggle"
+                              title="Voice settings"
+                            >
+                              <SettingsIcon className="h-4 w-4" />
+                            </button>
+                          )}
                         </div>
+
+                        {showVoiceSettings && speechSupported && (
+                          <div className="voice-settings-panel">
+                            <div className="voice-setting-group">
+                              <label className="voice-setting-label">Volume</label>
+                              <input
+                                type="range"
+                                min="0"
+                                max="1"
+                                step="0.1"
+                                value={voiceSettings.volume}
+                                onChange={(e) => setVoiceSettings(prev => ({ ...prev, volume: parseFloat(e.target.value) }))}
+                                className="voice-setting-slider"
+                              />
+                              <span className="voice-setting-value">{Math.round(voiceSettings.volume * 100)}%</span>
+                            </div>
+
+                            <div className="voice-setting-group">
+                              <label className="voice-setting-label">Speed</label>
+                              <input
+                                type="range"
+                                min="0.5"
+                                max="2"
+                                step="0.1"
+                                value={voiceSettings.rate}
+                                onChange={(e) => setVoiceSettings(prev => ({ ...prev, rate: parseFloat(e.target.value) }))}
+                                className="voice-setting-slider"
+                              />
+                              <span className="voice-setting-value">{voiceSettings.rate}x</span>
+                            </div>
+
+                            <div className="voice-setting-group">
+                              <label className="voice-setting-label">Pitch</label>
+                              <input
+                                type="range"
+                                min="0"
+                                max="2"
+                                step="0.1"
+                                value={voiceSettings.pitch}
+                                onChange={(e) => setVoiceSettings(prev => ({ ...prev, pitch: parseFloat(e.target.value) }))}
+                                className="voice-setting-slider"
+                              />
+                              <span className="voice-setting-value">{voiceSettings.pitch}</span>
+                            </div>
+
+                            {availableVoices.length > 0 && (
+                              <div className="voice-setting-group">
+                                <label className="voice-setting-label">Voice</label>
+                                <select
+                                  value={voiceSettings.voice?.name || ''}
+                                  onChange={(e) => {
+                                    const selectedVoice = availableVoices.find(voice => voice.name === e.target.value);
+                                    setVoiceSettings(prev => ({ ...prev, voice: selectedVoice || null }));
+                                  }}
+                                  className="voice-setting-select"
+                                >
+                                  <option value="">Default Voice</option>
+                                  {availableVoices.map((voice) => (
+                                    <option key={voice.name} value={voice.name}>
+                                      {voice.name} ({voice.lang})
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            )}
+
+                            <div className="voice-setting-hint">
+                              💡 Press <kbd className="voice-kbd">Ctrl+R</kbd> to toggle auto-read, <kbd className="voice-kbd">Space</kbd> to start/stop voice input
+                            </div>
+                          </div>
+                        )}
 
                         {lastHeardTranscript && voiceAssistStatus !== 'listening' && (
                           <div className="voice-heard">
