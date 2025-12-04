@@ -698,6 +698,45 @@
     }
   }
 
+  /* Test Voice Button */
+  .voice-test-button {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid #0ea5e9;
+    background: linear-gradient(135deg, #0ea5e9, #22d3ee);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 200ms ease;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .voice-test-button:hover:not(:disabled) {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+  }
+
+  .voice-test-button:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  .voice-test-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: #9ca3af;
+    background: #f3f4f6;
+    color: #9ca3af;
+  }
+
+  .dark .voice-test-button:disabled {
+    border-color: #6b7280;
+    background: #374151;
+    color: #6b7280;
+  }
+
   /* Mobile-friendly touch targets */
   @media (max-width: 640px) {
 

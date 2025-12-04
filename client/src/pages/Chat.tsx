@@ -570,6 +570,7 @@ export default function Chat() {
 
   async function sendMessage(trimmedMessage: string) {
     if (!trimmedMessage || sending) return;
+    console.log('Sending message:', trimmedMessage);
     setSending(true);
     setError(null);
     setGlobalNotice(null);
@@ -583,15 +584,27 @@ export default function Chat() {
       payload.sessionId = selectedSessionId;
     }
 
+    console.log('Payload:', payload);
+
     try {
+      console.log('Making API call to /api/chat');
       const data = await api<ChatResponse>('/api/chat', {
         method: 'POST',
         body: JSON.stringify(payload),
       });
+      console.log('API response received:', data);
+
+      if (!data.reply || data.reply.trim() === '') {
+        console.error('Empty or invalid response from server:', data);
+        setError('No response received from server. Please try again.');
+        return;
+      }
 
       const finalSessionId = data.sessionId;
       const userTimestamp = new Date().toISOString();
       const historyTimestamp = data.timestamp || userTimestamp;
+
+      console.log('Processing response - sessionId:', finalSessionId, 'reply:', data.reply.substring(0, 100) + '...');
 
       setSessions(prev => {
         const next = { ...prev };
@@ -626,9 +639,12 @@ export default function Chat() {
         return next;
       });
 
+      console.log('Setting selected session to:', finalSessionId);
       setSelectedSessionId(finalSessionId);
       setMessage('');
       setHasStartedConversation(true);
+
+      console.log('Message sent successfully, conversation should now show responses');
 
       // Scroll to bottom after sending message
       setTimeout(() => scrollToBottom(), 100);
@@ -986,8 +1002,18 @@ export default function Chat() {
       setVoiceAssistStatus('idle');
       const finalTranscript = transcript.trim();
       if (finalTranscript) {
+        console.log('Voice input received:', finalTranscript);
         setMessage(finalTranscript);
+
+        // Ensure conversation starts if we're in empty state
+        if (selectedSessionId === NEW_SESSION_SENTINEL && !hasStartedConversation) {
+          console.log('Starting conversation from voice input');
+          setHasStartedConversation(true);
+        }
+
         await sendMessage(finalTranscript);
+      } else {
+        console.log('No speech detected or empty transcript');
       }
     };
 
@@ -1381,6 +1407,23 @@ export default function Chat() {
                             ) : (
                               'Auto-voice: Off'
                             )}
+                          </button>
+                          {/* Test Voice Button */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              console.log('Testing voice output...');
+                              if (speechSupported) {
+                                speakReply("Voice test successful! Your voice output is working properly.");
+                              } else {
+                                console.log('Speech synthesis not supported');
+                              }
+                            }}
+                            className="voice-test-button"
+                            disabled={!speechSupported}
+                            title="Test voice output"
+                          >
+                            <SpeakerIcon className="h-5 w-5" />
                           </button>
                           {speechSupported && (
                             <button
