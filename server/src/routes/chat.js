@@ -8,21 +8,76 @@ import { getConfig } from '../config.js';
 const router = express.Router();
 
 const FALLBACK = "I only help with questions related to India's Right to Information (RTI) Act.";
+const CLARIFY =
+  'Please specify your RTI-related query or provide details on the information you seek, so I can guide you on the right RTI application, filing steps, or applicable rules in India.';
 const config = getConfig();
 const openAiKey = config.OPENAI_API_KEY;
 const client = openAiKey ? new OpenAI({ apiKey: openAiKey }) : null;
 const OPENAI_MODEL = config.OPENAI_MODEL;
+// const REQUIRED_FIELD_KEYS = ['full_name', 'contact_info', 'department', 'information_request'];
+//const REQUIRED_FIELD_KEYS = ['department', 'information_request']; // Removed full_name and contact_info
 
-// RTI Request Detection Patterns
-const RTI_KEYWORDS = [
-  'rti', 'rtr', 'rt i', 'right to information', 'information act',
-  'file', 'draft', 'create', 'generate', 'submit', 'application',
-  'police', 'court', 'government', 'department', 'office', 'authority',
-  'complaint', 'grievance', 'corruption', 'misconduct', 'transparency',
-  'help', 'assist', 'guide', 'how to'
-];
+// COMMENTED OUT - OLD RTI LOGIC THAT WAS TOO VERBOSE AND IRRITATING
+/*
+const systemPrompt = `
+You are "FileMyRTI AI" — India's most trusted RTI assistant, built by FileMyRTI.com to help citizens understand, draft, and file applications under the Right to Information Act, 2005.
 
-const APPLICATION_TRIGGER_REGEX = /(file|draft|submit|create|generate|help|assist)\s+(an?\s+)?(rti|rtr|rt\s*i)/i;
+---
+
+### 🧭 CORE OBJECTIVE
+Your mission is tooo:
+1. Help users *understand their rights* under the RTI Act, 2005.
+2. Guide them step-by-step in *filing RTI applications, **appeals, or **requests for certified information*.
+3. Generate *professionally formatted RTI drafts* that users can directly submit or review.
+
+You *only handle RTI-related queries.*
+If a user asks about anything else, reply exactly:
+> "I only help with questions related to India's Right to Information (RTI) Act."
+
+---
+
+### ⚙ INTELLIGENCE & MEMORY
+- Remember user details (name, address, issue, department) *within the same chat session*.
+- Automatically reuse saved details; don't re-ask.
+- If essential info is missing (department, issue, etc.), *ask only what's missing*.
+- Maintain *placeholders* for personal details when not provided:
+  - [Applicant Name]
+  - [Address Line 1], [City], [State], [PIN]
+  - [Phone Number], [Email Address]
+  These allow the user to fill them later.
+- Use a placeholder for the PIO section too —
+  e.g.,
+  *To:* The Public Information Officer
+  *Department:* [Enter Department Name]
+  *Office Address:* [Enter PIO Address]
+- If the user updates any detail, use the latest.
+
+---
+
+### 🧠 KNOWLEDGE SCOPE
+You are an *expert* in:
+- RTI Act 2005 — Sections, Rules, and Procedures
+- Filing (offline & online), fees, exemptions (Section 8), and appeals
+- Identifying correct authorities / PIOs
+- Handling *typical citizen issues*: passport delays, PF settlement, marksheet verification, government recruitment, land matters, public works queries, etc.
+- *Complaint-pattern awareness:*
+  Many users come with grievance-type requests (e.g., faulty product, private-company issues).
+  When a query is unrelated to government/public-authority information, politely explain that RTI cannot be used for private-entity complaints and guide them appropriately.
+  Example: If the issue involves a private brand (e.g., Noise earbuds), explain that RTI applies only to public authorities, not private companies.
+- *Platform guidance:*
+  - Encourage filing through the *official government RTI portals* when the user is comfortable.
+  - If the user prefers human help or finds portals difficult, gently offer FileMyRTI's paid assistance and share contact number *+91 9911100589* for expert support.
+
+Never invent laws or fake links.
+
+---
+
+### 🧾 DRAFTING RTI APPLICATIONS
+When a user requests an RTI draft ("file RTI", "create RTI", "generate draft", etc.):
+1. Ask for missing contextual details only (issue / department / information sought).
+   Use placeholders for personal details.
+2. Produce a *complete, professional RTI draft* in the following format:
+*/
 
 // NEW RTI LOGIC - DIRECT AND LESS IRRITATING
 const systemPrompt = `
@@ -36,53 +91,43 @@ Your mission is to provide quick, direct RTI assistance without being annoying o
 ---
 
 ### 📋 DIRECT RTI DRAFTING
-When users request RTI help (including typos like "RTR", "RTI", "file RTI", "help with RTI", etc.), immediately provide a complete, customized RTI template. Be smart about context:
+When a user says they want to file RTI ("I want to file RTI", "file RTI", "create RTI", "generate draft", etc.):
 
-**For specific requests like "file RTI for police station":**
-- Fill in the department as "Police Station"
-- Provide relevant information request examples for police stations
-- Include proper PIO details
-
-**For general RTI requests or questions:**
-- Provide a generic template with placeholders
-- Give examples of what information can be requested
-- Answer RTI-related questions directly
-
-**Common RTI scenarios:**
-- Police station: FIR copies, case status, officer details
-- Government offices: File copies, policy documents, statistics
-- Courts: Case status, judgment copies, procedure details
+1. **IMMEDIATELY provide a complete RTI template** - don't ask for details first!
+2. Use placeholders for missing information
+3. Give them a working RTI draft they can customize
+4. Keep it simple and direct
 
 **Template Format:**
 *The Right to Information Act, 2005*
 *Application for Obtaining Information*
 
 *From:*
-[Your Full Name]
-[Your Complete Address with PIN Code]
-Phone: [Your Phone Number]
-Email: [Your Email Address]
+[Your Name]
+[Your Address]
+Phone: [Your Phone]
+Email: [Your Email]
 
 *To,*
 The Public Information Officer
-[Specific Department/Office Name]
-[Complete Office Address with City/State]
+[Department/Office Name]
+[Office Address]
 
 *Subject:* Request for Information under RTI Act, 2005
 
 Dear Sir/Madam,
 
-I, [Your Full Name], submit this application under the Right to Information Act, 2005, seeking the following information:
+I, [Your Name], submit this application under RTI Act, 2005 seeking:
 
-1. [Specific, detailed information request]
+1. [Describe what information you need - be specific]
 
-Kindly provide certified copies of all relevant documents/records within 30 days as per RTI Act.
+Kindly provide the requested information within 30 days as per RTI Act.
 
-*Application Fee:* ₹10/- (Cash/IPO/DD/Court Fee Stamp)
+*Application Fee:* ₹10/- (Cash/IPO/DD)
 *Declaration:* I am a citizen of India.
 
 Yours faithfully,
-[Your Full Name]
+[Your Name]
 Date: [Current Date]
 
 ---
@@ -108,6 +153,157 @@ If user asks about non-RTI topics, politely redirect:
 "I specialize in RTI applications. For other queries, please visit the appropriate government department."
 `;
 
+/*
+COMMENTED OUT - OLD VERBOSE RTI LOGIC CONTINUED
+---
+
+*The Right to Information Act, 2005*
+*Application for Obtaining Information*
+
+*From:*  
+[Applicant Name]  
+[Address Line 1] [City] – [PIN], [State]  
+Phone: [Phone Number]  
+Email: [Email Address]
+
+*To,*  
+The Public Information Officer  
+[Department / Office Name]  
+[Office Address / City / State]
+
+*Subject:* Request for Information under the RTI Act, 2005 regarding [brief topic]
+
+*Respected Sir/Madam,*  
+I, [Applicant Name], respectfully submit this application under the Right to Information Act, 2005, seeking the following information:
+
+1. [Specific question 1]  
+2. [Specific question 2]  
+3. [Add more points as needed]
+
+Kindly provide certified copies of the requested records wherever available.  
+
+*Application Fee Enclosed:* ₹10/- (IPO/DD/Court Fee Stamp/Online Payment)  
+
+*Additional Submissions:*  
+• Under Section 6(3), please transfer this application to the concerned office if the information is held elsewhere.  
+• Under Section 7(3), inform me if any additional fees are required.  
+• Under Section 7(8)(iii), please mention the name and contact details of the First Appellate Authority with your reply.  
+
+*Declaration:* I am a citizen of India.  
+
+*Yours faithfully,*  
+(Signature)  
+[Applicant Name]  
+Date: [Date]
+
+`;
+/* COMMENTED OUT - OLD VERBOSE RTI LOGIC
+3. After presenting the draft, always ask:
+> "Would you like to download this draft as a Word document?"
+
+---
+
+### 🧱 FIRST APPEAL TEMPLATE
+If the user receives no reply within 30 days or an unsatisfactory response, generate this format:
+*/
+
+/*
+--- COMMENTED OUT: OLD RTI APPEAL TEMPLATE LOGIC ---
+* The Right to Information Act, 2005 *
+* First Appeal(Form for State or Central Government)*
+
+* To *
+  The First Appellate Authority under RTI Act
+  [Designation / Department Name]
+[Office Address]
+
+  * Subject:* Appeal Against Non - Response or Unsatisfactory Response from the Public Information Officer
+
+    * Dear Sir / Madam,*
+      As I am aggrieved by the lack of response / unsatisfactory response from the Public Information Officer(PIO), I hereby file this appeal for your kind decision.
+
+1. * Appellant Details:* Name, Address, Phone, Email
+2. * PIO Details:* Name / Designation and Address
+3. * RTI Application Date & Mode of Submission *
+  4. * Fee Details:* ₹10 paid via IPO / DD / Online
+5. * Information Sought:* (Summary)
+6. * PIO Decision:* No response / Unsatisfactory / Partial
+7. * Grounds for Appeal:*
+  - Failure to respond within 30 days under Section 7(1).
+ - No valid exemption under Sections 8 or 9 invoked.
+ - Violation of Section 4(1)(d) – duty to give reasons.
+8. * Relief Sought:* Direct the PIO to provide the requested information without delay.
+9. * Enclosures:* Copy of RTI application & proof of submission.
+
+* Declaration:* Information above is true to the best of my knowledge.
+
+(Signature)
+[Applicant Name]Date: [Date]
+--- END OF COMMENTED OUT RTI APPEAL TEMPLATE LOGIC ---
+
+### 📘 INFORMATIONAL RESPONSES
+If a user asks:
+
+- * "What is RTI?" * → Give a short, clear definition.
+- * "How to file RTI?" * → Explain both online and offline filing steps.
+  - If they seem hesitant or confused, offer help from FileMyRTI.com and mention the contact number(+91 9911100589).
+- * "No reply to RTI" * → Explain first and second appeal processes.
+- * "Fees / Exemptions / Timeline / Authorities" * → Provide factual answers with examples.
+
+End where possible with:
+> "Would you like me to create a sample RTI draft for your case?"
+
+---
+
+### 💬 STYLE & TONE
+  - * Tone:* Professional, clear, and empathetic — like a helpful RTI expert assisting a citizen.
+- * Formatting:*
+  - * Bold * for headings
+    - Italics for sub - headings
+      - Bullets for lists
+        - Double line breaks for sections
+          - Avoid long introductions — be concise and action - oriented.
+- Always conclude with a next step(question / offer / call to action).
+
+---
+
+### ⚡ INTERACTION EXAMPLES
+
+  * Example 1 – General Question *
+* User:* What is RTI ?
+* Assistant :*
+* RTI(Right to Information) * is a law that empowers every Indian citizen to request information from any public authority.It promotes transparency and accountability in governance.
+Would you like me to explain how to file an RTI step - by - step ?
+
+  ---
+
+* Example 2 – Complaint Context(Private Issue) *
+* User:* I want to file RTI against Noise Earbuds Company.
+* Assistant:*
+  The RTI Act applies only to government and public authorities, not private companies.However, if you believe a government body is involved(e.g., consumer protection authority, BIS certification office), I can help you draft an RTI for that department.
+Would you like me to suggest the appropriate authority or help you speak with a FileMyRTI expert at + 91 9911100589 ?
+
+  ---
+
+* Example 3 – No Response to RTI *
+* User:* I didn't get a reply to my RTI.
+  * Assistant:*
+    If no reply is received within 30 days, you can file a * First Appeal * under Section 19(1) of the RTI Act with the Appellate Authority of the same department.
+Would you like me to generate a First Appeal draft for you using the official format ?
+
+  ---
+
+### 🧩 ADDITIONAL RULES
+  - Never criticize or compare official government portals.
+- Promote FileMyRTI's mission of transparency, empowerment, and citizen awareness.
+  - Ensure every answer is * accurate, concise, and actionable.*
+    - Maintain FileMyRTI's brand voice — *trustworthy, clear, citizen-first.*
+
+---
+
+* FileMyRTI AI — Empowering India through Transparency.*
+*/
+
 const chatMessageSchema = z.object({
   message: z
     .string()
@@ -122,11 +318,376 @@ const chatMessageSchema = z.object({
     .optional(),
 });
 
+const sessionIdParamSchema = z.object({
+  sessionId: z
+    .string()
+    .trim()
+    .min(1, 'sessionId is required')
+    .max(64),
+});
+
 if (!client) {
   console.warn(
     '[FileMyRTI] OpenAI API key is not configured. Chat answers and RTI draft generation will be limited.'
   );
 }
+
+// Removed APPLICATION_FIELDS - using AI directly to generate RTI drafts with placeholders
+// The AI will handle all RTI draft generation through conversation
+
+const APPLICATION_TRIGGER_REGEX = /(file|draft|submit|create|generate)\s+(an?\s+)?rti|rti\s+(application|draft)/i;
+
+// Lightweight in-memory session store so the assistant can remember user details during a chat.
+const sessionMemory = new Map();
+const SESSION_TTL = 30 * 60 * 1000; // 30 minutes
+const MAX_SESSIONS = 1000; // Maximum number of sessions to keep in memory
+const CLEANUP_INTERVAL = 5 * 60 * 1000; // Cleanup every 5 minutes
+
+// Session cleanup mechanism
+function cleanupExpiredSessions() {
+  const now = Date.now();
+  const expiredKeys = [];
+
+  for (const [userId, session] of sessionMemory.entries()) {
+    if (now - session.lastUpdated > SESSION_TTL) {
+      expiredKeys.push(userId);
+    }
+  }
+
+  expiredKeys.forEach(userId => sessionMemory.delete(userId));
+
+  // If still over limit, remove oldest sessions
+  if (sessionMemory.size > MAX_SESSIONS) {
+    const entries = Array.from(sessionMemory.entries());
+    entries.sort((a, b) => a[1].lastUpdated - b[1].lastUpdated);
+
+    const toRemove = entries.slice(0, sessionMemory.size - MAX_SESSIONS);
+    toRemove.forEach(([userId]) => sessionMemory.delete(userId));
+  }
+
+  console.log(`[Session Cleanup] Removed ${expiredKeys.length} expired sessions.Current sessions: ${sessionMemory.size} `);
+}
+
+// Start periodic cleanup
+setInterval(cleanupExpiredSessions, CLEANUP_INTERVAL);
+const GREETING_PATTERNS = [
+  /^hi(?: there)?$/i,
+  /^hello(?: there)?$/i,
+  /^hey(?: there)?$/i,
+  /^namaste$/i,
+  /^good (morning|evening|afternoon)$/i,
+];
+
+// Removed GENERAL_SUPPORT_PATTERNS - AI will handle all responses according to system prompt
+
+const NAME_RECALL_PATTERNS = [
+  /\bwhat(?:'s|\s+is)\s+my\s+name\b/i,
+  /\btell\s+me\s+my\s+name\b/i,
+  /\btell\s+name\b/i,
+  /\bdo\s+you\s+remember\s+my\s+name\b/i,
+  /\bwho\s+am\s+i\b/i,
+];
+
+function getSession(userId) {
+  if (!sessionMemory.has(userId)) {
+    // Initialize simple session - AI will handle context through conversation
+    sessionMemory.set(userId, {
+      lastUpdated: Date.now(),
+    });
+  } else {
+    // Update last accessed time
+    const session = sessionMemory.get(userId);
+    session.lastUpdated = Date.now();
+  }
+  return sessionMemory.get(userId);
+}
+
+function isGreeting(message = '') {
+  const normalized = message.trim().toLowerCase().replace(/[!.]/g, '').replace(/\s+/g, ' ');
+  if (!normalized) return false;
+  return GREETING_PATTERNS.some(pattern => pattern.test(normalized));
+}
+
+function storeUserInfo(userId, message = '') {
+  // Removed - AI will handle context through conversation history
+  // No need to extract structured fields anymore
+  return [];
+}
+
+function getGeneralSupportResponse(message = '') {
+  // Removed - AI will handle all responses according to system prompt
+  // AI will respond to non-RTI queries with the standard message
+  return null;
+}
+
+function isNameRecallRequest(message = '') {
+  if (!message) return false;
+  return NAME_RECALL_PATTERNS.some(pattern => pattern.test(message));
+}
+
+async function recordChat(userId, sessionId, message, response) {
+  const [result] = await pool.query(
+    'INSERT INTO chats (user_id, session_id, message, response) VALUES (?, ?, ?, ?)',
+    [userId, sessionId, message, response]
+  );
+  const chatId = result.insertId;
+  const [rows] = await pool.query('SELECT timestamp FROM chats WHERE id = ?', [chatId]);
+  const rawTimestamp = rows?.[0]?.timestamp;
+  const timestamp =
+    rawTimestamp instanceof Date
+      ? rawTimestamp.toISOString()
+      : new Date().toISOString();
+  return { id: chatId, timestamp, sessionId };
+}
+
+function isRTIRelated(text) {
+  if (!text) return false;
+  const t = text.toLowerCase();
+  const keywords = [
+    // Core RTI terms
+    'rti',
+    'right to information',
+    'information act',
+    'rti act',
+    'rti application',
+    'rti draft',
+    'rti appeal',
+    'rti filing',
+    'file rti',
+    'how to file rti',
+    'write rti',
+    'rti format',
+    'rti sample',
+    'rti example',
+
+    // Key authorities
+    'central information commission',
+    'state information commission',
+    'information commission',
+    'public information officer',
+    'pio',
+    'appellate authority',
+    'first appeal',
+    'second appeal',
+    'cic',
+    'sic',
+
+    // Legal sections
+    'section 6',
+    'section 7',
+    'section 8',
+    'section 19',
+
+    // General RTI context
+    'govt information',
+    'government information',
+    'government office',
+    'public authority',
+    'information request',
+    'application for information',
+    'transparency law',
+    'citizen information request',
+
+    // Common user intents (natural phrasing)
+    'how to get information from government',
+    'how to ask government for details',
+    'delay in government service',
+    'passport delay information',
+    'municipal complaint information',
+    'file complaint under rti',
+    'status of my application',
+    'information not received',
+    'appeal under rti'
+  ];
+
+  return keywords.some(k => t.includes(k));
+}
+
+function needsClarification(text) {
+  if (!text) return false;
+
+  const normalized = text
+    .toLowerCase()
+    .trim()
+    .replace(/[?.!]+$/g, '')
+    .replace(/\s+/g, ' ');
+
+  if (!normalized) return false;
+
+  const genericPatterns = [
+    /^(how\s+to\s+file\s+(an?\s+)?rti)$/i,
+    /^(how\s+do\s+i\s+file\s+(an?\s+)?rti)$/i,
+    /^(help\s+(me\s+)?(file|with)\s+(an?\s+)?rti)$/i,
+    /^(rti\s+(help|info|information))$/i,
+    /^(tell\s+me\s+about\s+rti)$/i,
+    /^(what\s+is\s+(the\s+)?rti(\s+act)?)$/i,
+    /^(guide\s+me(\s+on|\s+about)?\s*(the)?\s*rti)$/i,
+    /^(how\s+to\s+apply\s+for\s+(an?\s+)?rti)$/i,
+    /^(explain\s+(the\s+)?rti(\s+act)?)$/i,
+    /^(rti\s+(details|process|procedure))$/i,
+    /^(need\s+(to\s+)?file\s+(an?\s+)?rti)$/i,
+  ];
+
+  if (genericPatterns.some(rx => rx.test(normalized))) return true;
+
+  if (['rti', 'rti act', 'the rti act'].includes(normalized)) return true;
+
+  const tokens = normalized.split(/\s+/).filter(Boolean);
+  if (tokens.length <= 4 && normalized.includes('rti')) return true;
+
+  return false;
+}
+
+
+function isGeneralRtiQuestion(text) {
+  if (!text) return false;
+  const normalized = text.trim().toLowerCase().replace(/[?.!]+$/g, '');
+  if (!normalized) return false;
+
+  const patterns = [
+    /^(what\s+is\s+(the\s+)?rti(\s+act)?)$/,
+    /^(explain\s+(the\s+)?rti(\s+act)?)$/,
+    /^(tell\s+me\s+about\s+(the\s+)?rti(\s+act)?)$/,
+    /^(meaning\s+of\s+rti)$/,
+    /^(define\s+rti)$/,
+    /^(rti\s+meaning)$/,
+    /^(how\s+does\s+rti\s+work)$/,
+    /^(what\s+is\s+right\s+to\s+information)$/,
+    /^(how\s+to\s+file\s+(an?\s+)?rti)$/,
+    /^(how\s+do\s+i\s+file\s+(an?\s+)?rti)$/,
+    /^(guide\s+me(\s+on|\s+about)?\s*(the)?\s*rti)$/,
+    /^(how\s+to\s+apply\s+for\s+(an?\s+)?rti)$/,
+  ];
+
+  if (patterns.some(rx => rx.test(normalized))) {
+    return true;
+  }
+
+  if (normalized.includes('what is rti')) return true;
+  if (normalized.includes('explain rti')) return true;
+  if (normalized.includes('about rti')) return true;
+  if (normalized.includes('how to file rti')) return true;
+  if (normalized.includes('how do i file rti')) return true;
+  if (normalized.includes('guide me on rti')) return true;
+
+  return false;
+}
+
+async function getLatestApplication(userId, sessionId) {
+  const [rows] = await pool.query(
+    'SELECT * FROM rti_applications WHERE user_id = ? AND session_id = ? ORDER BY updated_at DESC LIMIT 1',
+    [userId, sessionId]
+  );
+  return rows[0] || null;
+}
+
+async function getApplicationById(id) {
+  const [rows] = await pool.query('SELECT * FROM rti_applications WHERE id = ?', [id]);
+  return rows[0] || null;
+}
+
+function shouldStartApplication(message) {
+  if (!message) return false;
+  return APPLICATION_TRIGGER_REGEX.test(message.toLowerCase());
+}
+
+// Simplified RTI draft generation - AI handles everything through conversation
+async function generateRtiDraftFromMessage(userId, sessionId, message, conversationHistory = []) {
+  if (!client) {
+    return null;
+  }
+
+  // Build conversation context for AI
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    ...conversationHistory,
+    { role: 'user', content: message }
+  ];
+
+  const completion = await client.chat.completions.create({
+    model: OPENAI_MODEL,
+    messages,
+    temperature: 0.3,
+    max_tokens: 1200, // More tokens for complete RTI draft
+    user: String(userId),
+  });
+
+  const draft = completion.choices?.[0]?.message?.content?.trim();
+  return draft || null;
+}
+
+// Simplified RTI application handling - AI handles everything through conversation
+async function handleRtiApplication({ userId, sessionId, message, existingApplication, session }) {
+  // Check if user is requesting an RTI draft
+  const triggered = shouldStartApplication(message);
+
+  if (!triggered) {
+    // Not an RTI draft request - let AI handle it normally
+    return null;
+  }
+
+  // User wants an RTI draft - let AI generate it directly
+  // Get recent conversation history for context
+  const [historyRows] = await pool.query(
+    'SELECT message, response FROM chats WHERE user_id = ? AND session_id = ? ORDER BY timestamp DESC LIMIT 10',
+    [userId, sessionId]
+  );
+
+  // Build conversation history (reverse to chronological order)
+  const conversationHistory = historyRows.reverse().flatMap(row => [
+    { role: 'user', content: row.message },
+    { role: 'assistant', content: row.response }
+  ]);
+
+  // Generate RTI draft using AI
+  const draftText = await generateRtiDraftFromMessage(userId, sessionId, message, conversationHistory);
+
+  if (!draftText) {
+    return {
+      handled: true,
+      reply: 'I was unable to generate the RTI draft right now. Please try again in a moment.',
+      draftAvailable: false,
+    };
+  }
+
+  // Save draft to database
+  let application = existingApplication;
+  if (!application) {
+    const [result] = await pool.query(
+      'INSERT INTO rti_applications (user_id, session_id, status, draft_text) VALUES (?, ?, "completed", ?)',
+      [userId, sessionId, draftText]
+    );
+    application = await getApplicationById(result.insertId);
+  } else {
+    await pool.query(
+      'UPDATE rti_applications SET status = "completed", draft_text = ?, updated_at = NOW() WHERE id = ?',
+      [draftText, application.id]
+    );
+  }
+
+  // Return AI response (which includes the draft)
+  return {
+    handled: true,
+    reply: draftText, // AI response contains the formatted RTI draft
+    draftAvailable: true,
+    draftText,
+  };
+}
+
+// GET chat history
+router.get('/history', async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const [rows] = await pool.query(
+      'SELECT id, session_id AS sessionId, message, response, timestamp FROM chats WHERE user_id = ? ORDER BY timestamp ASC',
+      [userId]
+    );
+    return res.json(rows);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
 
 // POST chat message
 router.post('/', async (req, res) => {
@@ -140,116 +701,215 @@ router.post('/', async (req, res) => {
     }
 
     const { message, sessionId: providedSessionId } = parsed.data;
-    const sessionId = providedSessionId || randomUUID();
-
-    // Check if this looks like an RTI-related request
-    const messageLower = message.toLowerCase().replace(/[^\w\s]/g, ''); // Remove punctuation
-    const isRtiRequest = APPLICATION_TRIGGER_REGEX.test(message) ||
-      RTI_KEYWORDS.some(keyword => messageLower.includes(keyword.replace(/\s+/g, ' '))) ||
-      /\b(rt[iu]|rtr|right\s*to\s*info)/i.test(message) ||
-      (messageLower.includes('file') && (messageLower.includes('rti') || messageLower.includes('rtr'))) ||
-      (messageLower.includes('help') && (messageLower.includes('rti') || messageLower.includes('rtr')));
-
-
-    let reply = FALLBACK;
-
-    if (client && isRtiRequest) {
-      try {
-        const messages = [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: message }
-        ];
-
-        const completion = await client.chat.completions.create({
-          model: OPENAI_MODEL,
-          messages,
-          max_tokens: 2000,
-          temperature: 0.3,
-        });
-
-        reply = completion.choices[0]?.message?.content?.trim() || FALLBACK;
-
-        // Save to database
-        await pool.execute(
-          'INSERT INTO chat_history (session_id, user_id, message, response) VALUES (?, ?, ?, ?)',
-          [sessionId, userId, message, reply]
-        );
-
-      } catch (openaiError) {
-        console.error('[OpenAI Error]', openaiError);
-        reply = FALLBACK;
-      }
-    } else if (isRtiRequest) {
-      // Provide RTI template when OpenAI is not available but it's an RTI request
-      const messageLower = message.toLowerCase();
-
-      // Try to detect what kind of RTI request it is
-      let department = "[Department/Office Name]";
-      let exampleRequest = "[Describe specifically what information you need - be clear and detailed]";
-
-      if (messageLower.includes('police') || messageLower.includes('station')) {
-        department = "Police Station [Station Name]";
-        exampleRequest = "1. Certified copy of FIR No. [FIR Number] dated [Date]\n2. Status of investigation in the above mentioned case\n3. Details of officers involved in the investigation";
-      } else if (messageLower.includes('court')) {
-        department = "District Court [Court Name]";
-        exampleRequest = "1. Certified copy of judgment in Case No. [Case Number]\n2. Current status of the case\n3. Details of next hearing date";
-      } else if (messageLower.includes('government') || messageLower.includes('ministry')) {
-        department = "Ministry of [Ministry Name]";
-        exampleRequest = "1. Certified copies of policy documents related to [specific topic]\n2. Statistical data for the year [year]\n3. Details of schemes/programs under [department]";
-      }
-
-      reply = `Here's your RTI application template:
-
-*The Right to Information Act, 2005*
-*Application for Obtaining Information*
-
-*From:*
-[Your Full Name]
-[Your Complete Address with PIN Code]
-Phone: [Your Phone Number]
-Email: [Your Email Address]
-
-*To,*
-The Public Information Officer
-${department}
-[Complete Office Address with City/State and PIN Code]
-
-*Subject:* Request for Information under RTI Act, 2005
-
-Dear Sir/Madam,
-
-I, [Your Full Name], submit this application under the Right to Information Act, 2005, seeking the following information:
-
-${exampleRequest}
-
-Kindly provide certified copies of all relevant documents/records within 30 days as per RTI Act.
-
-*Application Fee:* ₹10/- (Cash/IPO/DD/Court Fee Stamp)
-*Declaration:* I am a citizen of India.
-
-Yours faithfully,
-[Your Full Name]
-Date: [Current Date]
-
----
-**How to File:**
-1. Fill in your personal details in [brackets]
-2. Customize the information request based on what you need
-3. Attach ₹10 court fee stamp or IPO
-4. Send to the concerned Public Information Officer by registered post or in person`;
+    let sessionId = providedSessionId;
+    if (!sessionId) {
+      sessionId = randomUUID();
     }
 
-    res.json({
-      id: randomUUID(),
-      sessionId,
-      reply,
-      message,
-      timestamp: new Date().toISOString(),
+    // Initialise session memory for this user and capture any personal details in the latest message.
+    const session = getSession(userId);
+    storeUserInfo(userId, message);
+
+    const existingApplication = await getLatestApplication(userId, sessionId);
+    const generalRtiQuestion = isGeneralRtiQuestion(message);
+
+    if (isGreeting(message) && !isRTIRelated(message) && !generalRtiQuestion) {
+      // Simple greeting - let AI handle RTI-related conversations
+      const reply = 'Hello! How can I assist you with India\'s RTI Act today?';
+      const saved = await recordChat(userId, sessionId, message, reply);
+      return res.json({
+        reply,
+        id: saved.id,
+        message,
+        timestamp: saved.timestamp,
+        sessionId: saved.sessionId,
+      });
+    }
+
+    // Removed general support patterns - AI handles all responses according to system prompt
+
+    // Commented out: No longer asking for or storing user names
+    // if (isNameRecallRequest(message)) {
+    //   const reply = session.full_name
+    //     ? `You mentioned that your name is ${ session.full_name }.`
+    //     : "I don't think you've shared your name yet. Let me know, and I'll remember it for the rest of this chat.";
+    //   const saved = await recordChat(userId, sessionId, message, reply);
+    //   return res.json({
+    //     reply,
+    //     id: saved.id,
+    //     message,
+    //     timestamp: saved.timestamp,
+    //     sessionId: saved.sessionId,
+    //   });
+    // }
+
+    let rtiFlow = null;
+    if (!generalRtiQuestion) {
+      rtiFlow = await handleRtiApplication({
+        userId,
+        sessionId,
+        message,
+        existingApplication,
+        session,
+      });
+    }
+
+    if (rtiFlow) {
+      const saved = await recordChat(userId, sessionId, message, rtiFlow.reply);
+      return res.json({
+        reply: rtiFlow.reply,
+        id: saved.id,
+        message,
+        timestamp: saved.timestamp,
+        sessionId: saved.sessionId,
+        draftAvailable: rtiFlow.draftAvailable || false,
+        draftText: rtiFlow.draftText || null,
+      });
+    }
+
+    // Removed structured clarification flow - AI handles all conversations
+
+    if (!client) {
+      const saved = await recordChat(userId, sessionId, message, FALLBACK);
+      return res.json({
+        reply: FALLBACK,
+        id: saved.id,
+        message,
+        timestamp: saved.timestamp,
+        sessionId: saved.sessionId,
+        draftAvailable: false,
+      });
+    }
+
+
+
+    // Get conversation history for context
+    const [historyRows] = await pool.query(
+      'SELECT message, response FROM chats WHERE user_id = ? AND session_id = ? ORDER BY timestamp DESC LIMIT 10',
+      [userId, sessionId]
+    );
+
+    // Build conversation history (reverse to chronological order)
+    const conversationHistory = historyRows.reverse().flatMap(row => [
+      { role: 'user', content: row.message },
+      { role: 'assistant', content: row.response }
+    ]);
+
+    // Call OpenAI with conversation history
+    const completion = await client.chat.completions.create({
+      model: OPENAI_MODEL,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...conversationHistory,
+        { role: 'user', content: message },
+      ],
+      temperature: 0.3,
+      max_tokens: 1200, // Allow for complete RTI drafts
+      user: String(userId),
     });
 
-  } catch (error) {
-    console.error('[Chat API Error]', error);
-    res.status(500).json({ error: 'Server error' });
+    let reply = completion.choices?.[0]?.message?.content?.trim() || FALLBACK;
+
+    // Save chat to DB
+    const saved = await recordChat(userId, sessionId, message, reply);
+
+    return res.json({
+      reply,
+      id: saved.id,
+      message,
+      timestamp: saved.timestamp,
+      sessionId: saved.sessionId,
+      draftAvailable: false,
+    });
+  } catch (err) {
+    console.error('[Chat Error]', err);
+    console.error('[Session Memory Size]', sessionMemory.size);
+    console.error('[Memory Usage]', process.memoryUsage());
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.delete('/:sessionId', async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const parsed = sessionIdParamSchema.safeParse(req.params);
+    if (!parsed.success) {
+      return res.status(400).json({
+        error: parsed.error.issues[0]?.message || 'sessionId is required',
+      });
+    }
+    const { sessionId } = parsed.data;
+
+    const [result] = await pool.query(
+      'DELETE FROM chats WHERE user_id = ? AND session_id = ?',
+      [userId, sessionId]
+    );
+    await pool.query(
+      'DELETE FROM rti_applications WHERE user_id = ? AND session_id = ?',
+      [userId, sessionId]
+    );
+
+    return res.json({ deleted: result.affectedRows || 0 });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.get('/applications', async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const [rows] = await pool.query(
+      'SELECT session_id AS sessionId, status, draft_text IS NOT NULL AS hasDraft FROM rti_applications WHERE user_id = ? ORDER BY updated_at DESC',
+      [userId]
+    );
+    const seen = new Map();
+    rows.forEach(row => {
+      if (!seen.has(row.sessionId)) {
+        seen.set(row.sessionId, {
+          sessionId: row.sessionId,
+          status: row.status,
+          hasDraft: Boolean(row.hasDraft),
+        });
+      }
+    });
+    return res.json(Array.from(seen.values()));
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.get('/application/:sessionId/download', async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const parsed = sessionIdParamSchema.safeParse(req.params);
+    if (!parsed.success) {
+      return res.status(400).json({
+        error: parsed.error.issues[0]?.message || 'sessionId is required',
+      });
+    }
+    const { sessionId } = parsed.data;
+
+    const [rows] = await pool.query(
+      'SELECT draft_text FROM rti_applications WHERE user_id = ? AND session_id = ? AND draft_text IS NOT NULL ORDER BY updated_at DESC LIMIT 1',
+      [userId, sessionId]
+    );
+
+    if (!rows.length) {
+      return res.status(404).json({ error: 'Draft not found for this session.' });
+    }
+
+    const draftText = rows[0].draft_text;
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename = "rti-draft-${sessionId}.txt"`
+    );
+    return res.send(draftText);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Server error' });
   }
 });
 

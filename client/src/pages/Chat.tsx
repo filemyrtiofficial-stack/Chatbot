@@ -226,7 +226,6 @@ export default function Chat() {
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | any>(null);
-  const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
   const [voiceAssistStatus, setVoiceAssistStatus] = useState<'idle' | 'listening' | 'error'>('idle');
   const [voiceAssistError, setVoiceAssistError] = useState<string | null>(null);
   const [lastHeardTranscript, setLastHeardTranscript] = useState('');
@@ -1396,74 +1395,44 @@ export default function Chat() {
 
                       {/* Voice Mode Toggle */}
                       <div className="voice-mode-container">
-                        {!voiceModeEnabled ? (
-                          // Voice Mode OFF - Show toggle to enable
-                          <button
-                            type="button"
-                            onClick={() => setVoiceModeEnabled(true)}
-                            className="voice-mode-toggle voice-mode-toggle--enable"
-                            title="Enable voice mode"
-                          >
-                            <div className="voice-mode-icon">
+                        <button
+                          type="button"
+                          onClick={voiceAssistStatus === 'listening' ? stopVoiceAssist : handleVoiceAssistCapture}
+                          className={`voice-mode-toggle ${voiceAssistStatus === 'listening' ? 'voice-mode-toggle--active' : ''} ${(!voiceSupported || !speechSupported) ? 'voice-mode-toggle--disabled' : ''}`}
+                          disabled={!voiceSupported || !speechSupported}
+                          title={voiceAssistStatus === 'listening' ? 'Disable voice mode' : 'Enable voice mode'}
+                        >
+                          <div className="voice-mode-icon">
+                            {voiceAssistStatus === 'listening' ? (
+                              <div className="voice-mode-stop">⏹️</div>
+                            ) : (
                               <MicrophoneIcon className="h-5 w-5" />
-                            </div>
-                            <span className="voice-mode-text">Voice Mode</span>
-                          </button>
-                        ) : (
-                          // Voice Mode ON - Show voice controls
-                          <>
-                            <button
-                              type="button"
-                              onClick={voiceAssistStatus === 'listening' ? stopVoiceAssist : handleVoiceAssistCapture}
-                              className={`voice-mode-toggle ${voiceAssistStatus === 'listening' ? 'voice-mode-toggle--active' : ''} ${(!voiceSupported || !speechSupported) ? 'voice-mode-toggle--disabled' : ''}`}
-                              disabled={!voiceSupported || !speechSupported}
-                              title={voiceAssistStatus === 'listening' ? 'Stop listening' : 'Start voice input'}
-                            >
-                              <div className="voice-mode-icon">
-                                {voiceAssistStatus === 'listening' ? (
-                                  <div className="voice-mode-stop">⏹️</div>
-                                ) : (
-                                  <MicrophoneIcon className="h-5 w-5" />
-                                )}
-                              </div>
-                              <span className="voice-mode-text">
-                                {voiceAssistStatus === 'listening' ? 'Stop Listening' : 'Start Voice'}
-                              </span>
-                              {voiceAssistStatus === 'listening' && (
-                                <div className="voice-mode-pulse"></div>
-                              )}
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => {
-                                stopVoiceAssist();
-                                setVoiceModeEnabled(false);
-                              }}
-                              className="voice-mode-toggle voice-mode-toggle--disable"
-                              title="Disable voice mode"
-                            >
-                              <span className="voice-mode-text">Exit Voice</span>
-                            </button>
-
-                            {voiceAssistStatus === 'listening' && (
-                              <div className="voice-mode-status">
-                                🎤 Listening continuously...
-                              </div>
                             )}
+                          </div>
+                          <span className="voice-mode-text">
+                            {voiceAssistStatus === 'listening' ? 'Voice Mode On' : 'Voice Mode'}
+                          </span>
+                          {voiceAssistStatus === 'listening' && (
+                            <div className="voice-mode-pulse"></div>
+                          )}
+                        </button>
 
-                            {isReadingReply && (
-                              <div className="voice-mode-status voice-mode-status--speaking">
-                                🔊 Speaking response...
-                              </div>
-                            )}
+                        {voiceAssistStatus === 'listening' && (
+                          <div className="voice-mode-status">
+                            🎤 Listening continuously...
+                          </div>
+                        )}
 
-                            {voiceAssistError && (
-                              <div className="voice-mode-error">
-                                {voiceAssistError}
-                              </div>
-                            )}
-                          </>
+                        {isReadingReply && (
+                          <div className="voice-mode-status voice-mode-status--speaking">
+                            🔊 Speaking response...
+                          </div>
+                        )}
+
+                        {voiceAssistError && (
+                          <div className="voice-mode-error">
+                            {voiceAssistError}
+                          </div>
                         )}
                       </div>
 
@@ -1522,22 +1491,20 @@ export default function Chat() {
                             </div>
 
                             <div className="flex items-center gap-2 p-2">
-                              {/* Voice Button - Only show when voice mode is enabled */}
-                              {voiceModeEnabled && (
-                                <button
-                                  type="button"
-                                  onClick={isRecording ? stopRecording : startRecording}
-                                  className={`voice-input-button ${isRecording ? 'voice-input-button--recording' : ''} ${!voiceSupported ? 'voice-input-button--disabled' : ''}`}
-                                  disabled={!voiceSupported || sending}
-                                  title={voiceSupported ? (isRecording ? 'Stop recording' : 'Start voice input') : 'Voice input not supported'}
-                                >
-                                  {isRecording ? (
-                                    <WaveAnimation />
-                                  ) : (
-                                    <MicrophoneIcon className="h-5 w-5" />
-                                  )}
-                                </button>
-                              )}
+                              {/* Voice Button - ChatGPT style */}
+                              <button
+                                type="button"
+                                onClick={isRecording ? stopRecording : startRecording}
+                                className={`voice-input-button ${isRecording ? 'voice-input-button--recording' : ''} ${!voiceSupported ? 'voice-input-button--disabled' : ''}`}
+                                disabled={!voiceSupported || sending}
+                                title={voiceSupported ? (isRecording ? 'Stop recording' : 'Start voice input') : 'Voice input not supported'}
+                              >
+                                {isRecording ? (
+                                  <WaveAnimation />
+                                ) : (
+                                  <MicrophoneIcon className="h-5 w-5" />
+                                )}
+                              </button>
 
                               <button
                                 type="submit"
@@ -1691,74 +1658,44 @@ export default function Chat() {
                 <div className="max-w-3xl mx-auto px-4 py-4">
                   {/* Voice Mode Toggle for Conversation */}
                   <div className="voice-mode-container conversation-voice">
-                    {!voiceModeEnabled ? (
-                      // Voice Mode OFF - Show toggle to enable
-                      <button
-                        type="button"
-                        onClick={() => setVoiceModeEnabled(true)}
-                        className="voice-mode-toggle voice-mode-toggle--enable"
-                        title="Enable voice mode"
-                      >
-                        <div className="voice-mode-icon">
+                    <button
+                      type="button"
+                      onClick={voiceAssistStatus === 'listening' ? stopVoiceAssist : handleVoiceAssistCapture}
+                      className={`voice-mode-toggle ${voiceAssistStatus === 'listening' ? 'voice-mode-toggle--active' : ''} ${(!voiceSupported || !speechSupported) ? 'voice-mode-toggle--disabled' : ''}`}
+                      disabled={!voiceSupported || !speechSupported}
+                      title={voiceAssistStatus === 'listening' ? 'Disable voice mode' : 'Enable voice mode'}
+                    >
+                      <div className="voice-mode-icon">
+                        {voiceAssistStatus === 'listening' ? (
+                          <div className="voice-mode-stop">⏹️</div>
+                        ) : (
                           <MicrophoneIcon className="h-5 w-5" />
-                        </div>
-                        <span className="voice-mode-text">Voice Mode</span>
-                      </button>
-                    ) : (
-                      // Voice Mode ON - Show voice controls
-                      <>
-                        <button
-                          type="button"
-                          onClick={voiceAssistStatus === 'listening' ? stopVoiceAssist : handleVoiceAssistCapture}
-                          className={`voice-mode-toggle ${voiceAssistStatus === 'listening' ? 'voice-mode-toggle--active' : ''} ${(!voiceSupported || !speechSupported) ? 'voice-mode-toggle--disabled' : ''}`}
-                          disabled={!voiceSupported || !speechSupported}
-                          title={voiceAssistStatus === 'listening' ? 'Stop listening' : 'Start voice input'}
-                        >
-                          <div className="voice-mode-icon">
-                            {voiceAssistStatus === 'listening' ? (
-                              <div className="voice-mode-stop">⏹️</div>
-                            ) : (
-                              <MicrophoneIcon className="h-5 w-5" />
-                            )}
-                          </div>
-                          <span className="voice-mode-text">
-                            {voiceAssistStatus === 'listening' ? 'Stop Listening' : 'Start Voice'}
-                          </span>
-                          {voiceAssistStatus === 'listening' && (
-                            <div className="voice-mode-pulse"></div>
-                          )}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            stopVoiceAssist();
-                            setVoiceModeEnabled(false);
-                          }}
-                          className="voice-mode-toggle voice-mode-toggle--disable"
-                          title="Disable voice mode"
-                        >
-                          <span className="voice-mode-text">Exit Voice</span>
-                        </button>
-
-                        {voiceAssistStatus === 'listening' && (
-                          <div className="voice-mode-status">
-                            🎤 Listening continuously...
-                          </div>
                         )}
+                      </div>
+                      <span className="voice-mode-text">
+                        {voiceAssistStatus === 'listening' ? 'Voice Mode On' : 'Voice Mode'}
+                      </span>
+                      {voiceAssistStatus === 'listening' && (
+                        <div className="voice-mode-pulse"></div>
+                      )}
+                    </button>
 
-                        {isReadingReply && (
-                          <div className="voice-mode-status voice-mode-status--speaking">
-                            🔊 Speaking response...
-                          </div>
-                        )}
+                    {voiceAssistStatus === 'listening' && (
+                      <div className="voice-mode-status">
+                        🎤 Listening continuously...
+                      </div>
+                    )}
 
-                        {voiceAssistError && (
-                          <div className="voice-mode-error">
-                            {voiceAssistError}
-                          </div>
-                        )}
-                      </>
+                    {isReadingReply && (
+                      <div className="voice-mode-status voice-mode-status--speaking">
+                        🔊 Speaking response...
+                      </div>
+                    )}
+
+                    {voiceAssistError && (
+                      <div className="voice-mode-error">
+                        {voiceAssistError}
+                      </div>
                     )}
                   </div>
 
@@ -1815,22 +1752,20 @@ export default function Chat() {
                       </div>
 
                       <div className="flex items-center gap-2 p-2">
-                        {/* Voice Button - Only show when voice mode is enabled */}
-                        {voiceModeEnabled && (
-                          <button
-                            type="button"
-                            onClick={isRecording ? stopRecording : startRecording}
-                            className={`voice-input-button ${isRecording ? 'voice-input-button--recording' : ''} ${!voiceSupported ? 'voice-input-button--disabled' : ''}`}
-                            disabled={!voiceSupported || sending}
-                            title={voiceSupported ? (isRecording ? 'Stop recording' : 'Start voice input') : 'Voice input not supported'}
-                          >
-                            {isRecording ? (
-                              <WaveAnimation />
-                            ) : (
-                              <MicrophoneIcon className="h-5 w-5" />
-                            )}
-                          </button>
-                        )}
+                        {/* Voice Button - ChatGPT style */}
+                        <button
+                          type="button"
+                          onClick={isRecording ? stopRecording : startRecording}
+                          className={`voice-input-button ${isRecording ? 'voice-input-button--recording' : ''} ${!voiceSupported ? 'voice-input-button--disabled' : ''}`}
+                          disabled={!voiceSupported || sending}
+                          title={voiceSupported ? (isRecording ? 'Stop recording' : 'Start voice input') : 'Voice input not supported'}
+                        >
+                          {isRecording ? (
+                            <WaveAnimation />
+                          ) : (
+                            <MicrophoneIcon className="h-5 w-5" />
+                          )}
+                        </button>
 
                         <button
                           type="submit"

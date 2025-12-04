@@ -419,29 +419,6 @@
     overflow: hidden;
   }
 
-  .voice-mode-toggle--enable {
-    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
-    border-color: #d1d5db;
-    color: #6b7280;
-  }
-
-  .voice-mode-toggle--enable:hover:not(:disabled) {
-    background: linear-gradient(135deg, #e5e7eb, #d1d5db);
-    border-color: #9ca3af;
-    color: #374151;
-  }
-
-  .voice-mode-toggle--disable {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    border-color: #dc2626;
-    color: white;
-  }
-
-  .voice-mode-toggle--disable:hover:not(:disabled) {
-    background: linear-gradient(135deg, #dc2626, #b91c1c);
-    border-color: #b91c1c;
-  }
-
   .voice-mode-toggle:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
