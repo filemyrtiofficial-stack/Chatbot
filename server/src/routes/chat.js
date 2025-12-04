@@ -13,6 +13,16 @@ const openAiKey = config.OPENAI_API_KEY;
 const client = openAiKey ? new OpenAI({ apiKey: openAiKey }) : null;
 const OPENAI_MODEL = config.OPENAI_MODEL;
 
+// RTI Request Detection Patterns
+const RTI_KEYWORDS = [
+  'rti', 'right to information', 'information act',
+  'file', 'draft', 'create', 'generate', 'submit', 'application',
+  'police', 'court', 'government', 'department', 'office', 'authority',
+  'complaint', 'grievance', 'corruption', 'misconduct', 'transparency'
+];
+
+const APPLICATION_TRIGGER_REGEX = /(file|draft|submit|create|generate)\s+(an?\s+)?rti|rti\s+(application|draft)/i;
+
 // NEW RTI LOGIC - DIRECT AND LESS IRRITATING
 const systemPrompt = `
 You are "FileMyRTI AI" — India's most trusted RTI assistant, built by FileMyRTI.com to help citizens understand, draft, and file applications under the Right to Information Act, 2005.
@@ -25,43 +35,47 @@ Your mission is to provide quick, direct RTI assistance without being annoying o
 ---
 
 ### 📋 DIRECT RTI DRAFTING
-When a user says they want to file RTI ("I want to file RTI", "file RTI", "create RTI", "generate draft", etc.):
+When users request RTI help, immediately provide a complete, customized RTI template. Be smart about context:
 
-1. **IMMEDIATELY provide a complete RTI template** - don't ask for details first!
-2. Use placeholders for missing information
-3. Give them a working RTI draft they can customize
-4. Keep it simple and direct
+**For specific requests like "file RTI for police station":**
+- Fill in the department as "Police Station"
+- Provide relevant information request examples for police stations
+- Include proper PIO details
+
+**For general RTI requests:**
+- Provide a generic template with placeholders
+- Give examples of what information can be requested
 
 **Template Format:**
 *The Right to Information Act, 2005*
 *Application for Obtaining Information*
 
 *From:*
-[Your Name]
-[Your Address]
-Phone: [Your Phone]
-Email: [Your Email]
+[Your Full Name]
+[Your Complete Address with PIN Code]
+Phone: [Your Phone Number]
+Email: [Your Email Address]
 
 *To,*
 The Public Information Officer
-[Department/Office Name]
-[Office Address]
+[Specific Department/Office Name]
+[Complete Office Address with City/State]
 
 *Subject:* Request for Information under RTI Act, 2005
 
 Dear Sir/Madam,
 
-I, [Your Name], submit this application under RTI Act, 2005 seeking:
+I, [Your Full Name], submit this application under the Right to Information Act, 2005, seeking the following information:
 
-1. [Describe what information you need - be specific]
+1. [Specific, detailed information request]
 
-Kindly provide the requested information within 30 days as per RTI Act.
+Kindly provide certified copies of all relevant documents/records within 30 days as per RTI Act.
 
-*Application Fee:* ₹10/- (Cash/IPO/DD)
+*Application Fee:* ₹10/- (Cash/IPO/DD/Court Fee Stamp)
 *Declaration:* I am a citizen of India.
 
 Yours faithfully,
-[Your Name]
+[Your Full Name]
 Date: [Current Date]
 
 ---
@@ -121,9 +135,21 @@ router.post('/', async (req, res) => {
     const { message, sessionId: providedSessionId } = parsed.data;
     const sessionId = providedSessionId || randomUUID();
 
+    // Check if this looks like an RTI-related request
+    const messageLower = message.toLowerCase();
+    const isRtiRequest = APPLICATION_TRIGGER_REGEX.test(message) ||
+      RTI_KEYWORDS.some(keyword => messageLower.includes(keyword)) ||
+      messageLower.includes('rti') ||
+      messageLower.includes('information') ||
+      messageLower.includes('file') ||
+      messageLower.includes('draft') ||
+      messageLower.includes('government') ||
+      messageLower.includes('police') ||
+      messageLower.includes('court');
+
     let reply = FALLBACK;
 
-    if (client) {
+    if (client && isRtiRequest) {
       try {
         const messages = [
           { role: 'system', content: systemPrompt },
@@ -149,36 +175,47 @@ router.post('/', async (req, res) => {
         console.error('[OpenAI Error]', openaiError);
         reply = FALLBACK;
       }
-    } else {
-      // Fallback response when OpenAI is not configured
-      reply = `I'd be happy to help you draft an RTI application! However, I'm currently operating in limited mode. Please provide your OpenAI API key in the server configuration to enable full RTI drafting capabilities.
-
-For now, here's a basic RTI template you can use:
+    } else if (isRtiRequest) {
+      // Fallback RTI template when OpenAI is not available but it's an RTI request
+      reply = `Here's a ready-to-use RTI application template:
 
 *The Right to Information Act, 2005*
 *Application for Obtaining Information*
 
 *From:*
-[Your Name]
-[Your Address]
+[Your Full Name]
+[Your Complete Address with PIN Code]
+Phone: [Your Phone Number]
+Email: [Your Email Address]
 
 *To,*
 The Public Information Officer
-[Department/Office Name]
-[Office Address]
+[Department/Office Name - e.g., Police Station Name]
+[Complete Office Address with City/State]
 
 *Subject:* Request for Information under RTI Act, 2005
 
 Dear Sir/Madam,
 
-I submit this application under RTI Act, 2005 seeking information about [describe what you need].
+I, [Your Full Name], submit this application under the Right to Information Act, 2005, seeking the following information:
 
-*Application Fee:* ₹10/-
+1. [Describe specifically what information you need - be clear and detailed]
+
+Kindly provide certified copies of all relevant documents/records.
+
+*Application Fee:* ₹10/- (Cash/IPO/DD/Court Fee Stamp)
 *Declaration:* I am a citizen of India.
 
 Yours faithfully,
-[Your Name]
-Date: [Current Date]`;
+[Your Full Name]
+Date: [Current Date]
+
+---
+**How to File:**
+1. Fill in your personal details in [brackets]
+2. Specify the exact information you need
+3. Attach ₹10 fee
+4. Send to the concerned Public Information Officer`;
     }
 
     res.json({
