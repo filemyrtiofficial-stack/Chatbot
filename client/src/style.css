@@ -506,6 +506,97 @@
     color: #cbd5e1;
   }
 
+  /* ChatGPT-style Voice Input Button */
+  .voice-input-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #d1d5db;
+    background: white;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 200ms ease;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .voice-input-button:hover:not(:disabled) {
+    border-color: #0ea5e9;
+    background: #f0f9ff;
+    color: #0ea5e9;
+    transform: scale(1.05);
+  }
+
+  .voice-input-button:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  .voice-input-button--recording {
+    border-color: #ef4444;
+    background: #fef2f2;
+    color: #ef4444;
+    animation: voice-button-pulse 2s ease-in-out infinite;
+  }
+
+  .voice-input-button--recording:hover:not(:disabled) {
+    border-color: #dc2626;
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  .voice-input-button--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: #e5e7eb;
+    background: #f9fafb;
+  }
+
+  .dark .voice-input-button {
+    border-color: #374151;
+    background: #1f2937;
+    color: #9ca3af;
+  }
+
+  .dark .voice-input-button:hover:not(:disabled) {
+    border-color: #0ea5e9;
+    background: #1e293b;
+    color: #0ea5e9;
+  }
+
+  .dark .voice-input-button--recording {
+    border-color: #ef4444;
+    background: #451a1a;
+    color: #fca5a5;
+  }
+
+  .dark .voice-input-button--recording:hover:not(:disabled) {
+    border-color: #dc2626;
+    background: #7f1d1d;
+    color: #fca5a5;
+  }
+
+  .dark .voice-input-button--disabled {
+    border-color: #374151;
+    background: #111827;
+    color: #6b7280;
+  }
+
+  @keyframes voice-button-pulse {
+
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    }
+
+    50% {
+      box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    }
+  }
+
   /* Mobile-friendly touch targets */
   @media (max-width: 640px) {
 

@@ -1510,14 +1510,13 @@ export default function Chat() {
                             </div>
 
                             <div className="flex items-center gap-2 p-2">
+                              {/* Voice Button - ChatGPT style */}
                               <button
                                 type="button"
                                 onClick={isRecording ? stopRecording : startRecording}
-                                className={`p-2 rounded-lg transition-colors duration-200 ${isRecording
-                                  ? isDarkMode ? 'text-red-400 hover:text-red-300 hover:bg-gray-700' : 'text-red-500 hover:text-red-600 hover:bg-gray-100'
-                                  : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                                  }`}
-                                disabled={sending}
+                                className={`voice-input-button ${isRecording ? 'voice-input-button--recording' : ''} ${!voiceSupported ? 'voice-input-button--disabled' : ''}`}
+                                disabled={!voiceSupported || sending}
+                                title={voiceSupported ? (isRecording ? 'Stop recording' : 'Start voice input') : 'Voice input not supported'}
                               >
                                 {isRecording ? (
                                   <WaveAnimation />
@@ -1649,14 +1648,13 @@ export default function Chat() {
                       </div>
 
                       <div className="flex items-center gap-2 p-2">
+                        {/* Voice Button - ChatGPT style */}
                         <button
                           type="button"
                           onClick={isRecording ? stopRecording : startRecording}
-                          className={`p-2 rounded-lg transition-colors duration-200 ${isRecording
-                            ? isDarkMode ? 'text-red-400 hover:text-red-300 hover:bg-gray-700' : 'text-red-500 hover:text-red-600 hover:bg-gray-100'
-                            : isDarkMode ? 'text-gray-400 hover:text-gray-200 hover:bg-gray-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                            }`}
-                          disabled={sending}
+                          className={`voice-input-button ${isRecording ? 'voice-input-button--recording' : ''} ${!voiceSupported ? 'voice-input-button--disabled' : ''}`}
+                          disabled={!voiceSupported || sending}
+                          title={voiceSupported ? (isRecording ? 'Stop recording' : 'Start voice input') : 'Voice input not supported'}
                         >
                           {isRecording ? (
                             <WaveAnimation />
