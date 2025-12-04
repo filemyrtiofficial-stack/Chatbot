@@ -232,6 +232,7 @@ export default function Chat() {
   const [voiceSupported, setVoiceSupported] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
   const [autoReadReplies, setAutoReadReplies] = useState(true);
+  const [isVoiceMessage, setIsVoiceMessage] = useState(false);
   const [isReadingReply, setIsReadingReply] = useState(false);
   const [currentlyReadingId, setCurrentlyReadingId] = useState<string | null>(null);
   const [voiceSettings, setVoiceSettings] = useState({
@@ -568,12 +569,14 @@ export default function Chat() {
     setHasStartedConversation(false);
   }
 
-  async function sendMessage(trimmedMessage: string) {
+  async function sendMessage(trimmedMessage: string, isVoiceInput: boolean = false) {
     if (!trimmedMessage || sending) return;
-    console.log('Sending message:', trimmedMessage);
     setSending(true);
     setError(null);
     setGlobalNotice(null);
+
+    // Set the voice message flag
+    setIsVoiceMessage(isVoiceInput);
 
     const payload: { message: string; sessionId?: string } = { message: trimmedMessage };
     const usingExisting =
@@ -584,18 +587,13 @@ export default function Chat() {
       payload.sessionId = selectedSessionId;
     }
 
-    console.log('Payload:', payload);
-
     try {
-      console.log('Making API call to /api/chat');
       const data = await api<ChatResponse>('/api/chat', {
         method: 'POST',
         body: JSON.stringify(payload),
       });
-      console.log('API response received:', data);
 
       if (!data.reply || data.reply.trim() === '') {
-        console.error('Empty or invalid response from server:', data);
         setError('No response received from server. Please try again.');
         return;
       }
@@ -603,8 +601,6 @@ export default function Chat() {
       const finalSessionId = data.sessionId;
       const userTimestamp = new Date().toISOString();
       const historyTimestamp = data.timestamp || userTimestamp;
-
-      console.log('Processing response - sessionId:', finalSessionId, 'reply:', data.reply.substring(0, 100) + '...');
 
       setSessions(prev => {
         const next = { ...prev };
@@ -639,12 +635,9 @@ export default function Chat() {
         return next;
       });
 
-      console.log('Setting selected session to:', finalSessionId);
       setSelectedSessionId(finalSessionId);
       setMessage('');
       setHasStartedConversation(true);
-
-      console.log('Message sent successfully, conversation should now show responses');
 
       // Scroll to bottom after sending message
       setTimeout(() => scrollToBottom(), 100);
@@ -667,7 +660,7 @@ export default function Chat() {
     e.preventDefault();
     const trimmed = message.trim();
     if (!trimmed || sending) return;
-    await sendMessage(trimmed);
+    await sendMessage(trimmed, false);
   }
 
   async function handleDeleteSession(sessionId: string) {
@@ -922,14 +915,20 @@ export default function Chat() {
   };
 
   useEffect(() => {
-    if (!autoReadReplies || !speechSupported) return;
+    if (!speechSupported) return;
+
     const assistantEntries = (currentSession?.entries ?? []).filter(entry => entry.role === 'assistant');
     const latest = assistantEntries[assistantEntries.length - 1];
     if (!latest || lastSpokenIdRef.current === latest.id) return;
     lastSpokenIdRef.current = latest.id;
-    speakReply(latest.text);
+
+    // Always read responses for voice messages, or if auto-read is enabled for text messages
+    if (isVoiceMessage || autoReadReplies) {
+      speakReply(latest.text);
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSession?.entries, autoReadReplies, speechSupported]);
+  }, [currentSession?.entries, autoReadReplies, speechSupported, isVoiceMessage]);
 
   const handleVoiceAssistCapture = () => {
     if (voiceAssistStatus === 'listening') {
@@ -1002,18 +1001,14 @@ export default function Chat() {
       setVoiceAssistStatus('idle');
       const finalTranscript = transcript.trim();
       if (finalTranscript) {
-        console.log('Voice input received:', finalTranscript);
         setMessage(finalTranscript);
 
         // Ensure conversation starts if we're in empty state
         if (selectedSessionId === NEW_SESSION_SENTINEL && !hasStartedConversation) {
-          console.log('Starting conversation from voice input');
           setHasStartedConversation(true);
         }
 
-        await sendMessage(finalTranscript);
-      } else {
-        console.log('No speech detected or empty transcript');
+        await sendMessage(finalTranscript, true);
       }
     };
 
@@ -1412,11 +1407,8 @@ export default function Chat() {
                           <button
                             type="button"
                             onClick={() => {
-                              console.log('Testing voice output...');
                               if (speechSupported) {
                                 speakReply("Voice test successful! Your voice output is working properly.");
-                              } else {
-                                console.log('Speech synthesis not supported');
                               }
                             }}
                             className="voice-test-button"
@@ -1656,17 +1648,75 @@ export default function Chat() {
 
                           {/* Message content */}
                           <div className="flex-1 min-w-0">
-                            <div className={`prose prose-sm max-w-none ${isDarkMode ? 'prose-invert' : ''
-                              }`}>
-                              <div className={`whitespace-pre-wrap leading-relaxed ${isDarkMode ? 'text-gray-100' : 'text-gray-900'
+                            {/* Show text content for manually typed messages */}
+                            {entry.role === 'user' && (
+                              <div className={`prose prose-sm max-w-none ${isDarkMode ? 'prose-invert' : ''
                                 }`}>
-                                {entry.text}
+                                <div className={`whitespace-pre-wrap leading-relaxed ${isDarkMode ? 'text-gray-100' : 'text-gray-900'
+                                  }`}>
+                                  {entry.text}
+                                </div>
                               </div>
-                            </div>
+                            )}
+
+                            {/* Voice indicator for voice messages */}
+                            {isVoiceMessage && entry.role === 'assistant' && (
+                              <div className="flex items-center justify-center py-4">
+                                <div className={`voice-message-indicator ${isDarkMode ? 'voice-message-indicator--dark' : ''}`}>
+                                  <SpeakerIcon className="h-5 w-5" />
+                                  <span className="ml-2 text-sm font-medium">
+                                    {currentlyReadingId === entry.id ? 'Speaking...' : 'Voice Response'}
+                                  </span>
+                                </div>
+
+                                {/* Hidden text content that can be toggled */}
+                                <div
+                                  id={`message-${entry.id}`}
+                                  className={`prose prose-sm max-w-none mt-3 ${isDarkMode ? 'prose-invert' : ''}`}
+                                  style={{ display: 'none' }}
+                                >
+                                  <div className={`whitespace-pre-wrap leading-relaxed text-sm opacity-75 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                                    }`}>
+                                    {entry.text}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Regular text display for manually typed assistant responses */}
+                            {!isVoiceMessage && entry.role === 'assistant' && (
+                              <div className={`prose prose-sm max-w-none ${isDarkMode ? 'prose-invert' : ''
+                                }`}>
+                                <div className={`whitespace-pre-wrap leading-relaxed ${isDarkMode ? 'text-gray-100' : 'text-gray-900'
+                                  }`}>
+                                  {entry.text}
+                                </div>
+                              </div>
+                            )}
 
                             {/* Voice playback button for assistant messages */}
                             {entry.role === 'assistant' && speechSupported && (
                               <div className="flex items-center justify-end mt-2 gap-2">
+                                {/* Show text toggle for voice messages */}
+                                {isVoiceMessage && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      // Toggle text visibility for this message
+                                      const messageElement = document.getElementById(`message-${entry.id}`);
+                                      if (messageElement) {
+                                        messageElement.style.display = messageElement.style.display === 'none' ? 'block' : 'none';
+                                      }
+                                    }}
+                                    className="voice-playback-button"
+                                    title="Show/hide text"
+                                  >
+                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                    </svg>
+                                  </button>
+                                )}
+
                                 <button
                                   type="button"
                                   onClick={() => speakMessage(entry.text, entry.id)}
