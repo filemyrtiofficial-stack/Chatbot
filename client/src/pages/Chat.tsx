@@ -1168,22 +1168,48 @@ export default function Chat() {
                               >
                                 <span className="truncate text-sm">{deriveTitle(session.entries)}</span>
                               </button>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteSession(session.sessionId);
-                                }}
-                                className={`ml-2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${isDarkMode
-                                  ? 'text-gray-400 hover:text-red-400 hover:bg-gray-600'
-                                  : 'text-gray-500 hover:text-red-500 hover:bg-gray-300'
-                                  }`}
-                                title="Delete conversation"
-                              >
-                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                </svg>
-                              </button>
+                              <div className="flex items-center gap-1 ml-2">
+                                {session.hasDraft && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDownloadDraft(session.sessionId);
+                                    }}
+                                    className={`p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${downloadingSession === session.sessionId
+                                        ? 'text-blue-500'
+                                        : isDarkMode
+                                          ? 'text-gray-400 hover:text-blue-400 hover:bg-gray-600'
+                                          : 'text-gray-500 hover:text-blue-500 hover:bg-gray-300'
+                                      }`}
+                                    title="Download RTI draft"
+                                  >
+                                    {downloadingSession === session.sessionId ? (
+                                      <div className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
+                                    ) : (
+                                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                      </svg>
+                                    )}
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteSession(session.sessionId);
+                                  }}
+                                  className={`p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${isDarkMode
+                                    ? 'text-gray-400 hover:text-red-400 hover:bg-gray-600'
+                                    : 'text-gray-500 hover:text-red-500 hover:bg-gray-300'
+                                    }`}
+                                  title="Delete conversation"
+                                >
+                                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                  </svg>
+                                </button>
+                              </div>
                             </div>
                           </li>
                         ))}
@@ -1588,8 +1614,61 @@ export default function Chat() {
                               </div>
                             )}
 
+                            {/* Special display for RTI draft messages */}
+                            {!isVoiceMessage && entry.role === 'assistant' && currentSession?.hasDraft && currentSession?.draftText && (
+                              <div className="space-y-4">
+                                <div className={`prose prose-sm max-w-none ${isDarkMode ? 'prose-invert' : ''
+                                  }`}>
+                                  <div className={`whitespace-pre-wrap leading-relaxed ${isDarkMode ? 'text-gray-100' : 'text-gray-900'
+                                    }`}>
+                                    {entry.text}
+                                  </div>
+                                </div>
+
+                                {/* RTI Draft Display */}
+                                <div className={`rounded-lg border p-4 ${isDarkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-200 bg-gray-50'
+                                  }`}>
+                                  <div className="flex items-center justify-between mb-3">
+                                    <h3 className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'
+                                      }`}>
+                                      📄 RTI Draft Ready
+                                    </h3>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDownloadDraft(currentSession.sessionId)}
+                                      disabled={downloadingSession === currentSession.sessionId}
+                                      className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-200 ${downloadingSession === currentSession.sessionId
+                                          ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                          : isDarkMode
+                                            ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                                            : 'bg-blue-500 hover:bg-blue-600 text-white'
+                                        }`}
+                                    >
+                                      {downloadingSession === currentSession.sessionId ? (
+                                        <>
+                                          <div className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent" />
+                                          Downloading...
+                                        </>
+                                      ) : (
+                                        <>
+                                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                          </svg>
+                                          Download Draft
+                                        </>
+                                      )}
+                                    </button>
+                                  </div>
+                                  <div className={`text-xs leading-relaxed whitespace-pre-wrap font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                                    }`}>
+                                    {currentSession.draftText}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
                             {/* Regular text display for manually typed assistant responses */}
-                            {!isVoiceMessage && entry.role === 'assistant' && (
+                            {!isVoiceMessage && entry.role === 'assistant' && (!currentSession?.hasDraft || !currentSession?.draftText) && (
                               <div className={`prose prose-sm max-w-none ${isDarkMode ? 'prose-invert' : ''
                                 }`}>
                                 <div className={`whitespace-pre-wrap leading-relaxed ${isDarkMode ? 'text-gray-100' : 'text-gray-900'
