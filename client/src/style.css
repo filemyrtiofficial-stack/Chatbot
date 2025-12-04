@@ -328,6 +328,13 @@
     border-color: #0ea5e9;
   }
 
+  .voice-toggle--voice-enabled {
+    background: linear-gradient(120deg, #0ea5e9, #22d3ee);
+    color: #0b1120;
+    border-color: #0ea5e9;
+    font-weight: 600;
+  }
+
   .voice-assist-card--dark .voice-toggle {
     background: #1f2937;
     color: #e2e8f0;
@@ -338,6 +345,13 @@
     background: #0ea5e9;
     color: #0b1120;
     border-color: #0ea5e9;
+  }
+
+  .voice-assist-card--dark .voice-toggle--voice-enabled {
+    background: linear-gradient(120deg, #0ea5e9, #22d3ee);
+    color: #0b1120;
+    border-color: #0ea5e9;
+    font-weight: 600;
   }
 
   .voice-heard {
@@ -594,6 +608,93 @@
 
     50% {
       box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    }
+  }
+
+  /* Voice Playback Button */
+  .voice-playback-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #6b7280;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 200ms ease;
+    cursor: pointer;
+  }
+
+  .voice-playback-button:hover:not(:disabled) {
+    border-color: #0ea5e9;
+    background: #f0f9ff;
+    color: #0ea5e9;
+  }
+
+  .voice-playback-button--playing {
+    border-color: #0ea5e9;
+    background: #f0f9ff;
+    color: #0ea5e9;
+  }
+
+  .voice-playback-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .dark .voice-playback-button {
+    border-color: #374151;
+    background: #1f2937;
+    color: #9ca3af;
+  }
+
+  .dark .voice-playback-button:hover:not(:disabled) {
+    border-color: #0ea5e9;
+    background: #1e293b;
+    color: #0ea5e9;
+  }
+
+  .dark .voice-playback-button--playing {
+    border-color: #0ea5e9;
+    background: #1e293b;
+    color: #0ea5e9;
+  }
+
+  .voice-playback-wave {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .voice-playback-bar {
+    width: 2px;
+    height: 8px;
+    background: currentColor;
+    border-radius: 1px;
+    animation: voice-playback-animation 1.2s ease-in-out infinite;
+  }
+
+  .voice-playback-bar:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .voice-playback-bar:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes voice-playback-animation {
+
+    0%,
+    100% {
+      transform: scaleY(0.5);
+      opacity: 0.5;
+    }
+
+    50% {
+      transform: scaleY(1);
+      opacity: 1;
     }
   }
 

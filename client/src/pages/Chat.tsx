@@ -147,6 +147,24 @@ function SendIcon(props: IconProps) {
   );
 }
 
+function SpeakerIcon(props: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      {...props}
+    >
+      <path d="M11 5L6 9H2v6h4l5 4V5z" />
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+    </svg>
+  );
+}
+
 function createEmptySession(sessionId: string): SessionState {
   return {
     sessionId,
@@ -213,8 +231,9 @@ export default function Chat() {
   const [lastHeardTranscript, setLastHeardTranscript] = useState('');
   const [voiceSupported, setVoiceSupported] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
-  const [autoReadReplies, setAutoReadReplies] = useState(false);
+  const [autoReadReplies, setAutoReadReplies] = useState(true);
   const [isReadingReply, setIsReadingReply] = useState(false);
+  const [currentlyReadingId, setCurrentlyReadingId] = useState<string | null>(null);
   const [voiceSettings, setVoiceSettings] = useState({
     volume: 1,
     rate: 1,
@@ -830,7 +849,7 @@ export default function Chat() {
     setVoiceAssistStatus('idle');
   };
 
-  const speakReply = (text: string) => {
+  const speakReply = (text: string, messageId?: string) => {
     if (!speechSupported || typeof window === 'undefined' || !text) return;
 
     try {
@@ -846,14 +865,19 @@ export default function Chat() {
       }
 
       setIsReadingReply(true);
+      if (messageId) {
+        setCurrentlyReadingId(messageId);
+      }
 
       utterance.onend = () => {
         setIsReadingReply(false);
+        setCurrentlyReadingId(null);
       };
 
       utterance.onerror = (event) => {
         console.error('TTS Error:', event.error);
         setIsReadingReply(false);
+        setCurrentlyReadingId(null);
         // Show user-friendly error message
         if (event.error === 'not-allowed') {
           setGlobalNotice('Speech synthesis was blocked. Please check your browser permissions.');
@@ -871,9 +895,14 @@ export default function Chat() {
     } catch (error) {
       console.error('Speech synthesis error:', error);
       setIsReadingReply(false);
+      setCurrentlyReadingId(null);
       setGlobalNotice('Text-to-speech is not available. The message will remain as text.');
       setTimeout(() => setGlobalNotice(null), 4000);
     }
+  };
+
+  const speakMessage = (text: string, messageId: string) => {
+    speakReply(text, messageId);
   };
 
   useEffect(() => {
@@ -1317,10 +1346,14 @@ export default function Chat() {
                             {voiceAssistStatus === 'listening'
                               ? 'Listening for your RTI request...'
                               : isReadingReply
-                                ? 'Reading the latest reply aloud'
-                                : voiceSupported
-                                  ? 'Tap mic to dictate and auto-send'
-                                  : 'Voice input not supported in this browser'}
+                                ? 'Reading reply aloud...'
+                                : voiceSupported && speechSupported
+                                  ? 'Voice input & auto voice responses enabled'
+                                  : voiceSupported
+                                    ? 'Voice input enabled, responses will be spoken'
+                                    : speechSupported
+                                      ? 'Responses will be read aloud automatically'
+                                      : 'Voice features not supported in this browser'}
                           </div>
                         </div>
 
@@ -1336,10 +1369,18 @@ export default function Chat() {
                           <button
                             type="button"
                             onClick={() => setAutoReadReplies(prev => !prev)}
-                            className={`voice-toggle ${autoReadReplies ? 'voice-toggle--on' : ''}`}
+                            className={`voice-toggle ${autoReadReplies ? 'voice-toggle--on voice-toggle--voice-enabled' : ''}`}
                             disabled={!speechSupported}
+                            title={speechSupported ? 'Toggle automatic voice responses' : 'Voice responses not supported'}
                           >
-                            {autoReadReplies ? 'Auto-read replies: On' : 'Auto-read replies: Off'}
+                            {autoReadReplies ? (
+                              <>
+                                <SpeakerIcon className="h-4 w-4" />
+                                Auto-voice: On
+                              </>
+                            ) : (
+                              'Auto-voice: Off'
+                            )}
                           </button>
                           {speechSupported && (
                             <button
@@ -1579,6 +1620,28 @@ export default function Chat() {
                                 {entry.text}
                               </div>
                             </div>
+
+                            {/* Voice playback button for assistant messages */}
+                            {entry.role === 'assistant' && speechSupported && (
+                              <div className="flex items-center justify-end mt-2 gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => speakMessage(entry.text, entry.id)}
+                                  className={`voice-playback-button ${currentlyReadingId === entry.id ? 'voice-playback-button--playing' : ''}`}
+                                  disabled={isReadingReply && currentlyReadingId !== entry.id}
+                                  title={currentlyReadingId === entry.id ? 'Stop reading' : 'Read aloud'}
+                                >
+                                  <SpeakerIcon className="h-4 w-4" />
+                                  {currentlyReadingId === entry.id && (
+                                    <div className="voice-playback-wave">
+                                      <div className="voice-playback-bar"></div>
+                                      <div className="voice-playback-bar"></div>
+                                      <div className="voice-playback-bar"></div>
+                                    </div>
+                                  )}
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
