@@ -233,6 +233,7 @@ export default function Chat() {
   const [speechSupported, setSpeechSupported] = useState(false);
   const [autoReadReplies, setAutoReadReplies] = useState(true);
   const [isVoiceMessage, setIsVoiceMessage] = useState(false);
+  const [isContinuousListening, setIsContinuousListening] = useState(false);
   const [isReadingReply, setIsReadingReply] = useState(false);
   const [currentlyReadingId, setCurrentlyReadingId] = useState<string | null>(null);
   const [voiceSettings, setVoiceSettings] = useState({
@@ -856,6 +857,7 @@ export default function Chat() {
       voiceRecognitionRef.current = null;
     }
     setVoiceAssistStatus('idle');
+    setIsContinuousListening(false);
   };
 
   const speakReply = (text: string, messageId?: string) => {
@@ -948,11 +950,13 @@ export default function Chat() {
     voiceRecognitionRef.current = recognition;
     recognition.lang = SPEECH_LANG;
     recognition.interimResults = true;
+    recognition.continuous = true; // Enable continuous listening
     recognition.continuous = false;
     let transcript = '';
 
     recognition.onstart = () => {
       setVoiceAssistStatus('listening');
+      setIsContinuousListening(true);
       setVoiceAssistError(null);
       setLastHeardTranscript('');
     };
@@ -997,10 +1001,10 @@ export default function Chat() {
     };
 
     recognition.onend = async () => {
-      voiceRecognitionRef.current = null;
-      setVoiceAssistStatus('idle');
       const finalTranscript = transcript.trim();
       if (finalTranscript) {
+        console.log('Voice input received:', finalTranscript);
+        setLastHeardTranscript(finalTranscript);
         setMessage(finalTranscript);
 
         // Ensure conversation starts if we're in empty state
@@ -1009,6 +1013,28 @@ export default function Chat() {
         }
 
         await sendMessage(finalTranscript, true);
+
+        // Continue listening after sending message (continuous mode)
+        // Only if we're still in continuous mode and haven't been stopped
+        if (isContinuousListening) {
+          setTimeout(() => {
+            console.log('Continuing voice listening...');
+            transcript = '';
+            recognition.start();
+          }, 2000); // Longer delay to allow response to be heard
+        } else {
+          setVoiceAssistStatus('idle');
+        }
+      } else {
+        // If no speech detected and still in continuous mode, continue listening
+        if (isContinuousListening) {
+          setTimeout(() => {
+            console.log('No speech detected, continuing to listen...');
+            recognition.start();
+          }, 500);
+        } else {
+          setVoiceAssistStatus('idle');
+        }
       }
     };
 
@@ -1355,170 +1381,6 @@ export default function Chat() {
                     </div>
                   )}
 
-                  {!loading && (
-                    <div className="mb-6">
-                      <div className={`voice-assist-card ${isDarkMode ? 'voice-assist-card--dark' : ''}`}>
-                        <div className="voice-assist-top">
-                          <div className="voice-chip">
-                            <span className={`voice-dot ${voiceAssistStatus === 'listening' || isReadingReply ? 'voice-dot--live' : ''}`} />
-                            <span className="voice-chip-text">Voice assistant</span>
-                          </div>
-                          <div className="voice-status">
-                            {voiceAssistStatus === 'listening'
-                              ? 'Listening for your RTI request...'
-                              : isReadingReply
-                                ? 'Reading reply aloud...'
-                                : voiceSupported && speechSupported
-                                  ? 'Voice input & auto voice responses enabled'
-                                  : voiceSupported
-                                    ? 'Voice input enabled, responses will be spoken'
-                                    : speechSupported
-                                      ? 'Responses will be read aloud automatically'
-                                      : 'Voice features not supported in this browser'}
-                          </div>
-                        </div>
-
-                        <div className="voice-actions">
-                          <button
-                            type="button"
-                            onClick={handleVoiceAssistCapture}
-                            className="voice-button"
-                            disabled={!voiceSupported || sending}
-                          >
-                            {voiceAssistStatus === 'listening' ? 'Stop listening' : 'Speak to fill your RTI'}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setAutoReadReplies(prev => !prev)}
-                            className={`voice-toggle ${autoReadReplies ? 'voice-toggle--on voice-toggle--voice-enabled' : ''}`}
-                            disabled={!speechSupported}
-                            title={speechSupported ? 'Toggle automatic voice responses' : 'Voice responses not supported'}
-                          >
-                            {autoReadReplies ? (
-                              <>
-                                <SpeakerIcon className="h-4 w-4" />
-                                Auto-voice: On
-                              </>
-                            ) : (
-                              'Auto-voice: Off'
-                            )}
-                          </button>
-                          {/* Test Voice Button */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (speechSupported) {
-                                speakReply("Voice test successful! Your voice output is working properly.");
-                              }
-                            }}
-                            className="voice-test-button"
-                            disabled={!speechSupported}
-                            title="Test voice output"
-                          >
-                            <SpeakerIcon className="h-5 w-5" />
-                          </button>
-                          {speechSupported && (
-                            <button
-                              type="button"
-                              onClick={() => setShowVoiceSettings(!showVoiceSettings)}
-                              className="voice-toggle"
-                              title="Voice settings"
-                            >
-                              <SettingsIcon className="h-4 w-4" />
-                            </button>
-                          )}
-                        </div>
-
-                        {showVoiceSettings && speechSupported && (
-                          <div className="voice-settings-panel">
-                            <div className="voice-setting-group">
-                              <label className="voice-setting-label">Volume</label>
-                              <input
-                                type="range"
-                                min="0"
-                                max="1"
-                                step="0.1"
-                                value={voiceSettings.volume}
-                                onChange={(e) => setVoiceSettings(prev => ({ ...prev, volume: parseFloat(e.target.value) }))}
-                                className="voice-setting-slider"
-                              />
-                              <span className="voice-setting-value">{Math.round(voiceSettings.volume * 100)}%</span>
-                            </div>
-
-                            <div className="voice-setting-group">
-                              <label className="voice-setting-label">Speed</label>
-                              <input
-                                type="range"
-                                min="0.5"
-                                max="2"
-                                step="0.1"
-                                value={voiceSettings.rate}
-                                onChange={(e) => setVoiceSettings(prev => ({ ...prev, rate: parseFloat(e.target.value) }))}
-                                className="voice-setting-slider"
-                              />
-                              <span className="voice-setting-value">{voiceSettings.rate}x</span>
-                            </div>
-
-                            <div className="voice-setting-group">
-                              <label className="voice-setting-label">Pitch</label>
-                              <input
-                                type="range"
-                                min="0"
-                                max="2"
-                                step="0.1"
-                                value={voiceSettings.pitch}
-                                onChange={(e) => setVoiceSettings(prev => ({ ...prev, pitch: parseFloat(e.target.value) }))}
-                                className="voice-setting-slider"
-                              />
-                              <span className="voice-setting-value">{voiceSettings.pitch}</span>
-                            </div>
-
-                            {availableVoices.length > 0 && (
-                              <div className="voice-setting-group">
-                                <label className="voice-setting-label">Voice</label>
-                                <select
-                                  value={voiceSettings.voice?.name || ''}
-                                  onChange={(e) => {
-                                    const selectedVoice = availableVoices.find(voice => voice.name === e.target.value);
-                                    setVoiceSettings(prev => ({ ...prev, voice: selectedVoice || null }));
-                                  }}
-                                  className="voice-setting-select"
-                                >
-                                  <option value="">Default Voice</option>
-                                  {availableVoices.map((voice) => (
-                                    <option key={voice.name} value={voice.name}>
-                                      {voice.name} ({voice.lang})
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-                            )}
-
-                            <div className="voice-setting-hint">
-                              💡 Press <kbd className="voice-kbd">Ctrl+R</kbd> to toggle auto-read, <kbd className="voice-kbd">Space</kbd> to start/stop voice input
-                            </div>
-                          </div>
-                        )}
-
-                        {lastHeardTranscript && voiceAssistStatus !== 'listening' && (
-                          <div className="voice-heard">
-                            <span className="voice-heard-label">Captured:</span>
-                            <span className="voice-heard-text">{lastHeardTranscript}</span>
-                          </div>
-                        )}
-
-                        {voiceAssistError && (
-                          <div className="voice-error">
-                            {voiceAssistError}
-                          </div>
-                        )}
-
-                        <div className="voice-tip">
-                          Try saying your RTI question in one go — we will transcribe it, send it to RTI-Dost, and read the reply back.
-                        </div>
-                      </div>
-                    </div>
-                  )}
 
                   {showEmptyState && (
                     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
@@ -1529,6 +1391,74 @@ export default function Chat() {
                         <p className={`text-sm transition-colors duration-200 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                           Draft your RTI in seconds — just tell me what you need information about.
                         </p>
+                      </div>
+
+                      {/* Voice Assistant Controls */}
+                      <div className={`voice-assist-compact ${isDarkMode ? 'voice-assist-compact--dark' : ''}`}>
+                        <div className="voice-assist-compact-top">
+                          <div className="voice-chip-compact">
+                            <span className={`voice-dot ${voiceAssistStatus === 'listening' || isReadingReply ? 'voice-dot--live' : ''}`} />
+                            <span className="voice-chip-text">Voice Mode</span>
+                          </div>
+                          <div className="voice-status-compact">
+                            {voiceAssistStatus === 'listening'
+                              ? '🎤 Listening continuously...'
+                              : isReadingReply
+                                ? '🔊 Speaking response...'
+                                : voiceSupported && speechSupported
+                                  ? 'Ready for voice input'
+                                  : 'Voice features available'}
+                          </div>
+                        </div>
+
+                        <div className="voice-actions-compact">
+                          <button
+                            type="button"
+                            onClick={voiceAssistStatus === 'listening' ? stopVoiceAssist : handleVoiceAssistCapture}
+                            className={`voice-continuous-button ${voiceAssistStatus === 'listening' ? 'voice-continuous-button--active' : ''}`}
+                            disabled={!voiceSupported || sending}
+                            title={voiceAssistStatus === 'listening' ? 'Stop continuous listening' : 'Start continuous voice input'}
+                          >
+                            {voiceAssistStatus === 'listening' ? (
+                              <>
+                                <div className="voice-stop-icon">⏹️</div>
+                                <span>Stop Listening</span>
+                              </>
+                            ) : (
+                              <>
+                                <MicrophoneIcon className="h-5 w-5" />
+                                <span>Start Voice Chat</span>
+                              </>
+                            )}
+                          </button>
+
+                          {/* Test Voice Button */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (speechSupported) {
+                                speakReply("Voice test successful! Your voice features are working properly.");
+                              }
+                            }}
+                            className="voice-test-button-compact"
+                            disabled={!speechSupported}
+                            title="Test voice output"
+                          >
+                            <SpeakerIcon className="h-4 w-4" />
+                          </button>
+                        </div>
+
+                        {lastHeardTranscript && voiceAssistStatus !== 'listening' && (
+                          <div className="voice-heard-compact">
+                            <span className="voice-heard-text">{lastHeardTranscript}</span>
+                          </div>
+                        )}
+
+                        {voiceAssistError && (
+                          <div className="voice-error-compact">
+                            {voiceAssistError}
+                          </div>
+                        )}
                       </div>
 
                       {/* Centered input box for empty state */}
@@ -1751,6 +1681,57 @@ export default function Chat() {
                 : 'border-gray-200 bg-white'
                 }`}>
                 <div className="max-w-3xl mx-auto px-4 py-4">
+                  {/* Voice Assistant Controls for Conversation */}
+                  <div className={`voice-assist-compact conversation-voice ${isDarkMode ? 'voice-assist-compact--dark' : ''}`}>
+                    <div className="voice-assist-compact-top">
+                      <div className="voice-chip-compact">
+                        <span className={`voice-dot ${voiceAssistStatus === 'listening' || isReadingReply ? 'voice-dot--live' : ''}`} />
+                        <span className="voice-chip-text">Voice Mode</span>
+                      </div>
+                      <div className="voice-status-compact">
+                        {voiceAssistStatus === 'listening'
+                          ? '🎤 Listening continuously...'
+                          : isReadingReply
+                            ? '🔊 Speaking response...'
+                            : 'Continue voice conversation'}
+                      </div>
+                    </div>
+
+                    <div className="voice-actions-compact">
+                      <button
+                        type="button"
+                        onClick={voiceAssistStatus === 'listening' ? stopVoiceAssist : handleVoiceAssistCapture}
+                        className={`voice-continuous-button ${voiceAssistStatus === 'listening' ? 'voice-continuous-button--active' : ''}`}
+                        disabled={!voiceSupported || sending}
+                        title={voiceAssistStatus === 'listening' ? 'Stop continuous listening' : 'Continue voice conversation'}
+                      >
+                        {voiceAssistStatus === 'listening' ? (
+                          <>
+                            <div className="voice-stop-icon">⏹️</div>
+                            <span>End Voice Chat</span>
+                          </>
+                        ) : (
+                          <>
+                            <MicrophoneIcon className="h-5 w-5" />
+                            <span>Continue Voice</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {lastHeardTranscript && voiceAssistStatus !== 'listening' && (
+                      <div className="voice-heard-compact">
+                        <span className="voice-heard-text">{lastHeardTranscript}</span>
+                      </div>
+                    )}
+
+                    {voiceAssistError && (
+                      <div className="voice-error-compact">
+                        {voiceAssistError}
+                      </div>
+                    )}
+                  </div>
+
                   <form onSubmit={e => {
                     e.preventDefault();
                     if (!disableSend) {
