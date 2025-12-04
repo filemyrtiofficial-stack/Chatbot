@@ -49,6 +49,7 @@ type SessionState = {
 
 const NEW_SESSION_SENTINEL = '__new-session__';
 const LAST_SESSION_STORAGE_KEY = 'filemyrti:lastSessionId';
+const SPEECH_LANG = 'en-IN';
 
 type IconProps = SVGProps<SVGSVGElement>;
 
@@ -189,11 +190,20 @@ export default function Chat() {
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | any>(null);
+  const [voiceAssistStatus, setVoiceAssistStatus] = useState<'idle' | 'listening' | 'error'>('idle');
+  const [voiceAssistError, setVoiceAssistError] = useState<string | null>(null);
+  const [lastHeardTranscript, setLastHeardTranscript] = useState('');
+  const [voiceSupported, setVoiceSupported] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
+  const [autoReadReplies, setAutoReadReplies] = useState(false);
+  const [isReadingReply, setIsReadingReply] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chatMessagesRef = useRef<HTMLDivElement>(null);
   const [hasStartedConversation, setHasStartedConversation] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const voiceRecognitionRef = useRef<any | null>(null);
+  const lastSpokenIdRef = useRef<string | null>(null);
 
   const showEmptyState =
     selectedSessionId === NEW_SESSION_SENTINEL &&
@@ -237,6 +247,10 @@ export default function Chat() {
     currentSession?.entries.length ?? (selectedSessionId === NEW_SESSION_SENTINEL ? 0 : 0);
 
   useEffect(() => {
+    lastSpokenIdRef.current = null;
+  }, [selectedSessionId]);
+
+  useEffect(() => {
     if (!selectedSessionId) return;
     if (selectedSessionId === NEW_SESSION_SENTINEL) return;
     messageListRef.current?.scrollTo({
@@ -261,6 +275,30 @@ export default function Chat() {
       // ignore storage access errors
     }
   }, [selectedSessionId, sessions]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    setVoiceSupported(Boolean(SpeechRecognition));
+    setSpeechSupported(
+      typeof window.speechSynthesis !== 'undefined' &&
+      typeof (window as any).SpeechSynthesisUtterance !== 'undefined'
+    );
+
+    return () => {
+      if (voiceRecognitionRef.current) {
+        if (voiceRecognitionRef.current.stop) {
+          voiceRecognitionRef.current.stop();
+        } else if (voiceRecognitionRef.current.abort) {
+          voiceRecognitionRef.current.abort();
+        }
+      }
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // System appearance detection
   useEffect(() => {
@@ -461,19 +499,13 @@ export default function Chat() {
     setHasStartedConversation(false);
   }
 
-
-  async function handleSend(e: FormEvent) {
-    e.preventDefault();
-    if (disableSend) return;
-
-    const trimmed = message.trim();
-    if (!trimmed) return;
-
+  async function sendMessage(trimmedMessage: string) {
+    if (!trimmedMessage || sending) return;
     setSending(true);
     setError(null);
     setGlobalNotice(null);
 
-    const payload: { message: string; sessionId?: string } = { message: trimmed };
+    const payload: { message: string; sessionId?: string } = { message: trimmedMessage };
     const usingExisting =
       selectedSessionId &&
       selectedSessionId !== NEW_SESSION_SENTINEL &&
@@ -498,7 +530,7 @@ export default function Chat() {
         const userEntry: ConversationEntry = {
           id: `user-${Date.now()}`,
           role: 'user',
-          text: trimmed,
+          text: trimmedMessage,
           timestamp: userTimestamp,
         };
         const assistantEntry: ConversationEntry = {
@@ -544,6 +576,13 @@ export default function Chat() {
     } finally {
       setSending(false);
     }
+  }
+
+  async function handleSend(e: FormEvent) {
+    e.preventDefault();
+    const trimmed = message.trim();
+    if (!trimmed || sending) return;
+    await sendMessage(trimmed);
   }
 
   async function handleDeleteSession(sessionId: string) {
@@ -729,10 +768,98 @@ export default function Chat() {
     }
   };
 
-  const mobileSessionValue =
-    selectedSessionId && selectedSessionId !== NEW_SESSION_SENTINEL
-      ? selectedSessionId
-      : NEW_SESSION_SENTINEL;
+  const stopVoiceAssist = () => {
+    if (voiceRecognitionRef.current) {
+      if (voiceRecognitionRef.current.stop) {
+        voiceRecognitionRef.current.stop();
+      } else if (voiceRecognitionRef.current.abort) {
+        voiceRecognitionRef.current.abort();
+      }
+      voiceRecognitionRef.current = null;
+    }
+    setVoiceAssistStatus('idle');
+  };
+
+  const speakReply = (text: string) => {
+    if (!speechSupported || typeof window === 'undefined' || !text) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = SPEECH_LANG;
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    setIsReadingReply(true);
+    utterance.onend = () => setIsReadingReply(false);
+    utterance.onerror = () => setIsReadingReply(false);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  useEffect(() => {
+    if (!autoReadReplies || !speechSupported) return;
+    const assistantEntries = (currentSession?.entries ?? []).filter(entry => entry.role === 'assistant');
+    const latest = assistantEntries[assistantEntries.length - 1];
+    if (!latest || lastSpokenIdRef.current === latest.id) return;
+    lastSpokenIdRef.current = latest.id;
+    speakReply(latest.text);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSession?.entries, autoReadReplies, speechSupported]);
+
+  const handleVoiceAssistCapture = () => {
+    if (voiceAssistStatus === 'listening') {
+      stopVoiceAssist();
+      return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setVoiceAssistError('Voice input not supported on this browser.');
+      setVoiceAssistStatus('error');
+      setTimeout(() => setVoiceAssistStatus('idle'), 1200);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    voiceRecognitionRef.current = recognition;
+    recognition.lang = SPEECH_LANG;
+    recognition.interimResults = true;
+    recognition.continuous = false;
+    let transcript = '';
+
+    recognition.onstart = () => {
+      setVoiceAssistStatus('listening');
+      setVoiceAssistError(null);
+      setLastHeardTranscript('');
+    };
+
+    recognition.onresult = (event: any) => {
+      const results: SpeechRecognitionResultList = event.results;
+      transcript = Array.from(results)
+        .map((result: SpeechRecognitionResult) => result[0].transcript)
+        .join(' ');
+      setLastHeardTranscript(transcript);
+    };
+
+    recognition.onerror = (event: any) => {
+      setVoiceAssistStatus('error');
+      const reason =
+        event.error === 'not-allowed'
+          ? 'Microphone permissions are blocked. Please allow mic access.'
+          : 'Voice capture failed. Please try again.';
+      setVoiceAssistError(reason);
+      setTimeout(() => setVoiceAssistStatus('idle'), 1500);
+    };
+
+    recognition.onend = async () => {
+      voiceRecognitionRef.current = null;
+      setVoiceAssistStatus('idle');
+      const finalTranscript = transcript.trim();
+      if (finalTranscript) {
+        setMessage(finalTranscript);
+        await sendMessage(finalTranscript);
+      }
+    };
+
+    recognition.start();
+  };
 
   const userInitial = (user?.name?.trim()?.[0] ?? user?.email?.trim()?.[0] ?? 'R').toUpperCase();
 
@@ -1039,6 +1166,64 @@ export default function Chat() {
                       <div className="flex items-center gap-3">
                         <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent"></div>
                         <div className="text-sm text-gray-500">Loading...</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {!loading && (
+                    <div className="mb-6">
+                      <div className={`voice-assist-card ${isDarkMode ? 'voice-assist-card--dark' : ''}`}>
+                        <div className="voice-assist-top">
+                          <div className="voice-chip">
+                            <span className={`voice-dot ${voiceAssistStatus === 'listening' || isReadingReply ? 'voice-dot--live' : ''}`} />
+                            <span className="voice-chip-text">Voice assistant</span>
+                          </div>
+                          <div className="voice-status">
+                            {voiceAssistStatus === 'listening'
+                              ? 'Listening for your RTI request...'
+                              : isReadingReply
+                                ? 'Reading the latest reply aloud'
+                                : voiceSupported
+                                  ? 'Tap mic to dictate and auto-send'
+                                  : 'Voice input not supported in this browser'}
+                          </div>
+                        </div>
+
+                        <div className="voice-actions">
+                          <button
+                            type="button"
+                            onClick={handleVoiceAssistCapture}
+                            className="voice-button"
+                            disabled={!voiceSupported || sending}
+                          >
+                            {voiceAssistStatus === 'listening' ? 'Stop listening' : 'Speak to fill your RTI'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setAutoReadReplies(prev => !prev)}
+                            className={`voice-toggle ${autoReadReplies ? 'voice-toggle--on' : ''}`}
+                            disabled={!speechSupported}
+                          >
+                            {autoReadReplies ? 'Auto-read replies: On' : 'Auto-read replies: Off'}
+                          </button>
+                        </div>
+
+                        {lastHeardTranscript && voiceAssistStatus !== 'listening' && (
+                          <div className="voice-heard">
+                            <span className="voice-heard-label">Captured:</span>
+                            <span className="voice-heard-text">{lastHeardTranscript}</span>
+                          </div>
+                        )}
+
+                        {voiceAssistError && (
+                          <div className="voice-error">
+                            {voiceAssistError}
+                          </div>
+                        )}
+
+                        <div className="voice-tip">
+                          Try saying your RTI question in one go — we will transcribe it, send it to RTI-Dost, and read the reply back.
+                        </div>
                       </div>
                     </div>
                   )}
