@@ -389,191 +389,151 @@
     color: #fee2e2;
   }
 
-  /* Compact Voice Assistant for Input Areas */
-  .voice-assist-compact {
-    border: 1px solid #e2e8f0;
-    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-    border-radius: 16px;
-    padding: 16px;
+  /* Voice Mode Toggle */
+  .voice-mode-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
   }
 
-  .voice-assist-compact--dark {
-    border-color: #334155;
-    background: linear-gradient(135deg, #1e293b, #334155);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  .conversation-voice {
+    margin-bottom: 16px;
   }
 
-  .voice-assist-compact-top {
+  .voice-mode-toggle {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-
-  .voice-chip-compact {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 8px;
-    border-radius: 12px;
-    background: linear-gradient(120deg, #0ea5e9, #22d3ee);
-    color: #0b1120;
-    font-weight: 600;
-    font-size: 12px;
-  }
-
-  .voice-status-compact {
-    font-size: 12px;
-    color: #64748b;
-    font-weight: 500;
-  }
-
-  .voice-assist-compact--dark .voice-status-compact {
-    color: #cbd5e1;
-  }
-
-  .voice-actions-compact {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-
-  .voice-continuous-button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    border-radius: 12px;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 25px;
     border: 2px solid #0ea5e9;
-    background: white;
-    color: #0ea5e9;
+    background: linear-gradient(135deg, #0ea5e9, #22d3ee);
+    color: white;
     font-weight: 600;
     font-size: 14px;
     transition: all 200ms ease;
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
   }
 
-  .voice-continuous-button:hover:not(:disabled) {
-    background: #f0f9ff;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+  .voice-mode-toggle:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
   }
 
-  .voice-continuous-button--active {
+  .voice-mode-toggle:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .voice-mode-toggle--active {
     border-color: #ef4444;
-    background: #fef2f2;
-    color: #ef4444;
-    animation: voice-button-pulse 2s ease-in-out infinite;
+    background: linear-gradient(135deg, #ef4444, #f87171);
+    animation: voice-mode-pulse 2s ease-in-out infinite;
   }
 
-  .voice-continuous-button--active:hover:not(:disabled) {
-    background: #fee2e2;
-  }
-
-  .voice-continuous-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .voice-assist-compact--dark .voice-continuous-button {
-    background: #1f2937;
-    border-color: #0ea5e9;
-    color: #0ea5e9;
-  }
-
-  .voice-assist-compact--dark .voice-continuous-button--active {
-    border-color: #ef4444;
-    background: #451a1a;
-    color: #fca5a5;
-  }
-
-  .voice-stop-icon {
-    font-size: 16px;
-  }
-
-  .voice-test-button-compact {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 2px solid #0ea5e9;
-    background: linear-gradient(135deg, #0ea5e9, #22d3ee);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 200ms ease;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-
-  .voice-test-button-compact:hover:not(:disabled) {
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
-  }
-
-  .voice-test-button-compact:disabled {
-    opacity: 0.4;
+  .voice-mode-toggle--disabled {
+    opacity: 0.6;
     cursor: not-allowed;
     border-color: #9ca3af;
     background: #f3f4f6;
     color: #9ca3af;
   }
 
-  .voice-assist-compact--dark .voice-test-button-compact:disabled {
+  .dark .voice-mode-toggle--disabled {
     border-color: #6b7280;
     background: #374151;
     color: #6b7280;
   }
 
-  .voice-heard-compact {
-    margin-top: 8px;
-    padding: 8px 12px;
-    background: #f0f9ff;
-    border-radius: 8px;
-    border: 1px solid #bae6fd;
+  .voice-mode-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
 
-  .voice-assist-compact--dark .voice-heard-compact {
-    background: #1e293b;
-    border-color: #334155;
+  .voice-mode-stop {
+    font-size: 16px;
   }
 
-  .voice-heard-compact .voice-heard-text {
-    font-size: 13px;
-    color: #0369a1;
-    font-style: italic;
+  .voice-mode-text {
+    white-space: nowrap;
   }
 
-  .voice-assist-compact--dark .voice-heard-compact .voice-heard-text {
+  .voice-mode-pulse {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 25px;
+    border: 2px solid #ef4444;
+    animation: voice-mode-ring 2s ease-in-out infinite;
+  }
+
+  @keyframes voice-mode-pulse {
+
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    }
+
+    50% {
+      box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+  }
+
+  @keyframes voice-mode-ring {
+
+    0%,
+    100% {
+      opacity: 0;
+      transform: scale(1);
+    }
+
+    50% {
+      opacity: 0.5;
+      transform: scale(1.1);
+    }
+  }
+
+  .voice-mode-status {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .voice-mode-status--speaking {
+    color: #0ea5e9;
+    font-weight: 600;
+  }
+
+  .dark .voice-mode-status {
+    color: #cbd5e1;
+  }
+
+  .dark .voice-mode-status--speaking {
     color: #7dd3fc;
   }
 
-  .voice-error-compact {
-    margin-top: 8px;
-    padding: 8px 12px;
+  .voice-mode-error {
+    font-size: 12px;
+    color: #ef4444;
     background: #fef2f2;
     border: 1px solid #fecdd3;
     border-radius: 8px;
-    font-size: 12px;
-    color: #b91c1c;
+    padding: 6px 12px;
+    text-align: center;
   }
 
-  .voice-assist-compact--dark .voice-error-compact {
-    background: #7f1d1d;
-    border-color: #ef4444;
-    color: #fee2e2;
-  }
-
-  /* Conversation-specific styling */
-  .conversation-voice {
-    margin-bottom: 16px;
-    padding: 12px;
-  }
-
-  .conversation-voice .voice-status-compact {
-    font-size: 11px;
+  .dark .voice-mode-error {
+    background: #451a1a;
+    border-color: #dc2626;
+    color: #fca5a5;
   }
 
   .voice-tip {

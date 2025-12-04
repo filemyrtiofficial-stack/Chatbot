@@ -1393,69 +1393,44 @@ export default function Chat() {
                         </p>
                       </div>
 
-                      {/* Voice Assistant Controls */}
-                      <div className={`voice-assist-compact ${isDarkMode ? 'voice-assist-compact--dark' : ''}`}>
-                        <div className="voice-assist-compact-top">
-                          <div className="voice-chip-compact">
-                            <span className={`voice-dot ${voiceAssistStatus === 'listening' || isReadingReply ? 'voice-dot--live' : ''}`} />
-                            <span className="voice-chip-text">Voice Mode</span>
-                          </div>
-                          <div className="voice-status-compact">
-                            {voiceAssistStatus === 'listening'
-                              ? '🎤 Listening continuously...'
-                              : isReadingReply
-                                ? '🔊 Speaking response...'
-                                : voiceSupported && speechSupported
-                                  ? 'Ready for voice input'
-                                  : 'Voice features available'}
-                          </div>
-                        </div>
-
-                        <div className="voice-actions-compact">
-                          <button
-                            type="button"
-                            onClick={voiceAssistStatus === 'listening' ? stopVoiceAssist : handleVoiceAssistCapture}
-                            className={`voice-continuous-button ${voiceAssistStatus === 'listening' ? 'voice-continuous-button--active' : ''}`}
-                            disabled={!voiceSupported || sending}
-                            title={voiceAssistStatus === 'listening' ? 'Stop continuous listening' : 'Start continuous voice input'}
-                          >
+                      {/* Voice Mode Toggle */}
+                      <div className="voice-mode-container">
+                        <button
+                          type="button"
+                          onClick={voiceAssistStatus === 'listening' ? stopVoiceAssist : handleVoiceAssistCapture}
+                          className={`voice-mode-toggle ${voiceAssistStatus === 'listening' ? 'voice-mode-toggle--active' : ''} ${(!voiceSupported || !speechSupported) ? 'voice-mode-toggle--disabled' : ''}`}
+                          disabled={!voiceSupported || !speechSupported}
+                          title={voiceAssistStatus === 'listening' ? 'Disable voice mode' : 'Enable voice mode'}
+                        >
+                          <div className="voice-mode-icon">
                             {voiceAssistStatus === 'listening' ? (
-                              <>
-                                <div className="voice-stop-icon">⏹️</div>
-                                <span>Stop Listening</span>
-                              </>
+                              <div className="voice-mode-stop">⏹️</div>
                             ) : (
-                              <>
-                                <MicrophoneIcon className="h-5 w-5" />
-                                <span>Start Voice Chat</span>
-                              </>
+                              <MicrophoneIcon className="h-5 w-5" />
                             )}
-                          </button>
+                          </div>
+                          <span className="voice-mode-text">
+                            {voiceAssistStatus === 'listening' ? 'Voice Mode On' : 'Voice Mode'}
+                          </span>
+                          {voiceAssistStatus === 'listening' && (
+                            <div className="voice-mode-pulse"></div>
+                          )}
+                        </button>
 
-                          {/* Test Voice Button */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (speechSupported) {
-                                speakReply("Voice test successful! Your voice features are working properly.");
-                              }
-                            }}
-                            className="voice-test-button-compact"
-                            disabled={!speechSupported}
-                            title="Test voice output"
-                          >
-                            <SpeakerIcon className="h-4 w-4" />
-                          </button>
-                        </div>
+                        {voiceAssistStatus === 'listening' && (
+                          <div className="voice-mode-status">
+                            🎤 Listening continuously...
+                          </div>
+                        )}
 
-                        {lastHeardTranscript && voiceAssistStatus !== 'listening' && (
-                          <div className="voice-heard-compact">
-                            <span className="voice-heard-text">{lastHeardTranscript}</span>
+                        {isReadingReply && (
+                          <div className="voice-mode-status voice-mode-status--speaking">
+                            🔊 Speaking response...
                           </div>
                         )}
 
                         {voiceAssistError && (
-                          <div className="voice-error-compact">
+                          <div className="voice-mode-error">
                             {voiceAssistError}
                           </div>
                         )}
@@ -1681,52 +1656,44 @@ export default function Chat() {
                 : 'border-gray-200 bg-white'
                 }`}>
                 <div className="max-w-3xl mx-auto px-4 py-4">
-                  {/* Voice Assistant Controls for Conversation */}
-                  <div className={`voice-assist-compact conversation-voice ${isDarkMode ? 'voice-assist-compact--dark' : ''}`}>
-                    <div className="voice-assist-compact-top">
-                      <div className="voice-chip-compact">
-                        <span className={`voice-dot ${voiceAssistStatus === 'listening' || isReadingReply ? 'voice-dot--live' : ''}`} />
-                        <span className="voice-chip-text">Voice Mode</span>
-                      </div>
-                      <div className="voice-status-compact">
-                        {voiceAssistStatus === 'listening'
-                          ? '🎤 Listening continuously...'
-                          : isReadingReply
-                            ? '🔊 Speaking response...'
-                            : 'Continue voice conversation'}
-                      </div>
-                    </div>
-
-                    <div className="voice-actions-compact">
-                      <button
-                        type="button"
-                        onClick={voiceAssistStatus === 'listening' ? stopVoiceAssist : handleVoiceAssistCapture}
-                        className={`voice-continuous-button ${voiceAssistStatus === 'listening' ? 'voice-continuous-button--active' : ''}`}
-                        disabled={!voiceSupported || sending}
-                        title={voiceAssistStatus === 'listening' ? 'Stop continuous listening' : 'Continue voice conversation'}
-                      >
+                  {/* Voice Mode Toggle for Conversation */}
+                  <div className="voice-mode-container conversation-voice">
+                    <button
+                      type="button"
+                      onClick={voiceAssistStatus === 'listening' ? stopVoiceAssist : handleVoiceAssistCapture}
+                      className={`voice-mode-toggle ${voiceAssistStatus === 'listening' ? 'voice-mode-toggle--active' : ''} ${(!voiceSupported || !speechSupported) ? 'voice-mode-toggle--disabled' : ''}`}
+                      disabled={!voiceSupported || !speechSupported}
+                      title={voiceAssistStatus === 'listening' ? 'Disable voice mode' : 'Enable voice mode'}
+                    >
+                      <div className="voice-mode-icon">
                         {voiceAssistStatus === 'listening' ? (
-                          <>
-                            <div className="voice-stop-icon">⏹️</div>
-                            <span>End Voice Chat</span>
-                          </>
+                          <div className="voice-mode-stop">⏹️</div>
                         ) : (
-                          <>
-                            <MicrophoneIcon className="h-5 w-5" />
-                            <span>Continue Voice</span>
-                          </>
+                          <MicrophoneIcon className="h-5 w-5" />
                         )}
-                      </button>
-                    </div>
+                      </div>
+                      <span className="voice-mode-text">
+                        {voiceAssistStatus === 'listening' ? 'Voice Mode On' : 'Voice Mode'}
+                      </span>
+                      {voiceAssistStatus === 'listening' && (
+                        <div className="voice-mode-pulse"></div>
+                      )}
+                    </button>
 
-                    {lastHeardTranscript && voiceAssistStatus !== 'listening' && (
-                      <div className="voice-heard-compact">
-                        <span className="voice-heard-text">{lastHeardTranscript}</span>
+                    {voiceAssistStatus === 'listening' && (
+                      <div className="voice-mode-status">
+                        🎤 Listening continuously...
+                      </div>
+                    )}
+
+                    {isReadingReply && (
+                      <div className="voice-mode-status voice-mode-status--speaking">
+                        🔊 Speaking response...
                       </div>
                     )}
 
                     {voiceAssistError && (
-                      <div className="voice-error-compact">
+                      <div className="voice-mode-error">
                         {voiceAssistError}
                       </div>
                     )}
