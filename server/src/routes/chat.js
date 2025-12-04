@@ -15,13 +15,14 @@ const OPENAI_MODEL = config.OPENAI_MODEL;
 
 // RTI Request Detection Patterns
 const RTI_KEYWORDS = [
-  'rti', 'right to information', 'information act',
+  'rti', 'rtr', 'rt i', 'right to information', 'information act',
   'file', 'draft', 'create', 'generate', 'submit', 'application',
   'police', 'court', 'government', 'department', 'office', 'authority',
-  'complaint', 'grievance', 'corruption', 'misconduct', 'transparency'
+  'complaint', 'grievance', 'corruption', 'misconduct', 'transparency',
+  'help', 'assist', 'guide', 'how to'
 ];
 
-const APPLICATION_TRIGGER_REGEX = /(file|draft|submit|create|generate)\s+(an?\s+)?rti|rti\s+(application|draft)/i;
+const APPLICATION_TRIGGER_REGEX = /(file|draft|submit|create|generate|help|assist)\s+(an?\s+)?(rti|rtr|rt\s*i)/i;
 
 // NEW RTI LOGIC - DIRECT AND LESS IRRITATING
 const systemPrompt = `
@@ -35,16 +36,22 @@ Your mission is to provide quick, direct RTI assistance without being annoying o
 ---
 
 ### 📋 DIRECT RTI DRAFTING
-When users request RTI help, immediately provide a complete, customized RTI template. Be smart about context:
+When users request RTI help (including typos like "RTR", "RTI", "file RTI", "help with RTI", etc.), immediately provide a complete, customized RTI template. Be smart about context:
 
 **For specific requests like "file RTI for police station":**
 - Fill in the department as "Police Station"
 - Provide relevant information request examples for police stations
 - Include proper PIO details
 
-**For general RTI requests:**
+**For general RTI requests or questions:**
 - Provide a generic template with placeholders
 - Give examples of what information can be requested
+- Answer RTI-related questions directly
+
+**Common RTI scenarios:**
+- Police station: FIR copies, case status, officer details
+- Government offices: File copies, policy documents, statistics
+- Courts: Case status, judgment copies, procedure details
 
 **Template Format:**
 *The Right to Information Act, 2005*
@@ -136,16 +143,13 @@ router.post('/', async (req, res) => {
     const sessionId = providedSessionId || randomUUID();
 
     // Check if this looks like an RTI-related request
-    const messageLower = message.toLowerCase();
+    const messageLower = message.toLowerCase().replace(/[^\w\s]/g, ''); // Remove punctuation
     const isRtiRequest = APPLICATION_TRIGGER_REGEX.test(message) ||
-      RTI_KEYWORDS.some(keyword => messageLower.includes(keyword)) ||
-      messageLower.includes('rti') ||
-      messageLower.includes('information') ||
-      messageLower.includes('file') ||
-      messageLower.includes('draft') ||
-      messageLower.includes('government') ||
-      messageLower.includes('police') ||
-      messageLower.includes('court');
+      RTI_KEYWORDS.some(keyword => messageLower.includes(keyword.replace(/\s+/g, ' '))) ||
+      /\b(rt[iu]|rtr|right\s*to\s*info)/i.test(message) ||
+      (messageLower.includes('file') && (messageLower.includes('rti') || messageLower.includes('rtr'))) ||
+      (messageLower.includes('help') && (messageLower.includes('rti') || messageLower.includes('rtr')));
+
 
     let reply = FALLBACK;
 
@@ -176,8 +180,25 @@ router.post('/', async (req, res) => {
         reply = FALLBACK;
       }
     } else if (isRtiRequest) {
-      // Fallback RTI template when OpenAI is not available but it's an RTI request
-      reply = `Here's a ready-to-use RTI application template:
+      // Provide RTI template when OpenAI is not available but it's an RTI request
+      const messageLower = message.toLowerCase();
+
+      // Try to detect what kind of RTI request it is
+      let department = "[Department/Office Name]";
+      let exampleRequest = "[Describe specifically what information you need - be clear and detailed]";
+
+      if (messageLower.includes('police') || messageLower.includes('station')) {
+        department = "Police Station [Station Name]";
+        exampleRequest = "1. Certified copy of FIR No. [FIR Number] dated [Date]\n2. Status of investigation in the above mentioned case\n3. Details of officers involved in the investigation";
+      } else if (messageLower.includes('court')) {
+        department = "District Court [Court Name]";
+        exampleRequest = "1. Certified copy of judgment in Case No. [Case Number]\n2. Current status of the case\n3. Details of next hearing date";
+      } else if (messageLower.includes('government') || messageLower.includes('ministry')) {
+        department = "Ministry of [Ministry Name]";
+        exampleRequest = "1. Certified copies of policy documents related to [specific topic]\n2. Statistical data for the year [year]\n3. Details of schemes/programs under [department]";
+      }
+
+      reply = `Here's your RTI application template:
 
 *The Right to Information Act, 2005*
 *Application for Obtaining Information*
@@ -190,8 +211,8 @@ Email: [Your Email Address]
 
 *To,*
 The Public Information Officer
-[Department/Office Name - e.g., Police Station Name]
-[Complete Office Address with City/State]
+${department}
+[Complete Office Address with City/State and PIN Code]
 
 *Subject:* Request for Information under RTI Act, 2005
 
@@ -199,9 +220,9 @@ Dear Sir/Madam,
 
 I, [Your Full Name], submit this application under the Right to Information Act, 2005, seeking the following information:
 
-1. [Describe specifically what information you need - be clear and detailed]
+${exampleRequest}
 
-Kindly provide certified copies of all relevant documents/records.
+Kindly provide certified copies of all relevant documents/records within 30 days as per RTI Act.
 
 *Application Fee:* ₹10/- (Cash/IPO/DD/Court Fee Stamp)
 *Declaration:* I am a citizen of India.
@@ -213,9 +234,9 @@ Date: [Current Date]
 ---
 **How to File:**
 1. Fill in your personal details in [brackets]
-2. Specify the exact information you need
-3. Attach ₹10 fee
-4. Send to the concerned Public Information Officer`;
+2. Customize the information request based on what you need
+3. Attach ₹10 court fee stamp or IPO
+4. Send to the concerned Public Information Officer by registered post or in person`;
     }
 
     res.json({
