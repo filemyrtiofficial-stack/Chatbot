@@ -153,7 +153,8 @@ If user asks about non-RTI topics, politely redirect:
 "I specialize in RTI applications. For other queries, please visit the appropriate government department."
 `;
 
-/* COMMENTED OUT - OLD VERBOSE RTI LOGIC CONTINUED
+/*
+COMMENTED OUT - OLD VERBOSE RTI LOGIC CONTINUED
 ---
 
 *The Right to Information Act, 2005*
@@ -302,8 +303,8 @@ Would you like me to generate a First Appeal draft for you using the official fo
 ---
 
 * FileMyRTI AI — Empowering India through Transparency.*
-  `;
-COMMENTED OUT - END OF OLD VERBOSE RTI LOGIC */
+  */
+COMMENTED OUT - END OF OLD VERBOSE RTI LOGIC
 
 const chatMessageSchema = z.object({
   message: z
@@ -366,7 +367,7 @@ function cleanupExpiredSessions() {
     toRemove.forEach(([userId]) => sessionMemory.delete(userId));
   }
 
-  console.log(`[Session Cleanup] Removed ${ expiredKeys.length } expired sessions.Current sessions: ${ sessionMemory.size } `);
+  console.log(`[Session Cleanup] Removed ${expiredKeys.length} expired sessions.Current sessions: ${sessionMemory.size} `);
 }
 
 // Start periodic cleanup
