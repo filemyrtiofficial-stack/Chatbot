@@ -536,6 +536,71 @@
     color: #fca5a5;
   }
 
+  /* Compact Voice Mode Toggle for Input Area */
+  .voice-mode-toggle-compact {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid #0ea5e9;
+    background: linear-gradient(135deg, #0ea5e9, #22d3ee);
+    color: white;
+    transition: all 200ms ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .voice-mode-toggle-compact:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+  }
+
+  .voice-mode-toggle-compact:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .voice-mode-toggle-compact--active {
+    border-color: #ef4444;
+    background: linear-gradient(135deg, #ef4444, #f87171);
+    animation: voice-mode-pulse-compact 2s ease-in-out infinite;
+  }
+
+  .voice-mode-toggle-compact--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #9ca3af;
+    background: #f3f4f6;
+    color: #9ca3af;
+  }
+
+  .dark .voice-mode-toggle-compact--disabled {
+    border-color: #6b7280;
+    background: #374151;
+    color: #6b7280;
+  }
+
+  .voice-mode-stop-compact {
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @keyframes voice-mode-pulse-compact {
+
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3);
+    }
+
+    50% {
+      box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+    }
+  }
+
   .voice-tip {
     font-size: 12px;
     color: #475569;

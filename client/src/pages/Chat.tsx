@@ -1177,10 +1177,10 @@ export default function Chat() {
                                       handleDownloadDraft(session.sessionId);
                                     }}
                                     className={`p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${downloadingSession === session.sessionId
-                                        ? 'text-blue-500'
-                                        : isDarkMode
-                                          ? 'text-gray-400 hover:text-blue-400 hover:bg-gray-600'
-                                          : 'text-gray-500 hover:text-blue-500 hover:bg-gray-300'
+                                      ? 'text-blue-500'
+                                      : isDarkMode
+                                        ? 'text-gray-400 hover:text-blue-400 hover:bg-gray-600'
+                                        : 'text-gray-500 hover:text-blue-500 hover:bg-gray-300'
                                       }`}
                                     title="Download RTI draft"
                                   >
@@ -1638,10 +1638,10 @@ export default function Chat() {
                                       onClick={() => handleDownloadDraft(currentSession.sessionId)}
                                       disabled={downloadingSession === currentSession.sessionId}
                                       className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-200 ${downloadingSession === currentSession.sessionId
-                                          ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                                          : isDarkMode
-                                            ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                                            : 'bg-blue-500 hover:bg-blue-600 text-white'
+                                        ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                        : isDarkMode
+                                          ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                                          : 'bg-blue-500 hover:bg-blue-600 text-white'
                                         }`}
                                     >
                                       {downloadingSession === currentSession.sessionId ? (
@@ -1843,6 +1843,21 @@ export default function Chat() {
                             <WaveAnimation />
                           ) : (
                             <MicrophoneIcon className="h-5 w-5" />
+                          )}
+                        </button>
+
+                        {/* Voice Mode Toggle - Compact */}
+                        <button
+                          type="button"
+                          onClick={voiceAssistStatus === 'listening' ? stopVoiceAssist : handleVoiceAssistCapture}
+                          className={`voice-mode-toggle-compact ${voiceAssistStatus === 'listening' ? 'voice-mode-toggle-compact--active' : ''} ${(!voiceSupported || !speechSupported) ? 'voice-mode-toggle-compact--disabled' : ''}`}
+                          disabled={!voiceSupported || !speechSupported || sending}
+                          title={voiceAssistStatus === 'listening' ? 'Disable voice mode' : 'Enable voice mode'}
+                        >
+                          {voiceAssistStatus === 'listening' ? (
+                            <div className="voice-mode-stop-compact">⏹️</div>
+                          ) : (
+                            <SpeakerIcon className="h-4 w-4" />
                           )}
                         </button>
 
