@@ -1419,49 +1419,6 @@ export default function Chat() {
                         </p>
                       </div>
 
-                      {/* Voice Mode Toggle */}
-                      <div className="voice-mode-container">
-                        <button
-                          type="button"
-                          onClick={voiceAssistStatus === 'listening' ? stopVoiceAssist : handleVoiceAssistCapture}
-                          className={`voice-mode-toggle ${voiceAssistStatus === 'listening' ? 'voice-mode-toggle--active' : ''} ${(!voiceSupported || !speechSupported) ? 'voice-mode-toggle--disabled' : ''}`}
-                          disabled={!voiceSupported || !speechSupported}
-                          title={voiceAssistStatus === 'listening' ? 'Disable voice mode' : 'Enable voice mode'}
-                        >
-                          <div className="voice-mode-icon">
-                            {voiceAssistStatus === 'listening' ? (
-                              <div className="voice-mode-stop">⏹️</div>
-                            ) : (
-                              <MicrophoneIcon className="h-5 w-5" />
-                            )}
-                          </div>
-                          <span className="voice-mode-text">
-                            {voiceAssistStatus === 'listening' ? 'Voice Mode On' : 'Voice Mode'}
-                          </span>
-                          {voiceAssistStatus === 'listening' && (
-                            <div className="voice-mode-pulse"></div>
-                          )}
-                        </button>
-
-                        {voiceAssistStatus === 'listening' && (
-                          <div className="voice-mode-status">
-                            🎤 Listening continuously...
-                          </div>
-                        )}
-
-                        {isReadingReply && (
-                          <div className="voice-mode-status voice-mode-status--speaking">
-                            🔊 Speaking response...
-                          </div>
-                        )}
-
-                        {voiceAssistError && (
-                          <div className="voice-mode-error">
-                            {voiceAssistError}
-                          </div>
-                        )}
-                      </div>
-
                       {/* Centered input box for empty state */}
                       <div className="w-full max-w-2xl">
                         <form onSubmit={e => {
@@ -1529,6 +1486,21 @@ export default function Chat() {
                                   <WaveAnimation />
                                 ) : (
                                   <MicrophoneIcon className="h-5 w-5" />
+                                )}
+                              </button>
+
+                              {/* Voice Mode Toggle - Compact */}
+                              <button
+                                type="button"
+                                onClick={voiceAssistStatus === 'listening' ? stopVoiceAssist : handleVoiceAssistCapture}
+                                className={`voice-mode-toggle-compact ${voiceAssistStatus === 'listening' ? 'voice-mode-toggle-compact--active' : ''} ${(!voiceSupported || !speechSupported) ? 'voice-mode-toggle-compact--disabled' : ''}`}
+                                disabled={!voiceSupported || !speechSupported || sending}
+                                title={voiceAssistStatus === 'listening' ? 'Disable voice mode' : 'Enable voice mode'}
+                              >
+                                {voiceAssistStatus === 'listening' ? (
+                                  <div className="voice-mode-stop-compact">⏹️</div>
+                                ) : (
+                                  <SpeakerIcon className="h-4 w-4" />
                                 )}
                               </button>
 
