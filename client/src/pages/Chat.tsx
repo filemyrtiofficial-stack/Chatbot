@@ -730,6 +730,48 @@ export default function Chat() {
     }
   }
 
+  // Function to download any message content as draft
+  function handleDownloadMessage(messageText: string, messageId: string) {
+    try {
+      const blob = new Blob([messageText], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `draft-${messageId}.txt`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      setGlobalNotice('Draft downloaded.');
+    } catch (err) {
+      setError('Failed to download draft.');
+    }
+  }
+
+  // Function to check if a message contains draft content
+  function isDraftContent(text: string): boolean {
+    if (!text) return false;
+    const lowerText = text.toLowerCase();
+
+    // Check for RTI draft indicators
+    if (lowerText.includes('right to information act') ||
+      lowerText.includes('application for obtaining information') ||
+      lowerText.includes('to, the public information officer') ||
+      lowerText.includes('subject: request for information')) {
+      return true;
+    }
+
+    // Check for general draft keywords
+    const draftKeywords = ['draft', 'application', 'format', 'template', 'sample', 'example'];
+    const hasDraftKeyword = draftKeywords.some(keyword => lowerText.includes(keyword));
+
+    // Check for structured format (multiple sections, bullet points, etc.)
+    const hasStructure = lowerText.includes('*') || lowerText.includes('1.') || lowerText.includes('2.') ||
+      lowerText.includes('from:') || lowerText.includes('to:') || lowerText.includes('subject:');
+
+    return hasDraftKeyword && hasStructure;
+  }
+
   // File attachment functions
   const handleFileAttach = () => {
     const input = document.createElement('input');
@@ -924,13 +966,13 @@ export default function Chat() {
     if (!latest || lastSpokenIdRef.current === latest.id) return;
     lastSpokenIdRef.current = latest.id;
 
-    // Always read responses for voice messages, or if auto-read is enabled for text messages
-    if (isVoiceMessage || autoReadReplies) {
+    // Only read responses for voice messages, not automatically for text messages
+    if (isVoiceMessage) {
       speakReply(latest.text);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSession?.entries, autoReadReplies, speechSupported, isVoiceMessage]);
+  }, [currentSession?.entries, speechSupported, isVoiceMessage]);
 
   const handleVoiceAssistCapture = () => {
     if (voiceAssistStatus === 'listening') {
@@ -1605,31 +1647,47 @@ export default function Chat() {
                                       }`}>
                                       📄 RTI Draft Ready
                                     </h3>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleDownloadDraft(currentSession.sessionId)}
-                                      disabled={downloadingSession === currentSession.sessionId}
-                                      className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-200 ${downloadingSession === currentSession.sessionId
-                                        ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                                        : isDarkMode
-                                          ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                                          : 'bg-blue-500 hover:bg-blue-600 text-white'
-                                        }`}
-                                    >
-                                      {downloadingSession === currentSession.sessionId ? (
-                                        <>
-                                          <div className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent" />
-                                          Downloading...
-                                        </>
-                                      ) : (
-                                        <>
-                                          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                          </svg>
-                                          Download Draft
-                                        </>
-                                      )}
-                                    </button>
+                                    <div className="flex gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDownloadDraft(currentSession.sessionId)}
+                                        disabled={downloadingSession === currentSession.sessionId}
+                                        className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-200 ${downloadingSession === currentSession.sessionId
+                                          ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                          : isDarkMode
+                                            ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                                            : 'bg-blue-500 hover:bg-blue-600 text-white'
+                                          }`}
+                                      >
+                                        {downloadingSession === currentSession.sessionId ? (
+                                          <>
+                                            <div className="h-3 w-3 animate-spin rounded-full border border-white border-t-transparent" />
+                                            Downloading...
+                                          </>
+                                        ) : (
+                                          <>
+                                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            Download RTI Draft
+                                          </>
+                                        )}
+                                      </button>
+                                      {/* Additional download button for the conversation text */}
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDownloadMessage(entry.text, entry.id)}
+                                        className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-200 ${isDarkMode
+                                          ? 'bg-green-600 hover:bg-green-700 text-white'
+                                          : 'bg-green-500 hover:bg-green-600 text-white'
+                                          }`}
+                                      >
+                                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        Download Chat
+                                      </button>
+                                    </div>
                                   </div>
                                   <div className={`text-xs leading-relaxed whitespace-pre-wrap font-mono ${isDarkMode ? 'text-gray-300' : 'text-gray-700'
                                     }`}>
@@ -1647,6 +1705,24 @@ export default function Chat() {
                                   }`}>
                                   {entry.text}
                                 </div>
+                                {/* Download button for draft content */}
+                                {isDraftContent(entry.text) && (
+                                  <div className="flex items-center justify-end mt-3">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDownloadMessage(entry.text, entry.id)}
+                                      className={`flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-200 ${isDarkMode
+                                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                                        : 'bg-blue-500 hover:bg-blue-600 text-white'
+                                        }`}
+                                    >
+                                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                      </svg>
+                                      Download Draft
+                                    </button>
+                                  </div>
+                                )}
                               </div>
                             )}
 
