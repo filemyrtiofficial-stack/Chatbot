@@ -47,9 +47,33 @@ app.use(limiter);
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 
-app.get('/api/health', (req, res) =>
-  res.json({ ok: true, uptime: process.uptime(), timestamp: new Date().toISOString() })
-);
+app.get('/api/health', async (req, res) => {
+  try {
+    // Test database connection if pool is initialized
+    if (pool) {
+      await pool.query('SELECT 1');
+      return res.json({ 
+        ok: true, 
+        uptime: process.uptime(), 
+        timestamp: new Date().toISOString(),
+        database: 'connected'
+      });
+    }
+    return res.json({ 
+      ok: true, 
+      uptime: process.uptime(), 
+      timestamp: new Date().toISOString(),
+      database: 'initializing'
+    });
+  } catch (err) {
+    return res.status(503).json({ 
+      ok: false, 
+      error: 'Database unavailable',
+      timestamp: new Date().toISOString(),
+      message: process.env.NODE_ENV === 'production' ? undefined : err.message
+    });
+  }
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', authMiddleware, chatRoutes);
@@ -72,11 +96,35 @@ app.use((err, req, res, next) => {
 
 initDatabase()
   .then(() => {
-    app.listen(config.PORT, () => {
-      console.log(`FileMyRTI server listening on http://localhost:${config.PORT}`);
+    const server = app.listen(config.PORT, '0.0.0.0', () => {
+      console.log(`FileMyRTI server listening on http://0.0.0.0:${config.PORT}`);
+      console.log(`Environment: ${config.NODE_ENV}`);
+      console.log(`Health check: http://localhost:${config.PORT}/api/health`);
+    });
+    
+    // Graceful shutdown
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM received, shutting down gracefully');
+      server.close(() => {
+        console.log('Server closed');
+        if (pool) {
+          pool.end(() => {
+            console.log('Database pool closed');
+            process.exit(0);
+          });
+        } else {
+          process.exit(0);
+        }
+      });
     });
   })
   .catch(err => {
     console.error('Failed to initialize database', err);
+    console.error('Error details:', {
+      message: err.message,
+      code: err.code,
+      errno: err.errno,
+      sqlState: err.sqlState
+    });
     process.exit(1);
   });
