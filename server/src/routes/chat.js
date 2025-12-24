@@ -476,6 +476,18 @@ router.get('/history', async (req, res) => {
 // POST chat message
 router.post('/', async (req, res) => {
   try {
+    // Check if database pool is initialized
+    if (!pool) {
+      console.error('[Chat Error] Database pool is not initialized');
+      return res.status(503).json({ error: 'Database not available' });
+    }
+    
+    // Check if user is authenticated
+    if (!req.user || !req.user.id) {
+      console.error('[Chat Error] User not authenticated');
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
     const userId = req.user.id;
     const parsed = chatMessageSchema.safeParse(req.body);
     if (!parsed.success) {
@@ -607,9 +619,30 @@ router.post('/', async (req, res) => {
     });
   } catch (err) {
     console.error('[Chat Error]', err);
+    console.error('[Error Stack]', err.stack);
     console.error('[Session Memory Size]', sessionMemory.size);
     console.error('[Memory Usage]', process.memoryUsage());
-    return res.status(500).json({ error: 'Server error' });
+    
+    // Provide more detailed error information
+    const errorMessage = err.message || 'Unknown error';
+    const errorCode = err.code || 'UNKNOWN';
+    
+    // Log specific error types
+    if (err.code === 'ECONNREFUSED' || err.code === 'ER_ACCESS_DENIED_ERROR') {
+      console.error('[Database Error] Connection failed');
+    } else if (err.code === 'ER_NO_SUCH_TABLE') {
+      console.error('[Database Error] Table does not exist');
+    } else if (err.response?.status === 401) {
+      console.error('[OpenAI Error] Invalid API key');
+    } else if (err.response?.status === 429) {
+      console.error('[OpenAI Error] Rate limit exceeded');
+    }
+    
+    return res.status(500).json({ 
+      error: 'Server error',
+      message: process.env.NODE_ENV === 'development' ? errorMessage : 'Internal server error',
+      code: process.env.NODE_ENV === 'development' ? errorCode : undefined
+    });
   }
 });
 

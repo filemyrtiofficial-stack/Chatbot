@@ -1,8 +1,12 @@
 const DEPLOYED_BASE = 'https://chat.filemyrti.com/api';
 const LOCAL_BASE = 'http://localhost:5000';
 
+// In development, use relative URLs so Vite proxy works
+const isDev = import.meta.env.DEV;
 const envBase = import.meta.env.VITE_API_BASE?.trim();
-const initialBase = envBase && envBase.length > 0 ? envBase : DEPLOYED_BASE;
+const initialBase = isDev 
+  ? '' // Use relative URLs in dev (Vite proxy will handle it)
+  : (envBase && envBase.length > 0 ? envBase : DEPLOYED_BASE);
 
 export let API_BASE = initialBase;
 let activeBase = initialBase;
@@ -39,6 +43,10 @@ function normalizePath(path: string) {
 }
 
 function buildUrl(base: string, path: string) {
+  // If base is empty (dev mode with proxy), use relative URL
+  if (!base || base === '') {
+    return normalizePath(path);
+  }
   const trimmedBase = normalizeBase(base);
   let normalizedPath = normalizePath(path);
   if (trimmedBase.endsWith('/api') && normalizedPath.startsWith('/api')) {
@@ -81,6 +89,38 @@ async function request<T>(path: string, init: RequestInit, retry = true): Promis
     headers,
     credentials: 'include',
   };
+
+  // In dev mode with proxy, use relative URLs directly
+  if (isDev && (!activeBase || activeBase === '')) {
+    try {
+      const response = await fetch(buildUrl('', path), requestInit);
+      if (!response.ok) {
+        if (response.status === 401 && retry && refreshHandler) {
+          const refreshed = await refreshHandler();
+          if (refreshed) {
+            return request<T>(path, init, false);
+          }
+        }
+        const message = await parseError(response);
+        throw new ApiError(response.status, message);
+      }
+      if (response.status === 204) {
+        return undefined as T;
+      }
+      if (isJsonRequest({ headers }) || response.headers.get('Content-Type')?.includes('application/json')) {
+        return (await response.json()) as T;
+      }
+      // @ts-expect-error - caller should handle other response types manually
+      return response;
+    } catch (err) {
+      if (err instanceof ApiError) {
+        throw err;
+      }
+      throw err instanceof Error
+        ? err
+        : new Error('Network request failed. Please try again later.');
+    }
+  }
 
   const basesToTry =
     activeBase === LOCAL_BASE ? [LOCAL_BASE] : Array.from(new Set([activeBase, LOCAL_BASE]));
