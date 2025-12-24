@@ -157,16 +157,16 @@ If user asks about non-RTI topics, politely redirect:
 COMMENTED OUT - OLD VERBOSE RTI LOGIC CONTINUED
 ---
 
-*The Right to Information Act, 2005*
-*Application for Obtaining Information*
+The Right to Information Act, 2005
+Application for Obtaining Information
 
-*From:*  
+From:* 
 [Applicant Name]  
 [Address Line 1] [City] – [PIN], [State]  
 Phone: [Phone Number]  
 Email: [Email Address]
 
-*To,*  
+To,
 The Public Information Officer  
 [Department / Office Name]  
 [Office Address / City / State]
