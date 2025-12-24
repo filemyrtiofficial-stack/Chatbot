@@ -207,9 +207,8 @@ Date: [Date]
 If the user receives no reply within 30 days or an unsatisfactory response, generate this format:
 */
 
----
 
-* The Right to Information Act, 2005 *  
+/* The Right to Information Act, 2005 *  
 * First Appeal(Form for State or Central Government)*  
 
 * To *
@@ -304,7 +303,7 @@ Would you like me to generate a First Appeal draft for you using the official fo
 
 * FileMyRTI AI — Empowering India through Transparency.*
   */
-COMMENTED OUT - END OF OLD VERBOSE RTI LOGIC
+// COMMENTED OUT - END OF OLD VERBOSE RTI LOGIC
 
 const chatMessageSchema = z.object({
   message: z
