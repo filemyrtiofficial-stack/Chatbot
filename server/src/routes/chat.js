@@ -388,16 +388,22 @@ async function generateRtiDraftFromMessage(userId, sessionId, message, conversat
     { role: 'user', content: message }
   ];
 
-  const completion = await client.chat.completions.create({
-    model: OPENAI_MODEL,
-    messages,
-    temperature: 0.3,
-    max_tokens: 1200, // More tokens for complete RTI draft
-    user: String(userId),
-  });
+  try {
+    const completion = await client.chat.completions.create({
+      model: OPENAI_MODEL,
+      messages,
+      temperature: 0.3,
+      max_tokens: 1200, // More tokens for complete RTI draft
+      user: String(userId),
+    });
 
-  const draft = completion.choices?.[0]?.message?.content?.trim();
-  return draft || null;
+    const draft = completion.choices?.[0]?.message?.content?.trim();
+    return draft || null;
+  } catch (err) {
+    console.error('[OpenAI Error in RTI Draft]', err.message);
+    // Return null to fall back to regular chat flow
+    return null;
+  }
 }
 
 // Simplified RTI application handling - AI handles everything through conversation
@@ -592,17 +598,52 @@ router.post('/', async (req, res) => {
     ]);
 
     // Call OpenAI with conversation history
-    const completion = await client.chat.completions.create({
-      model: OPENAI_MODEL,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...conversationHistory,
-        { role: 'user', content: message },
-      ],
-      temperature: 0.3,
-      max_tokens: 1200, // Allow for complete RTI drafts
-      user: String(userId),
-    });
+    let completion;
+    try {
+      completion = await client.chat.completions.create({
+        model: OPENAI_MODEL,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          ...conversationHistory,
+          { role: 'user', content: message },
+        ],
+        temperature: 0.3,
+        max_tokens: 1200, // Allow for complete RTI drafts
+        user: String(userId),
+      });
+    } catch (openaiErr) {
+      // Handle OpenAI API errors gracefully
+      if (openaiErr.status === 401 || openaiErr.code === 'invalid_api_key') {
+        console.error('[OpenAI Error] Invalid API key');
+        const reply = 'I apologize, but there is a configuration issue with the AI service. Please contact support.';
+        const saved = await recordChat(userId, sessionId, message, reply);
+        return res.status(503).json({
+          reply,
+          id: saved.id,
+          message,
+          timestamp: saved.timestamp,
+          sessionId: saved.sessionId,
+          draftAvailable: false,
+          error: 'AI service unavailable'
+        });
+      }
+      if (openaiErr.status === 429) {
+        console.error('[OpenAI Error] Rate limit exceeded');
+        const reply = 'I apologize, but the AI service is currently busy. Please try again in a moment.';
+        const saved = await recordChat(userId, sessionId, message, reply);
+        return res.status(503).json({
+          reply,
+          id: saved.id,
+          message,
+          timestamp: saved.timestamp,
+          sessionId: saved.sessionId,
+          draftAvailable: false,
+          error: 'AI service rate limited'
+        });
+      }
+      // Re-throw other errors to be caught by outer catch
+      throw openaiErr;
+    }
 
     let reply = completion.choices?.[0]?.message?.content?.trim() || FALLBACK;
 

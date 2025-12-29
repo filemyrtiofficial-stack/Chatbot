@@ -6,7 +6,12 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
-    "check": "node check-server.js"
+    "check": "node check-server.js",
+    "pm2:start": "pm2 start ecosystem.config.js --env production",
+    "pm2:stop": "pm2 stop chatbot-api",
+    "pm2:restart": "pm2 restart chatbot-api",
+    "pm2:logs": "pm2 logs chatbot-api",
+    "pm2:status": "pm2 status"
   },
   "keywords": [],
   "author": "",
